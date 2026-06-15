@@ -1,0 +1,81 @@
+import React, { useState } from 'react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
+
+const FaqContact = () => {
+  const [openFaq, setOpenFaq] = useState(0);
+
+  const faqs = [
+    'Không nắm được thông tin về tăng giá do chính quyền thông báo?',
+    'Các khu vực thu gom rác 02 ngày/lần vì sao lại thu tiền bằng khu vực thu gom ngày/lần?',
+    'Hộ kinh doanh nhỏ lẻ xả thải còn ít hơn hộ gia đình sao lại thu kinh doanh cao; Nhà nước không quy định các tiêu chí để xác định là hộ kinh doanh (mở hình lớn nhỏ ra sao)?',
+    'Nhà nước thu thuế từ các hoạt động sản xuất, kinh doanh, cũng như thu nhập của người dân thì phải chi phí thu dọn vệ sinh chứ tại sao lại bắt người dân phải nộp thêm tiền?',
+    'Tại sao không thu theo nhân khẩu mà cào bằng, nhà 1, 2 hộ cũng giống như nhà đông người?'
+  ];
+
+  return (
+    <section className="relative py-24 bg-gray-900 overflow-hidden">
+      {/* Background image overlay */}
+      <div className="absolute inset-0 bg-cover bg-center opacity-40 mix-blend-overlay" style={{ backgroundImage: 'url(https://via.placeholder.com/1920x1080?text=Background+Image)' }}></div>
+      <div className="absolute inset-0 bg-green-900/60 mix-blend-multiply"></div>
+
+      <div className="container mx-auto px-4 max-w-6xl relative z-10">
+        <h2 className="text-4xl font-bold text-white text-center mb-16">Câu hỏi</h2>
+
+        <div className="flex flex-col lg:flex-row shadow-2xl rounded-xl overflow-hidden bg-white/10 backdrop-blur-md">
+          {/* FAQ Accordion */}
+          <div className="w-full lg:w-1/2 bg-white p-10">
+            <h3 className="text-2xl font-bold text-gray-900 mb-8 text-center">Câu hỏi thường gặp</h3>
+            <div className="space-y-4">
+              {faqs.map((faq, index) => (
+                <div key={index} className="border-b border-gray-200 pb-4">
+                  <button 
+                    className="w-full flex justify-between items-center text-left focus:outline-none group"
+                    onClick={() => setOpenFaq(openFaq === index ? -1 : index)}
+                  >
+                    <span className={`text-sm md:text-base font-semibold pr-4 transition-colors ${openFaq === index ? 'text-hepco-green' : 'text-gray-700 group-hover:text-hepco-green'}`}>
+                      {faq}
+                    </span>
+                    {openFaq === index ? (
+                      <ChevronUp className="w-5 h-5 text-hepco-green flex-shrink-0" />
+                    ) : (
+                      <ChevronDown className="w-5 h-5 text-gray-400 flex-shrink-0 group-hover:text-hepco-green" />
+                    )}
+                  </button>
+                  {openFaq === index && (
+                    <div className="mt-4 text-gray-600 text-sm leading-relaxed">
+                      Nội dung trả lời cho câu hỏi này sẽ được cập nhật chi tiết để giải đáp thắc mắc của khách hàng một cách rõ ràng và minh bạch nhất.
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Contact Form */}
+          <div className="w-full lg:w-1/2 bg-hepco-green/90 p-10 backdrop-blur-sm relative">
+            {/* watermark logo */}
+            <div className="absolute top-4 right-4 w-16 h-16 opacity-20 border-2 border-white rounded-full flex items-center justify-center font-bold text-white">HEPCO</div>
+            
+            <h3 className="text-2xl font-bold text-white mb-8 text-center drop-shadow-md">Gửi câu hỏi</h3>
+            <form className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <input type="text" placeholder="Tên" className="w-full bg-transparent border border-white/40 text-white placeholder-white/70 px-4 py-3 rounded focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all" />
+                <input type="email" placeholder="Email" className="w-full bg-transparent border border-white/40 text-white placeholder-white/70 px-4 py-3 rounded focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all" />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <input type="tel" placeholder="Số điện thoại" className="w-full bg-transparent border border-white/40 text-white placeholder-white/70 px-4 py-3 rounded focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all" />
+                <input type="text" placeholder="Tiêu đề" className="w-full bg-transparent border border-white/40 text-white placeholder-white/70 px-4 py-3 rounded focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all" />
+              </div>
+              <textarea placeholder="Nội dung" rows="4" className="w-full bg-transparent border border-white/40 text-white placeholder-white/70 px-4 py-3 rounded focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all resize-none"></textarea>
+              <button type="submit" className="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-4 rounded transition-colors shadow-lg shadow-green-900/20">
+                GỬI
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default FaqContact;
