@@ -1,23 +1,24 @@
 import { Phone } from 'lucide-react';
 import { NavLink, Link } from 'react-router-dom';
+import { ROUTES } from '../constants/routes';
 
 const Header = () => {
   const navItems = [
-    { name: 'TRANG CHỦ', path: '/' },
-    { name: 'GIỚI THIỆU', path: '/gioi-thieu' },
-    { name: 'DỊCH VỤ', path: '/dich-vu' },
-    { name: 'TIN TỨC', path: '/tin-tuc' },
-    { name: 'DỰ ÁN', path: '/du-an' },
-    { name: 'CỔ ĐÔNG', path: '/co-dong' },
-    { name: 'CÂU HỎI', path: '/cau-hoi' },
-    { name: 'LIÊN HỆ', path: '/lien-he' },
-    { name: 'HÓA ĐƠN', path: '/hoa-don' }
+    { name: 'TRANG CHỦ', path: ROUTES.HOME },
+    { name: 'GIỚI THIỆU', path: ROUTES.ABOUT },
+    { name: 'DỊCH VỤ', path: ROUTES.SERVICES },
+    { name: 'TIN TỨC', path: ROUTES.NEWS },
+    { name: 'DỰ ÁN', path: ROUTES.PROJECTS },
+    { name: 'CỔ ĐÔNG', path: ROUTES.SHAREHOLDERS },
+    { name: 'CÂU HỎI', path: ROUTES.FAQ },
+    { name: 'LIÊN HỆ', path: ROUTES.CONTACT },
+    { name: 'HÓA ĐƠN', path: ROUTES.INVOICE }
   ];
 
   return (
     <header className="bg-hepco-green text-white flex items-center justify-between h-20 pl-8">
       {/* Logo */}
-      <Link to="/" className="flex-shrink-0">
+      <Link to={ROUTES.HOME} className="flex-shrink-0">
         <div className="w-16 h-16 rounded-full border-2 border-white flex items-center justify-center font-bold text-xl relative">
           <span className="z-10">HEPCO</span>
           {/* A simple placeholder for the logo inner details */}

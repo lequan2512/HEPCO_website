@@ -4,21 +4,30 @@ This document outlines the coding standards, architecture, and best practices fo
 
 ## 1. Tech Stack Overview
 - **Framework:** React 19 (via Vite)
-- **Routing:** React Router DOM (v6+)
+- **Routing:** React Router DOM v7
 - **Styling:** Tailwind CSS v4 + SCSS
+- **Forms & Validation:** Formik + Yup
+- **State Management:** Zustand (Global State) & @tanstack/react-query (Server State)
 - **Icons:** Lucide React (`lucide-react`)
 - **Build Tool:** Vite
 
 ---
 
 ## 2. File and Directory Structure
-Maintain a clean and modular folder structure inside the `src/` directory:
+Maintain a clean and modular folder structure inside the `src/` directory. Each page should be encapsulated within its own folder, containing its specific components:
 
 ```text
 src/
 ├── assets/          # Static files (images, fonts)
-├── components/      # Reusable UI components (Header, Footer, Buttons, etc.)
-├── pages/           # Page-level components (Home, About, Services, etc.)
+├── components/      # Global/Reusable UI components across multiple pages (Header, Footer, Button, etc.)
+├── pages/           # Page-level directories
+│   ├── Home/        # Folder for the Home page
+│   │   ├── index.jsx          # Entry component for the Home page
+│   │   └── components/        # Components specific ONLY to the Home page (e.g., HeroSection.jsx)
+│   ├── About/       # Folder for the About page
+│   │   ├── index.jsx
+│   │   └── components/
+│   └── ...
 ├── styles/          # Global SCSS files (if needed to separate from index.css)
 ├── App.jsx          # Main application component & Router configuration
 ├── index.css        # Global CSS (Tailwind entry point & theme variables)
@@ -38,7 +47,9 @@ src/
   ```
 - **One Component Per File:** Each file should export only one main component.
 - **Naming:** 
-  - Components & Pages: `PascalCase.jsx` (e.g., `PageBanner.jsx`, `Home.jsx`).
+  - Shared Components: `PascalCase.jsx` (e.g., `PageBanner.jsx`, `Button.jsx`).
+  - Pages: Use a folder named in `PascalCase` (e.g., `Home/`) containing an `index.jsx` as the entry file.
+  - Page-specific Components: Placed in the page's `components/` folder, named in `PascalCase.jsx`.
   - Helper functions/hooks: `camelCase.js` (e.g., `useFetchData.js`, `formatDate.js`).
 
 ---
@@ -70,9 +81,11 @@ src/
 
 ---
 
-## 7. State Management
-- Use `useState` and `useReducer` for local component state.
-- Keep components "dumb" (presentation only) when possible, passing state down via props.
+## 7. State Management, Data Fetching & Forms
+- **Local State:** Use `useState` and `useReducer` for local component state. Keep components "dumb" when possible, passing state down via props.
+- **Global State:** Use **Zustand** for scalable global state management instead of Context API or Redux.
+- **Server State / API:** Use **@tanstack/react-query** for fetching, caching, and synchronizing asynchronous data from the backend.
+- **Form Management:** All forms MUST use **Formik** for handling form states and **Yup** for schema-based validation.
 
 ## 8. Anti-Patterns to Avoid
 - Avoid direct DOM manipulation (e.g., `document.getElementById`).

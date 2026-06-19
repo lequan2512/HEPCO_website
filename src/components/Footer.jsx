@@ -1,5 +1,6 @@
 import { Mail, Phone, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { ROUTES } from '../constants/routes';
 
 const Footer = () => {
   return (
@@ -18,7 +19,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
           
           {/* Column 1: Logo & Intro */}
-          <div>
+          <div className="lg:w-1/4 mb-10 lg:mb-0">
             <div className="flex items-center gap-4 mb-6">
               <div className="w-16 h-16 rounded-full border-2 border-white flex items-center justify-center font-bold text-xl relative bg-green-800">
                 <span className="z-10">HEPCO</span>
@@ -28,7 +29,7 @@ const Footer = () => {
             <p className="text-sm leading-relaxed mb-6 opacity-90 text-justify">
               Phát huy thế mạnh và đa dạng hóa lĩnh vực hoạt động để trở thành Công ty môi trường hàng đầu khu vực miền Trung - Tây Nguyên
             </p>
-            <Link to="/gioi-thieu" className="inline-block bg-hepco-orange hover:bg-orange-600 text-white font-bold py-2 px-8 rounded transition-colors shadow-md">
+            <Link to={ROUTES.ABOUT} className="inline-block bg-hepco-orange hover:bg-orange-600 text-white font-bold py-2 px-8 rounded transition-colors shadow-md">
               GIỚI THIỆU
             </Link>
           </div>

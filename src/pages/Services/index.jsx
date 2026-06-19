@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import PageBanner from '../components/PageBanner';
-import SubNav from '../components/SubNav';
+import PageBanner from '../../components/PageBanner';
+import SubNav from '../../components/SubNav';
 
 const Services = () => {
   const [activeTab, setActiveTab] = useState(0);
