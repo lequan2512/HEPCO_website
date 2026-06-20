@@ -8,11 +8,7 @@ const Header = () => {
     { name: 'GIỚI THIỆU', path: ROUTES.ABOUT },
     { name: 'DỊCH VỤ', path: ROUTES.SERVICES },
     { name: 'TIN TỨC', path: ROUTES.NEWS },
-    { name: 'DỰ ÁN', path: ROUTES.PROJECTS },
     { name: 'CỔ ĐÔNG', path: ROUTES.SHAREHOLDERS },
-    { name: 'CÂU HỎI', path: ROUTES.FAQ },
-    { name: 'LIÊN HỆ', path: ROUTES.CONTACT },
-    { name: 'HÓA ĐƠN', path: ROUTES.INVOICE }
   ];
 
   return (
@@ -32,7 +28,7 @@ const Header = () => {
           <NavLink
             key={index}
             to={item.path}
-            className={({ isActive }) => 
+            className={({ isActive }) =>
               `hover:text-yellow-300 transition-colors ${isActive ? 'text-yellow-400' : ''}`
             }
           >
