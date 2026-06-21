@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { ROUTES } from '../../constants/routes';
+import { API_BASE_URL } from '../../constants/api';
 
 const AdminLogin = () => {
   const [error, setError] = useState('');
@@ -17,12 +18,33 @@ const AdminLogin = () => {
       username: Yup.string().required('Vui lòng nhập tên đăng nhập'),
       password: Yup.string().required('Vui lòng nhập mật khẩu'),
     }),
-    onSubmit: (values) => {
-      if (values.username === 'admin' && values.password === '123456') {
-        localStorage.setItem('isAdminLoggedIn', 'true');
-        navigate(ROUTES.ADMIN_DASHBOARD);
-      } else {
-        setError('Tài khoản hoặc mật khẩu không chính xác!');
+    onSubmit: async (values, { setSubmitting }) => {
+      setError('');
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/login`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            username: values.username,
+            password: values.password,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          localStorage.setItem('isAdminLoggedIn', 'true');
+          navigate(ROUTES.ADMIN_DASHBOARD);
+        } else {
+          setError(data.error || 'Tài khoản hoặc mật khẩu không chính xác!');
+        }
+      } catch (err) {
+        console.error('Lỗi khi đăng nhập:', err);
+        setError('Không thể kết nối tới máy chủ. Vui lòng thử lại sau!');
+      } finally {
+        setSubmitting(false);
       }
     },
   });

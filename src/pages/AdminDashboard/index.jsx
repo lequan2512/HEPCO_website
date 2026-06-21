@@ -5,6 +5,7 @@ import 'react-quill-new/dist/quill.snow.css';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { ROUTES } from '../../constants/routes';
+import { API_BASE_URL } from '../../constants/api';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -25,27 +26,50 @@ const AdminDashboard = () => {
   const formik = useFormik({
     initialValues: {
       title: '',
+      category: 'Hoạt động Công ty',
       content: '',
     },
     validationSchema: Yup.object({
       title: Yup.string().required('Vui lòng nhập tiêu đề bài viết'),
+      category: Yup.string().required('Vui lòng chọn danh mục bài viết'),
       content: Yup.string().test(
         'is-empty', 
         'Vui lòng nhập nội dung bài viết',
-        (value) => value && value.replace(/<[^>]+>/g, '').trim().length > 0 // Loại bỏ thẻ HTML để kiểm tra rỗng
+        (value) => value && value.replace(/<[^>]+>/g, '').trim().length > 0
       ),
     }),
-    onSubmit: (values, { resetForm }) => {
-      console.log('Tiêu đề:', values.title);
-      console.log('Nội dung HTML (từ ReactQuill):', values.content);
-      
-      setSuccessMsg('Đăng bài thành công! (Xem log tại console)');
-      
-      resetForm();
-      
-      setTimeout(() => {
-        setSuccessMsg('');
-      }, 3000);
+    onSubmit: async (values, { resetForm, setSubmitting }) => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/news`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title: values.title,
+            category: values.category,
+            content: values.content,
+            author: 'Ban Truyền Thông'
+          }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          setSuccessMsg('Đăng bài viết mới thành công vào cơ sở dữ liệu!');
+          resetForm();
+          setTimeout(() => {
+            setSuccessMsg('');
+          }, 3000);
+        } else {
+          alert(data.error || 'Có lỗi xảy ra khi đăng bài viết!');
+        }
+      } catch (err) {
+        console.error('Lỗi khi đăng bài:', err);
+        alert('Không thể kết nối đến máy chủ API để đăng bài!');
+      } finally {
+        setSubmitting(false);
+      }
     },
   });
 
@@ -95,6 +119,26 @@ const AdminDashboard = () => {
           />
           {formik.touched.title && formik.errors.title ? (
             <div className="text-red-500 text-sm mt-1">{formik.errors.title}</div>
+          ) : null}
+        </div>
+
+        <div>
+          <label className="block text-lg font-medium text-gray-700 mb-2">Danh mục bài viết</label>
+          <select 
+            name="category"
+            className={`w-full p-3 border rounded outline-none focus:ring-hepco-green focus:border-hepco-green bg-white ${
+              formik.touched.category && formik.errors.category ? 'border-red-500' : 'border-gray-300'
+            }`}
+            value={formik.values.category}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+          >
+            <option value="Bảo vệ Môi trường">Bảo vệ Môi trường</option>
+            <option value="Hoạt động Công ty">Hoạt động Công ty</option>
+            <option value="Tin tức Cổ đông">Tin tức Cổ đông</option>
+          </select>
+          {formik.touched.category && formik.errors.category ? (
+            <div className="text-red-500 text-sm mt-1">{formik.errors.category}</div>
           ) : null}
         </div>
 

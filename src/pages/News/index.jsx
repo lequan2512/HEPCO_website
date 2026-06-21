@@ -1,8 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Search, Calendar, User, X, ArrowRight, Tag, BookOpen } from 'lucide-react';
 import PageBanner from '../../components/PageBanner';
+import { API_BASE_URL } from '../../constants/api';
 
-const NEWS_DATA = [
+const FALLBACK_NEWS_DATA = [
   {
     id: 1,
     title: 'HEPCO đồng hành cùng ngày hội "Chủ Nhật Xanh" dọn sạch rác thải dọc hai bờ sông Hương',
@@ -120,9 +121,28 @@ const NEWS_DATA = [
 const CATEGORIES = ['Tất cả', 'Bảo vệ Môi trường', 'Hoạt động Công ty', 'Tin tức Cổ đông'];
 
 const News = () => {
+  const [articles, setArticles] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('Tất cả');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedArticle, setSelectedArticle] = useState(null);
+
+  useEffect(() => {
+    const fetchNews = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/news`);
+        if (!response.ok) throw new Error('Không thể tải tin tức từ máy chủ');
+        const data = await response.json();
+        setArticles(data);
+      } catch (err) {
+        console.error('Lỗi khi fetch tin tức, sử dụng dữ liệu dự phòng:', err);
+        setArticles(FALLBACK_NEWS_DATA);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchNews();
+  }, []);
 
   // Clear search query
   const handleClearSearch = () => {
@@ -131,7 +151,7 @@ const News = () => {
 
   // Filtered and Searched Articles
   const filteredArticles = useMemo(() => {
-    return NEWS_DATA.filter((article) => {
+    return articles.filter((article) => {
       const matchesCategory = selectedCategory === 'Tất cả' || article.category === selectedCategory;
       const matchesSearch = searchQuery.trim() === '' || 
         article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -139,7 +159,7 @@ const News = () => {
       
       return matchesCategory && matchesSearch;
     });
-  }, [selectedCategory, searchQuery]);
+  }, [articles, selectedCategory, searchQuery]);
 
   return (
     <div className="bg-gray-50 pb-20 flex-grow min-h-screen">
@@ -324,8 +344,15 @@ const News = () => {
               </div>
 
               {/* Body Content */}
-              <div className="text-gray-700 text-sm md:text-base leading-relaxed whitespace-pre-line font-light">
-                {selectedArticle.content}
+              <div className="text-gray-700 text-sm md:text-base leading-relaxed font-light">
+                {typeof selectedArticle.content === 'string' ? (
+                  <div 
+                    className="prose max-w-none [&>p]:mb-4 [&>blockquote]:border-l-4 [&>blockquote]:border-hepco-green [&>blockquote]:pl-4 [&>blockquote]:italic [&>blockquote]:my-6 [&>blockquote]:text-gray-600 [&>blockquote]:bg-gray-50 [&>blockquote]:py-2 [&>blockquote]:rounded-r" 
+                    dangerouslySetInnerHTML={{ __html: selectedArticle.content }} 
+                  />
+                ) : (
+                  selectedArticle.content
+                )}
               </div>
             </div>
 
