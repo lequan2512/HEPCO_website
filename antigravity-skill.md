@@ -91,3 +91,32 @@ src/
 - Avoid direct DOM manipulation (e.g., `document.getElementById`).
 - Do not use inline styles unless dynamically calculated (e.g., `style={{ backgroundImage: url(...) }}`). Use Tailwind classes instead.
 - Do not duplicate standard Tailwind utility configurations in custom SCSS.
+
+---
+
+## 9. Backend Standards (HEPCO-API - Node.js & Express.js)
+The backend follows a strict MVC-like architecture, separating routing, business logic, and database operations for scalability and maintainability.
+
+- **Tech Stack:** Node.js, Express.js, `mssql` (SQL Server).
+- **Directory Structure:**
+  ```text
+  src/
+  ├── db.js                # Database connection pool and setup
+  ├── index.js             # Main application entry point (mounts routes, middleware)
+  ├── routes/              # Route definitions
+  ├── controllers/         # Request handling, validation, and business logic
+  └── models/              # Data access layer (Database interaction, raw SQL queries)
+  ```
+- **Naming Conventions:**
+  - Routes: `[feature].routes.js` (e.g., `news.routes.js`)
+  - Controllers: `[feature].controller.js` (e.g., `news.controller.js`)
+  - Models: `[feature].model.js` (e.g., `news.model.js`)
+- **Architectural Rules:**
+  - **Routes:** Only map endpoints to controller functions. Do not write business logic or database queries here. Use `express.Router()`.
+  - **Controllers:** Handle HTTP requests and responses (`req`, `res`). Extract data from request, validate, call Models for data operations, and send formatted JSON responses.
+  - **Models:** Encapsulate all database access logic. Use classes with `static async` methods. **Never write raw SQL queries directly inside Controllers.** Always use Models to interact with `poolPromise`.
+- **Security & Authentication Rules:**
+  - **JWT Authentication:** Use Bearer Tokens (`jsonwebtoken`) for authenticating API requests.
+  - **IP Whitelisting:** Any sensitive API endpoints—such as login, creating data, or editing information—MUST verify that the client's IP address exists in the `IpWhitelist` database table before execution. Requests from unlisted IPs should be immediately rejected with a `403 Forbidden` status.
+- **Error Handling:** APIs MUST return a specific `errorCode` string (e.g., `MISSING_FIELDS`, `IP_NOT_WHITELISTED`, `INVALID_CREDENTIALS`, `INTERNAL_ERROR`) instead of localized error messages. The frontend is responsible for mapping these codes to the correct Vietnamese messages.
+- **Code Comments:** All code comments MUST be written in English.

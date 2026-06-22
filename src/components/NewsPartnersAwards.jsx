@@ -7,10 +7,10 @@ const NewsPartnersAwards = () => {
   useEffect(() => {
     const fetchLatestNews = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/news`);
+        const response = await fetch(`${API_BASE_URL}/api/news?type=news&limit=3`);
         if (!response.ok) throw new Error('Không thể tải tin nổi bật');
-        const data = await response.json();
-        setNews(data.slice(0, 3));
+        const result = await response.json();
+        setNews(result.data || []);
       } catch (err) {
         console.error('Lỗi khi tải tin tức nổi bật, sử dụng dữ liệu tĩnh:', err);
         setNews([

@@ -1,13 +1,16 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { ROUTES } from '../../constants/routes';
-import { API_BASE_URL } from '../../constants/api';
+import { ROUTES } from '../../../constants/routes';
+import axiosInstance from '../../../utils/axios';
+import useAuthStore from '../../../store/useAuthStore';
+import toast from 'react-hot-toast';
+import { getErrorMessage } from '../../../utils/errorMapper';
+import Loading from '../../../components/Loading';
 
 const AdminLogin = () => {
-  const [error, setError] = useState('');
   const navigate = useNavigate();
+  const setAuth = useAuthStore((state) => state.setAuth);
 
   const formik = useFormik({
     initialValues: {
@@ -19,30 +22,23 @@ const AdminLogin = () => {
       password: Yup.string().required('Vui lòng nhập mật khẩu'),
     }),
     onSubmit: async (values, { setSubmitting }) => {
-      setError('');
       try {
-        const response = await fetch(`${API_BASE_URL}/api/login`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            username: values.username,
-            password: values.password,
-          }),
+        const response = await axiosInstance.post('/api/login', {
+          username: values.username,
+          password: values.password,
         });
 
-        const data = await response.json();
-
-        if (response.ok && data.success) {
-          localStorage.setItem('isAdminLoggedIn', 'true');
+        if (response.data.success) {
+          setAuth(response.data.token);
           navigate(ROUTES.ADMIN_DASHBOARD);
         } else {
-          setError(data.error || 'Tài khoản hoặc mật khẩu không chính xác!');
+          const errorCode = response.data.errorCode;
+          toast.error(getErrorMessage(errorCode));
         }
       } catch (err) {
-        console.error('Lỗi khi đăng nhập:', err);
-        setError('Không thể kết nối tới máy chủ. Vui lòng thử lại sau!');
+        console.error('Login error:', err);
+        const errorCode = err.response?.data?.errorCode;
+        toast.error(getErrorMessage(errorCode));
       } finally {
         setSubmitting(false);
       }
@@ -50,14 +46,10 @@ const AdminLogin = () => {
   });
 
   return (
-    <div className="flex items-center justify-center py-20 bg-gray-50 flex-grow">
+    <div className="flex items-center justify-center py-20 bg-gray-50 flex-grow relative">
+      {formik.isSubmitting && <Loading fullScreen message="Đang đăng nhập..." />}
       <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md border border-gray-100">
         <h2 className="text-2xl font-bold text-center text-hepco-green mb-6">Đăng nhập Quản trị</h2>
-        {error && (
-          <div className="mb-4 p-3 text-sm text-red-600 bg-red-100 rounded border border-red-200">
-            {error}
-          </div>
-        )}
         <form onSubmit={formik.handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">Tên đăng nhập</label>

@@ -1,15 +1,17 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { Search, Calendar, User, X, ArrowRight, Tag, BookOpen } from 'lucide-react';
-import PageBanner from '../../components/PageBanner';
-import { API_BASE_URL } from '../../constants/api';
+import { useState, useMemo, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Search, Calendar, X, Tag } from 'lucide-react';
+import PageBanner from '../../../components/PageBanner';
+import Loading from '../../../components/Loading';
+import { API_BASE_URL } from '../../../constants/api';
+import { ROUTES } from '../../../constants/routes';
 
 const FALLBACK_NEWS_DATA = [
   {
     id: 1,
     title: 'HEPCO đồng hành cùng ngày hội "Chủ Nhật Xanh" dọn sạch rác thải dọc hai bờ sông Hương',
-    category: 'Bảo vệ Môi trường',
+    type: 'news',
     date: '14-06-2026',
-    author: 'Ban Truyền Thông',
     image: '/images/news_cleanup.png',
     excerpt: 'Hưởng ứng phong trào Ngày Chủ Nhật Xanh của tỉnh Thừa Thiên Huế, hơn 200 cán bộ công nhân viên HEPCO đã ra quân thu gom rác thải nhựa và dọn dẹp vệ sinh dọc tuyến đường đi bộ bờ sông Hương.',
     content: (
@@ -35,9 +37,8 @@ const FALLBACK_NEWS_DATA = [
   {
     id: 2,
     title: 'HEPCO đưa vào vận hành dàn xe ép rác chuyên dụng thế hệ mới, giảm thiểu tiếng ồn và khí thải',
-    category: 'Hoạt động Công ty',
+    type: 'news',
     date: '18-06-2026',
-    author: 'Phòng Kỹ thuật',
     image: '/images/news_trucks.png',
     excerpt: 'Nhằm nâng cao năng lực thu gom và hiện đại hóa quy trình xử lý chất thải đô thị, HEPCO đã chính thức đưa vào sử dụng dàn xe ép rác thế hệ mới đạt tiêu chuẩn khí thải Euro 5.',
     content: (
@@ -63,9 +64,8 @@ const FALLBACK_NEWS_DATA = [
   {
     id: 3,
     title: 'Xanh hóa Cố đô: HEPCO ra quân trồng hơn 1.000 cây xanh và hoa trang trí quanh Đại Nội Huế',
-    category: 'Bảo vệ Môi trường',
+    type: 'news',
     date: '10-06-2026',
-    author: 'Đội Cây xanh',
     image: '/images/news_planting.png',
     excerpt: 'Nhằm tô điểm thêm vẻ đẹp cổ kính của di sản Huế, Đội Công viên Cây xanh HEPCO đã triển khai đề án trồng mới cây bóng mát và hoa trang trí dọc các tuyến đường bao quanh Hoàng Thành.',
     content: (
@@ -91,9 +91,8 @@ const FALLBACK_NEWS_DATA = [
   {
     id: 4,
     title: 'Đại hội đồng Cổ đông thường niên năm 2026 của HEPCO thành công tốt đẹp',
-    category: 'Tin tức Cổ đông',
+    type: 'shareholders',
     date: '28-05-2026',
-    author: 'Hội đồng Quản trị',
     image: '/images/news_meeting.png',
     excerpt: 'Ngày 28/05/2026, HEPCO đã tổ chức thành công Đại hội đồng Cổ đông thường niên năm 2026. Đại hội đã thông qua kế hoạch kinh doanh với mục tiêu tăng trưởng doanh thu 12%.',
     content: (
@@ -118,22 +117,23 @@ const FALLBACK_NEWS_DATA = [
   }
 ];
 
-const CATEGORIES = ['Tất cả', 'Bảo vệ Môi trường', 'Hoạt động Công ty', 'Tin tức Cổ đông'];
-
-const News = () => {
+const News = ({ pageType = 'news' }) => {
+  const navigate = useNavigate();
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState('Tất cả');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedArticle, setSelectedArticle] = useState(null);
+
+  const bannerInfo = pageType === 'news' 
+    ? { title: "Tin tức & Sự kiện", description: "Cập nhật những thông tin mới nhất về hoạt động và sự kiện của HEPCO." }
+    : { title: "Thông tin Cổ đông", description: "Cập nhật các báo cáo, thông cáo và thông tin dành cho cổ đông của HEPCO." };
 
   useEffect(() => {
     const fetchNews = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/news`);
+        const response = await fetch(`${API_BASE_URL}/api/news?type=${pageType}&limit=20`);
         if (!response.ok) throw new Error('Không thể tải tin tức từ máy chủ');
-        const data = await response.json();
-        setArticles(data);
+        const result = await response.json();
+        setArticles(result.data || []);
       } catch (err) {
         console.error('Lỗi khi fetch tin tức, sử dụng dữ liệu dự phòng:', err);
         setArticles(FALLBACK_NEWS_DATA);
@@ -152,41 +152,28 @@ const News = () => {
   // Filtered and Searched Articles
   const filteredArticles = useMemo(() => {
     return articles.filter((article) => {
-      const matchesCategory = selectedCategory === 'Tất cả' || article.category === selectedCategory;
       const matchesSearch = searchQuery.trim() === '' || 
         article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         article.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
       
-      return matchesCategory && matchesSearch;
+      return matchesSearch;
     });
-  }, [articles, selectedCategory, searchQuery]);
+  }, [articles, searchQuery]);
 
   return (
     <div className="bg-gray-50 pb-20 flex-grow min-h-screen">
       <PageBanner 
-        title="Tin tức & Sự kiện"
-        description="Cập nhật những thông tin mới nhất về hoạt động, chiến dịch bảo vệ môi trường và thông tin cổ đông của HEPCO."
+        title={bannerInfo.title}
+        description={bannerInfo.description}
       />
 
       <div className="container mx-auto px-4 max-w-7xl mt-12">
         {/* Controls Layout: Category & Search bar */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-12 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
           
-          {/* Categories Tab */}
-          <div className="flex flex-wrap gap-2">
-            {CATEGORIES.map((category) => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 ${
-                  selectedCategory === category
-                    ? 'bg-hepco-green text-white shadow-md shadow-green-200'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                {category}
-              </button>
-            ))}
+          {/* Left spacing if needed, but since we removed categories, just a title or empty div to push search right */}
+          <div className="flex-grow">
+             <h2 className="text-xl font-bold text-gray-800">{bannerInfo.title}</h2>
           </div>
 
           {/* Search Box */}
@@ -211,7 +198,9 @@ const News = () => {
         </div>
 
         {/* Articles List or Empty State */}
-        {filteredArticles.length > 0 ? (
+        {loading ? (
+          <Loading message="Đang tải danh sách bài viết..." />
+        ) : filteredArticles.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredArticles.map((article) => (
               <div 
@@ -221,16 +210,16 @@ const News = () => {
                 {/* Image Section */}
                 <div 
                   className="h-56 bg-gray-100 relative overflow-hidden cursor-pointer"
-                  onClick={() => setSelectedArticle(article)}
+                  onClick={() => navigate(ROUTES.ARTICLE_DETAIL.replace(':id', article.id))}
                 >
                   <img 
                     src={article.image} 
                     alt={article.title} 
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
-                  {/* Category Badge over image */}
+                  {/* Badge over image */}
                   <span className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm text-hepco-green font-bold text-xs px-3 py-1 rounded-full shadow-sm">
-                    {article.category}
+                    {pageType === 'news' ? 'Tin Mới' : 'Cổ Đông'}
                   </span>
                 </div>
 
@@ -243,16 +232,12 @@ const News = () => {
                         <Calendar className="w-3.5 h-3.5" />
                         <span>{article.date}</span>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <User className="w-3.5 h-3.5" />
-                        <span>{article.author}</span>
-                      </div>
                     </div>
 
                     {/* Title */}
                     <h3 
                       className="text-gray-900 font-bold text-lg mb-3 line-clamp-2 leading-snug cursor-pointer group-hover:text-hepco-orange transition-colors"
-                      onClick={() => setSelectedArticle(article)}
+                      onClick={() => navigate(ROUTES.ARTICLE_DETAIL.replace(':id', article.id))}
                     >
                       {article.title}
                     </h3>
@@ -262,15 +247,6 @@ const News = () => {
                       {article.excerpt}
                     </p>
                   </div>
-
-                  {/* Read More button */}
-                  <button 
-                    onClick={() => setSelectedArticle(article)}
-                    className="flex items-center gap-1 text-hepco-green font-bold text-sm hover:text-hepco-orange transition-colors group/btn mt-2 self-start"
-                  >
-                    <span>Đọc tiếp</span>
-                    <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
-                  </button>
                 </div>
               </div>
             ))}
@@ -283,7 +259,7 @@ const News = () => {
               Không tìm thấy kết quả nào phù hợp với danh mục hoặc từ khóa tìm kiếm của bạn. Hãy thử thay đổi bộ lọc hoặc nhập từ khóa khác.
             </p>
             <button 
-              onClick={() => { setSelectedCategory('Tất cả'); handleClearSearch(); }}
+              onClick={() => { handleClearSearch(); }}
               className="mt-6 bg-hepco-green text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-opacity-90 shadow-md transition-all"
             >
               Reset bộ lọc
@@ -291,88 +267,6 @@ const News = () => {
           </div>
         )}
       </div>
-
-      {/* Article Detail Modal */}
-      {selectedArticle && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-all duration-300">
-          <div 
-            className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative flex flex-col animate-in fade-in zoom-in-95 duration-200"
-            role="dialog"
-            aria-modal="true"
-          >
-            {/* Modal Sticky Header with Close Button */}
-            <div className="sticky top-0 bg-white/95 backdrop-blur-md px-6 py-4 border-b border-gray-100 flex items-center justify-between z-10">
-              <span className="flex items-center gap-1.5 text-hepco-green font-bold text-sm bg-green-50 px-3 py-1 rounded-full">
-                <BookOpen className="w-3.5 h-3.5" />
-                {selectedArticle.category}
-              </span>
-              <button 
-                onClick={() => setSelectedArticle(null)}
-                className="p-1.5 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
-                aria-label="Close modal"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Modal Scrollable Content */}
-            <div className="p-6 md:p-8">
-              {/* Meta */}
-              <div className="flex items-center gap-4 text-gray-400 text-xs md:text-sm mb-4">
-                <div className="flex items-center gap-1.5">
-                  <Calendar className="w-4 h-4" />
-                  <span>{selectedArticle.date}</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <User className="w-4 h-4" />
-                  <span>{selectedArticle.author}</span>
-                </div>
-              </div>
-
-              {/* Title */}
-              <h2 className="text-gray-900 font-extrabold text-2xl md:text-3xl mb-6 leading-tight">
-                {selectedArticle.title}
-              </h2>
-
-              {/* Image */}
-              <div className="h-64 md:h-96 w-full rounded-xl overflow-hidden mb-6 bg-gray-100 shadow-inner">
-                <img 
-                  src={selectedArticle.image} 
-                  alt={selectedArticle.title} 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-
-              {/* Body Content */}
-              <div className="text-gray-700 text-sm md:text-base leading-relaxed font-light">
-                {typeof selectedArticle.content === 'string' ? (
-                  <div 
-                    className="prose max-w-none [&>p]:mb-4 [&>blockquote]:border-l-4 [&>blockquote]:border-hepco-green [&>blockquote]:pl-4 [&>blockquote]:italic [&>blockquote]:my-6 [&>blockquote]:text-gray-600 [&>blockquote]:bg-gray-50 [&>blockquote]:py-2 [&>blockquote]:rounded-r" 
-                    dangerouslySetInnerHTML={{ __html: selectedArticle.content }} 
-                  />
-                ) : (
-                  selectedArticle.content
-                )}
-              </div>
-            </div>
-
-            {/* Modal Footer */}
-            <div className="px-6 py-5 border-t border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Chia sẻ:</span>
-                <button className="text-xs bg-white border border-gray-200 px-3 py-1.5 rounded-lg hover:border-hepco-green hover:text-hepco-green transition-all shadow-sm">Zalo</button>
-                <button className="text-xs bg-white border border-gray-200 px-3 py-1.5 rounded-lg hover:border-blue-600 hover:text-blue-600 transition-all shadow-sm">Facebook</button>
-              </div>
-              <button 
-                onClick={() => setSelectedArticle(null)}
-                className="bg-hepco-green text-white font-bold px-6 py-2 rounded-lg text-sm hover:bg-opacity-95 shadow-md shadow-green-150 transition-all text-center sm:w-auto"
-              >
-                Đóng
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
