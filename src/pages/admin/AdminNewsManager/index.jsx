@@ -3,82 +3,70 @@ import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { Plus, Trash2, Edit2, X, Image as ImageIcon, FileText } from 'lucide-react';
-import axiosInstance from '../../../utils/axios';
 import { API_BASE_URL } from '../../../constants/api';
 import toast from 'react-hot-toast';
 import { getErrorMessage } from '../../../utils/errorMapper';
 import Loading from '../../../components/Loading';
+import { useGetNews, useCreateNews, useUpdateNews, useDeleteNews } from '../../../apis/news';
+import { useUploadImage, useDeleteImage } from '../../../apis/upload';
+import ConfirmModal from '../../../components/ConfirmModal';
 
-const AdminNewsManager = ({ type }) => {
+const AdminNewsManager = ({ type, editOnly = false }) => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [confirmConfig, setConfirmConfig] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
   const queryClient = useQueryClient();
 
-  const titleText = type === 'news' ? 'Tin Tức' : 'Cổ Đông';
+  const titleText = type === 'news' ? 'Tin Tức' : type === 'shareholders' ? 'Cổ Đông' : 'Dịch Vụ';
 
-  const { data: articles = [], isLoading } = useQuery({
-    queryKey: ['admin-news', type],
-    queryFn: async () => {
-      const response = await axiosInstance.get('/api/news', {
-        params: { type, limit: 20 }
-      });
-      return response.data.data;
-    }
-  });
+  const { data: newsResponse = {}, isLoading } = useGetNews({ type, limit: 20 });
+  const articles = newsResponse.data || [];
 
-  const createNewsMutation = useMutation({
-    mutationFn: (newPost) => axiosInstance.post('/api/news', newPost),
-    onSuccess: () => {
-      toast.success('Thêm bài viết mới thành công!');
-      queryClient.invalidateQueries({ queryKey: ['admin-news'] });
-      setIsFormOpen(false);
-      formik.resetForm();
-    },
-    onError: (error) => {
-      const errorCode = error.response?.data?.errorCode;
-      toast.error(getErrorMessage(errorCode));
-    }
-  });
+  const createNewsMutation = useCreateNews();
+  const updateNewsMutation = useUpdateNews();
+  const deleteNewsMutation = useDeleteNews();
+  const uploadImageMutation = useUploadImage();
+  const deleteImageMutation = useDeleteImage();
 
-  const updateNewsMutation = useMutation({
-    mutationFn: ({ id, ...data }) => axiosInstance.put(`/api/news/${id}`, data),
-    onSuccess: () => {
-      toast.success('Cập nhật bài viết thành công!');
-      queryClient.invalidateQueries({ queryKey: ['admin-news'] });
-      setIsFormOpen(false);
-      setEditingId(null);
-      formik.resetForm();
-    },
-    onError: (error) => {
-      const errorCode = error.response?.data?.errorCode;
-      toast.error(getErrorMessage(errorCode));
-    }
-  });
+  const handleCreateSuccess = () => {
+    toast.success('Thêm bài viết mới thành công!');
+    queryClient.invalidateQueries({ queryKey: ['news'] });
+    setIsFormOpen(false);
+    formik.resetForm();
+  };
 
-  const deleteNewsMutation = useMutation({
-    mutationFn: (id) => axiosInstance.delete(`/api/news/${id}`),
-    onSuccess: () => {
-      toast.success('Xóa bài viết thành công!');
-      queryClient.invalidateQueries({ queryKey: ['admin-news'] });
-    },
-    onError: (error) => {
-      const errorCode = error.response?.data?.errorCode;
-      toast.error(getErrorMessage(errorCode));
-    }
-  });
+  const handleUpdateSuccess = () => {
+    toast.success('Cập nhật bài viết thành công!');
+    queryClient.invalidateQueries({ queryKey: ['news'] });
+    setIsFormOpen(false);
+    setEditingId(null);
+    formik.resetForm();
+  };
+
+  const handleDeleteSuccess = () => {
+    toast.success('Xóa bài viết thành công!');
+    queryClient.invalidateQueries({ queryKey: ['news'] });
+  };
+
+  const handleError = (error) => {
+    const errorCode = error.response?.data?.errorCode;
+    toast.error(getErrorMessage(errorCode) || 'Có lỗi xảy ra');
+  };
 
   const formik = useFormik({
     initialValues: {
       title: '',
       content: '',
+      image: '',
       thumbnail: '',
       type: type
     },
     enableReinitialize: true,
     validationSchema: Yup.object({
       title: Yup.string().required('Vui lòng nhập tiêu đề bài viết'),
+      thumbnail: type === 'service' ? Yup.string() : Yup.string().required('Vui lòng tải lên thumbnail'),
       content: Yup.string().test(
         'is-empty', 
         'Vui lòng nhập nội dung bài viết',
@@ -89,11 +77,14 @@ const AdminNewsManager = ({ type }) => {
       try {
         if (editingId) {
           await updateNewsMutation.mutateAsync({ id: editingId, ...values });
+          handleUpdateSuccess();
         } else {
           await createNewsMutation.mutateAsync(values);
+          handleCreateSuccess();
         }
       } catch (err) {
         console.error('Lỗi khi lưu bài:', err);
+        handleError(err);
       } finally {
         setSubmitting(false);
       }
@@ -105,16 +96,35 @@ const AdminNewsManager = ({ type }) => {
     formik.setValues({
       title: article.title,
       content: article.content,
+      image: article.image || '',
       thumbnail: article.thumbnail || '',
       type: article.type
     });
     setIsFormOpen(true);
   };
 
-  const handleDelete = (id) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa bài viết này?')) {
-      deleteNewsMutation.mutate(id);
-    }
+  const handleDelete = (article) => {
+    setConfirmConfig({
+      isOpen: true,
+      title: 'Xóa bài viết',
+      message: 'Bạn có chắc chắn muốn xóa bài viết này? Hành động này không thể hoàn tác.',
+      onConfirm: async () => {
+        try {
+          await deleteNewsMutation.mutateAsync(article.id);
+          
+          if (article.thumbnail && article.thumbnail.startsWith('/uploads/')) {
+            await deleteImageMutation.mutateAsync(article.thumbnail);
+          }
+          if (article.image && article.image.startsWith('/uploads/') && article.image !== article.thumbnail) {
+            await deleteImageMutation.mutateAsync(article.image);
+          }
+
+          handleDeleteSuccess();
+        } catch (error) {
+          handleError(error);
+        }
+      }
+    });
   };
 
   const handleCloseForm = () => {
@@ -137,8 +147,8 @@ const AdminNewsManager = ({ type }) => {
 
   if (isFormOpen) {
     return (
-      <div className="w-full max-w-5xl relative">
-        {(formik.isSubmitting || updateNewsMutation.isPending || createNewsMutation.isPending) && <Loading fullScreen message="Đang xử lý..." />}
+      <div className="w-full relative">
+        {(formik.isSubmitting || updateNewsMutation.isPending || createNewsMutation.isPending || uploadImageMutation.isPending) && <Loading fullScreen message="Đang xử lý..." />}
         <div className="mb-6 border-b pb-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-gray-800">
             {editingId ? `Sửa Bài Viết ${titleText}` : `Thêm Mới ${titleText}`}
@@ -170,36 +180,89 @@ const AdminNewsManager = ({ type }) => {
             ) : null}
           </div>
 
-          <div>
-            <label className="block text-lg font-medium text-gray-700 mb-2">Ảnh đại diện (Thumbnail)</label>
-            <input 
-              type="file" 
-              accept="image/*"
-              className="w-full p-2 border border-gray-300 rounded outline-none focus:ring-hepco-green focus:border-hepco-green"
-              onChange={async (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                  const formData = new FormData();
-                  formData.append('image', file);
-                  try {
-                    toast.loading('Đang tải ảnh lên...', { id: 'upload' });
-                    const res = await axiosInstance.post('/api/upload', formData, {
-                      headers: { 'Content-Type': 'multipart/form-data' }
-                    });
-                    if (res.data.success) {
-                      formik.setFieldValue('thumbnail', res.data.url);
-                      toast.success('Tải ảnh thành công!', { id: 'upload' });
+          {type !== 'service' && (
+            <div>
+              <label className="block text-lg font-medium text-gray-700 mb-2">Ảnh đại diện (Thumbnail)</label>
+              <input 
+                type="file" 
+                accept="image/*"
+                className={`w-full p-2 border rounded outline-none focus:ring-hepco-green focus:border-hepco-green ${
+                  formik.submitCount > 0 && formik.errors.thumbnail ? 'border-red-500' : 'border-gray-300'
+                }`}
+                onChange={async (e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    const formData = new FormData();
+                    formData.append('image', file);
+                    try {
+                      toast.loading('Đang tải ảnh lên...', { id: 'upload' });
+                      const res = await uploadImageMutation.mutateAsync(formData);
+                      if (res.success) {
+                        const oldThumb = formik.values.thumbnail;
+                        const oldImage = formik.values.image;
+                        
+                        if (oldThumb && oldThumb.startsWith('/uploads/')) {
+                          await deleteImageMutation.mutateAsync(oldThumb);
+                        } else if (oldImage && oldImage.startsWith('/uploads/') && oldImage !== oldThumb) {
+                          await deleteImageMutation.mutateAsync(oldImage);
+                        }
+
+                        formik.setFieldValue('thumbnail', res.url);
+                        formik.setFieldValue('image', res.url);
+                        toast.success('Tải ảnh thành công!', { id: 'upload' });
+                      }
+                    } catch (error) {
+                      console.error('Lỗi tải ảnh:', error.response?.data || error);
+                      toast.error('Lỗi tải ảnh lên', { id: 'upload' });
                     }
-                  } catch {
-                    toast.error('Lỗi tải ảnh lên', { id: 'upload' });
                   }
-                }
-              }}
-            />
-            {formik.values.thumbnail && (
-               <img src={`${API_BASE_URL}${formik.values.thumbnail}`} alt="Thumbnail" className="mt-2 h-32 object-cover rounded shadow" />
-            )}
-          </div>
+                }}
+              />
+              {formik.submitCount > 0 && formik.errors.thumbnail ? (
+                <div className="text-red-500 text-sm mt-1">{formik.errors.thumbnail}</div>
+              ) : null}
+              {(formik.values.thumbnail || formik.values.image) && (
+                 <div className="mt-2 relative inline-block">
+                   <img src={(formik.values.thumbnail || formik.values.image).startsWith('http') ? (formik.values.thumbnail || formik.values.image) : `${API_BASE_URL}${(formik.values.thumbnail || formik.values.image)}`} alt="Thumbnail" className="h-32 object-cover rounded shadow" />
+                   <button
+                     type="button"
+                     onClick={() => {
+                       setConfirmConfig({
+                         isOpen: true,
+                         title: 'Xóa ảnh',
+                         message: 'Bạn có chắc chắn muốn xóa ảnh này?',
+                         onConfirm: async () => {
+                           try {
+                             toast.loading('Đang xóa ảnh...', { id: 'delete_upload' });
+                             
+                             const currThumb = formik.values.thumbnail;
+                             const currImage = formik.values.image;
+                             
+                             if (currThumb && currThumb.startsWith('/uploads/')) {
+                               await deleteImageMutation.mutateAsync(currThumb);
+                             } else if (currImage && currImage.startsWith('/uploads/') && currImage !== currThumb) {
+                               await deleteImageMutation.mutateAsync(currImage);
+                             }
+
+                             formik.setFieldValue('thumbnail', '');
+                             formik.setFieldValue('image', '');
+                             toast.success('Xóa ảnh thành công!', { id: 'delete_upload' });
+                           } catch (error) {
+                             console.error('Lỗi xóa ảnh:', error);
+                             toast.error('Lỗi xóa ảnh', { id: 'delete_upload' });
+                           }
+                         }
+                       });
+                     }}
+                     className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 shadow transition-colors"
+                     title="Xóa ảnh"
+                   >
+                     <X className="w-4 h-4" />
+                   </button>
+                 </div>
+              )}
+            </div>
+          )}
 
           <div>
             <label className="block text-lg font-medium text-gray-700 mb-2">Nội dung</label>
@@ -243,23 +306,25 @@ const AdminNewsManager = ({ type }) => {
   }
 
   return (
-    <div className="w-full max-w-5xl relative">
+    <div className="w-full relative">
       {deleteNewsMutation.isPending && <Loading fullScreen message="Đang xóa..." />}
       
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b pb-4 gap-4">
         <h1 className="text-2xl font-bold text-gray-800">Quản lý {titleText}</h1>
-        <button 
-          onClick={() => {
-            setEditingId(null);
-            formik.resetForm();
-            formik.setFieldValue('type', type);
-            setIsFormOpen(true);
-          }}
-          className="flex items-center gap-2 px-4 py-2 bg-hepco-green text-white font-semibold rounded-lg hover:bg-green-700 transition-colors shadow-sm w-full sm:w-auto justify-center"
-        >
-          <Plus className="w-5 h-5" />
-          <span>Thêm Bài Viết</span>
-        </button>
+        {!editOnly && (
+          <button 
+            onClick={() => {
+              setEditingId(null);
+              formik.resetForm();
+              formik.setFieldValue('type', type);
+              setIsFormOpen(true);
+            }}
+            className="flex items-center gap-2 px-4 py-2 bg-hepco-green text-white font-semibold rounded-lg hover:bg-green-700 transition-colors shadow-sm w-full sm:w-auto justify-center"
+          >
+            <Plus className="w-5 h-5" />
+            <span>Thêm Mới</span>
+          </button>
+        )}
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
@@ -271,7 +336,7 @@ const AdminNewsManager = ({ type }) => {
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-100">
                   <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase w-16">ID</th>
-                  <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Hình Ảnh</th>
+                  {type !== 'service' && <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Hình Ảnh</th>}
                   <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Tiêu đề</th>
                   <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Ngày đăng</th>
                   <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase text-right"></th>
@@ -281,19 +346,21 @@ const AdminNewsManager = ({ type }) => {
                 {articles.map((item) => (
                   <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="px-6 py-4 text-sm text-gray-500 font-medium">#{item.id}</td>
-                    <td className="px-6 py-4">
-                      {item.thumbnail || item.image ? (
-                        <img 
-                          src={item.thumbnail || item.image} 
-                          alt="Thumb" 
-                          className="w-16 h-12 object-cover rounded-md shadow-sm border border-gray-200"
-                        />
-                      ) : (
-                        <div className="w-16 h-12 bg-gray-100 rounded-md flex items-center justify-center text-gray-400 border border-gray-200">
-                          <ImageIcon className="w-5 h-5" />
-                        </div>
-                      )}
-                    </td>
+                    {type !== 'service' && (
+                      <td className="px-6 py-4">
+                        {item.thumbnail || item.image ? (
+                          <img 
+                            src={(item.thumbnail || item.image).startsWith('http') ? (item.thumbnail || item.image) : `${API_BASE_URL}${item.thumbnail || item.image}`} 
+                            alt="Thumb" 
+                            className="w-16 h-12 object-cover rounded-md shadow-sm border border-gray-200"
+                          />
+                        ) : (
+                          <div className="w-16 h-12 bg-gray-100 rounded-md flex items-center justify-center text-gray-400 border border-gray-200">
+                            <ImageIcon className="w-5 h-5" />
+                          </div>
+                        )}
+                      </td>
+                    )}
                     <td className="px-6 py-4">
                       <div className="text-sm text-gray-800 font-medium line-clamp-2 leading-tight max-w-[200px] sm:max-w-xs md:max-w-md" title={item.title}>
                         {item.title}
@@ -311,13 +378,15 @@ const AdminNewsManager = ({ type }) => {
                         >
                           <Edit2 className="w-4 h-4" />
                         </button>
-                        <button 
-                          onClick={() => handleDelete(item.id)}
-                          className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                          title="Xóa bài viết"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        {!editOnly && (
+                          <button 
+                            onClick={() => handleDelete(item)}
+                            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                            title="Xóa bài viết"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -335,6 +404,14 @@ const AdminNewsManager = ({ type }) => {
           </div>
         )}
       </div>
+
+      <ConfirmModal 
+        isOpen={confirmConfig.isOpen}
+        title={confirmConfig.title}
+        message={confirmConfig.message}
+        onConfirm={confirmConfig.onConfirm}
+        onClose={() => setConfirmConfig({ ...confirmConfig, isOpen: false })}
+      />
     </div>
   );
 };

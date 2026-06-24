@@ -1,22 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useGetNews } from '../apis/news';
 import { API_BASE_URL } from '../constants/api';
 
 const NewsPartnersAwards = () => {
-  const [news, setNews] = useState([]);
-
-  useEffect(() => {
-    const fetchLatestNews = async () => {
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/news?type=news&limit=3`);
-        if (!response.ok) throw new Error('Không thể tải tin nổi bật');
-        const result = await response.json();
-        setNews(result.data || []);
-      } catch (err) {
-        console.error('Lỗi khi tải tin tức nổi bật, sử dụng dữ liệu tĩnh:', err);
-      }
-    };
-    fetchLatestNews();
-  }, []);
+  const { data: newsResponse = {} } = useGetNews({ type: 'news', limit: 3 });
+  const news = newsResponse.data || [];
 
   return (
     <section className="py-20 relative bg-white overflow-hidden">
@@ -39,7 +26,7 @@ const NewsPartnersAwards = () => {
                 <div className="h-48 bg-gray-100 relative overflow-hidden">
                    {item.image ? (
                      <img 
-                       src={item.image} 
+                       src={item.image?.startsWith('http') ? item.image : `${API_BASE_URL}${item.image}`} 
                        alt={item.title} 
                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
                      />
@@ -61,7 +48,7 @@ const NewsPartnersAwards = () => {
                     {item.author} - {item.category || 'Tin tức'}
                   </p>
                   <p className="text-gray-500 text-sm line-clamp-3 mt-auto">
-                    {item.excerpt || 'Đọc chi tiết bài viết tin tức để tìm hiểu thêm các thông tin hoạt động mới nhất...'}
+                    Đọc chi tiết bài viết để tìm hiểu thêm các thông tin hoạt động mới nhất của HEPCO...
                   </p>
                 </div>
               </div>

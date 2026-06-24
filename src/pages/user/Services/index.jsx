@@ -1,29 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import PageBanner from '../../../components/PageBanner';
 import SubNav from '../../../components/SubNav';
-import { API_BASE_URL } from '../../../constants/api';
+import { useGetNews } from '../../../apis/news';
 
 const Services = () => {
-  const [services, setServices] = useState([]);
   const [activeTab, setActiveTab] = useState(0);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchServiceData = async () => {
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/news?type=service&limit=10`);
-        const result = await response.json();
-        if (result && result.data && result.data.length > 0) {
-          setServices(result.data.sort((a, b) => a.id - b.id));
-        }
-      } catch (error) {
-        console.error('Lỗi khi tải dữ liệu dịch vụ:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchServiceData();
-  }, []);
+  const { data: newsResponse = {}, isLoading: loading } = useGetNews({ type: 'service', limit: 10 });
+  
+  const services = useMemo(() => {
+    const items = newsResponse.data || [];
+    return [...items].sort((a, b) => a.id - b.id);
+  }, [newsResponse.data]);
 
   const subNavItems = services.length > 0 
     ? services.map(s => s.title)

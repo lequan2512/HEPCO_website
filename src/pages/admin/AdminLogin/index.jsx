@@ -2,15 +2,17 @@ import { useNavigate } from 'react-router-dom';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { ROUTES } from '../../../constants/routes';
-import axiosInstance from '../../../utils/axios';
 import useAuthStore from '../../../store/useAuthStore';
 import toast from 'react-hot-toast';
 import { getErrorMessage } from '../../../utils/errorMapper';
 import Loading from '../../../components/Loading';
+import { useLogin } from '../../../apis/auth';
 
 const AdminLogin = () => {
   const navigate = useNavigate();
   const setAuth = useAuthStore((state) => state.setAuth);
+
+  const { mutateAsync: loginMutation } = useLogin();
 
   const formik = useFormik({
     initialValues: {
@@ -23,17 +25,16 @@ const AdminLogin = () => {
     }),
     onSubmit: async (values, { setSubmitting }) => {
       try {
-        const response = await axiosInstance.post('/api/login', {
+        const data = await loginMutation({
           username: values.username,
           password: values.password,
         });
 
-        if (response.data.success) {
-          setAuth(response.data.token);
+        if (data.success) {
+          setAuth(data.token);
           navigate(ROUTES.ADMIN_DASHBOARD);
         } else {
-          const errorCode = response.data.errorCode;
-          toast.error(getErrorMessage(errorCode));
+          toast.error(getErrorMessage(data.errorCode));
         }
       } catch (err) {
         console.error('Login error:', err);

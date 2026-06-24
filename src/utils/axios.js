@@ -26,8 +26,10 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      useAuthStore.getState().logout();
-      window.location.href = '/admin-login';
+      if (error.config && error.config.url !== '/api/login') {
+        useAuthStore.getState().logout();
+        window.location.href = '/admin-login';
+      }
     }
     return Promise.reject(error);
   }

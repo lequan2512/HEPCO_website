@@ -1,10 +1,18 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Calendar, X, Tag } from 'lucide-react';
 import PageBanner from '../../../components/PageBanner';
 import Loading from '../../../components/Loading';
-import { API_BASE_URL } from '../../../constants/api';
 import { ROUTES } from '../../../constants/routes';
+import { API_BASE_URL } from '../../../constants/api';
+import { useGetInfiniteNews } from '../../../apis/news';
+
+const stripHtml = (html) => {
+  if (typeof html !== 'string') return '';
+  const tmp = document.createElement('DIV');
+  tmp.innerHTML = html;
+  return tmp.textContent || tmp.innerText || '';
+};
 
 const FALLBACK_NEWS_DATA = [
   {
@@ -13,7 +21,6 @@ const FALLBACK_NEWS_DATA = [
     type: 'news',
     date: '14-06-2026',
     image: '/images/news_cleanup.png',
-    excerpt: 'Hưởng ứng phong trào Ngày Chủ Nhật Xanh của tỉnh Thừa Thiên Huế, hơn 200 cán bộ công nhân viên HEPCO đã ra quân thu gom rác thải nhựa và dọn dẹp vệ sinh dọc tuyến đường đi bộ bờ sông Hương.',
     content: (
       <>
         <p className="mb-4">
@@ -40,7 +47,6 @@ const FALLBACK_NEWS_DATA = [
     type: 'news',
     date: '18-06-2026',
     image: '/images/news_trucks.png',
-    excerpt: 'Nhằm nâng cao năng lực thu gom và hiện đại hóa quy trình xử lý chất thải đô thị, HEPCO đã chính thức đưa vào sử dụng dàn xe ép rác thế hệ mới đạt tiêu chuẩn khí thải Euro 5.',
     content: (
       <>
         <p className="mb-4">
@@ -67,7 +73,6 @@ const FALLBACK_NEWS_DATA = [
     type: 'news',
     date: '10-06-2026',
     image: '/images/news_planting.png',
-    excerpt: 'Nhằm tô điểm thêm vẻ đẹp cổ kính của di sản Huế, Đội Công viên Cây xanh HEPCO đã triển khai đề án trồng mới cây bóng mát và hoa trang trí dọc các tuyến đường bao quanh Hoàng Thành.',
     content: (
       <>
         <p className="mb-4">
@@ -94,7 +99,6 @@ const FALLBACK_NEWS_DATA = [
     type: 'shareholders',
     date: '28-05-2026',
     image: '/images/news_meeting.png',
-    excerpt: 'Ngày 28/05/2026, HEPCO đã tổ chức thành công Đại hội đồng Cổ đông thường niên năm 2026. Đại hội đã thông qua kế hoạch kinh doanh với mục tiêu tăng trưởng doanh thu 12%.',
     content: (
       <>
         <p className="mb-4">
@@ -119,30 +123,40 @@ const FALLBACK_NEWS_DATA = [
 
 const News = ({ pageType = 'news' }) => {
   const navigate = useNavigate();
-  const [articles, setArticles] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const observer = useRef();
 
   const bannerInfo = pageType === 'news' 
     ? { title: "Tin tức & Sự kiện", description: "Cập nhật những thông tin mới nhất về hoạt động và sự kiện của HEPCO." }
     : { title: "Thông tin Cổ đông", description: "Cập nhật các báo cáo, thông cáo và thông tin dành cho cổ đông của HEPCO." };
 
-  useEffect(() => {
-    const fetchNews = async () => {
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/news?type=${pageType}&limit=20`);
-        if (!response.ok) throw new Error('Không thể tải tin tức từ máy chủ');
-        const result = await response.json();
-        setArticles(result.data || []);
-      } catch (err) {
-        console.error('Lỗi khi fetch tin tức, sử dụng dữ liệu dự phòng:', err);
-        setArticles(FALLBACK_NEWS_DATA);
-      } finally {
-        setLoading(false);
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading: loading,
+    isError
+  } = useGetInfiniteNews({ type: pageType, limit: 9 });
+
+  const articles = useMemo(() => {
+    if (isError) return FALLBACK_NEWS_DATA;
+    if (!data) return [];
+    return data.pages.flatMap((page) => page.data || []);
+  }, [data, isError]);
+
+  const lastElementRef = useCallback(node => {
+    if (loading || isFetchingNextPage) return;
+    if (observer.current) observer.current.disconnect();
+    
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasNextPage) {
+        fetchNextPage();
       }
-    };
-    fetchNews();
-  }, []);
+    });
+    
+    if (node) observer.current.observe(node);
+  }, [loading, isFetchingNextPage, hasNextPage, fetchNextPage]);
 
   // Clear search query
   const handleClearSearch = () => {
@@ -152,9 +166,11 @@ const News = ({ pageType = 'news' }) => {
   // Filtered and Searched Articles
   const filteredArticles = useMemo(() => {
     return articles.filter((article) => {
+      // Use fallback string if content is a React element
+      const contentStr = typeof article.content === 'string' ? stripHtml(article.content) : '';
       const matchesSearch = searchQuery.trim() === '' || 
         article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        article.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
+        contentStr.toLowerCase().includes(searchQuery.toLowerCase());
       
       return matchesSearch;
     });
@@ -201,56 +217,66 @@ const News = ({ pageType = 'news' }) => {
         {loading ? (
           <Loading message="Đang tải danh sách bài viết..." />
         ) : filteredArticles.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredArticles.map((article) => (
-              <div 
-                key={article.id} 
-                className="bg-white rounded-2xl shadow-lg border border-gray-100/80 overflow-hidden flex flex-col group hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-              >
-                {/* Image Section */}
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {filteredArticles.map((article, index) => (
                 <div 
-                  className="h-56 bg-gray-100 relative overflow-hidden cursor-pointer"
-                  onClick={() => navigate(ROUTES.ARTICLE_DETAIL.replace(':id', article.id))}
+                  key={article.id}
+                  ref={index === filteredArticles.length - 1 ? lastElementRef : null}
+                  className="bg-white rounded-2xl shadow-lg border border-gray-100/80 overflow-hidden flex flex-col group hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
                 >
-                  <img 
-                    src={article.image} 
-                    alt={article.title} 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  {/* Badge over image */}
-                  <span className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm text-hepco-green font-bold text-xs px-3 py-1 rounded-full shadow-sm">
-                    {pageType === 'news' ? 'Tin Mới' : 'Cổ Đông'}
-                  </span>
-                </div>
+                  {/* Image Section */}
+                  <div 
+                    className="h-56 bg-gray-100 relative overflow-hidden cursor-pointer"
+                    onClick={() => navigate(ROUTES.ARTICLE_DETAIL.replace(':id', article.id))}
+                  >
+                    <img 
+                      src={article.image?.startsWith('http') ? article.image : `${API_BASE_URL}${article.image}`} 
+                      alt={article.title} 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    {/* Badge over image */}
+                    <span className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm text-hepco-green font-bold text-xs px-3 py-1 rounded-full shadow-sm">
+                      {pageType === 'news' ? 'Tin Mới' : 'Cổ Đông'}
+                    </span>
+                  </div>
 
-                {/* Content Section */}
-                <div className="p-6 flex-grow flex flex-col justify-between">
-                  <div>
-                    {/* Metadata */}
-                    <div className="flex items-center gap-4 text-gray-400 text-xs mb-3">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="w-3.5 h-3.5" />
-                        <span>{article.date}</span>
+                  {/* Content Section */}
+                  <div className="p-6 flex-grow flex flex-col justify-between">
+                    <div>
+                      {/* Metadata */}
+                      <div className="flex items-center gap-4 text-gray-400 text-xs mb-3">
+                        <div className="flex items-center gap-1">
+                          <Calendar className="w-3.5 h-3.5" />
+                          <span>{article.date}</span>
+                        </div>
                       </div>
+
+                      {/* Title */}
+                      <h3 
+                        className="text-gray-900 font-bold text-lg mb-3 line-clamp-2 leading-snug cursor-pointer group-hover:text-hepco-orange transition-colors"
+                        onClick={() => navigate(ROUTES.ARTICLE_DETAIL.replace(':id', article.id))}
+                      >
+                        {article.title}
+                      </h3>
+
+                      {/* Short Description */}
+                      <p className="text-gray-500 text-sm mb-4 line-clamp-3 leading-relaxed">
+                        {typeof article.content === 'string' ? stripHtml(article.content) : 'Click vào để xem chi tiết bài viết...'}
+                      </p>
                     </div>
-
-                    {/* Title */}
-                    <h3 
-                      className="text-gray-900 font-bold text-lg mb-3 line-clamp-2 leading-snug cursor-pointer group-hover:text-hepco-orange transition-colors"
-                      onClick={() => navigate(ROUTES.ARTICLE_DETAIL.replace(':id', article.id))}
-                    >
-                      {article.title}
-                    </h3>
-
-                    {/* Short Description */}
-                    <p className="text-gray-500 text-sm mb-4 line-clamp-3 leading-relaxed">
-                      {article.excerpt}
-                    </p>
                   </div>
                 </div>
+              ))}
+            </div>
+            
+            {/* Loading more indicator */}
+            {isFetchingNextPage && (
+              <div className="flex justify-center mt-12 mb-4">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-hepco-green"></div>
               </div>
-            ))}
-          </div>
+            )}
+          </>
         ) : (
           <div className="text-center py-20 bg-white rounded-2xl shadow-sm border border-gray-100 max-w-2xl mx-auto">
             <Tag className="w-12 h-12 text-gray-300 mx-auto mb-4" />

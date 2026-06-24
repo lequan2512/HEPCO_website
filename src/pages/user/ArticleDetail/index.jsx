@@ -1,32 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Calendar, User, ArrowLeft, BookOpen, Share2 } from 'lucide-react';
+import { Calendar, ArrowLeft, Share2 } from 'lucide-react';
 import { API_BASE_URL } from '../../../constants/api';
 import Loading from '../../../components/Loading';
+import { useGetArticleById } from '../../../apis/news';
 
 const ArticleDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [article, setArticle] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+
+  const { data: article, isLoading: loading, error: queryError } = useGetArticleById(id);
+  const error = queryError ? 'Bài viết không tồn tại hoặc đã bị xóa' : '';
 
   useEffect(() => {
-    const fetchArticle = async () => {
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/news/${id}`);
-        if (!response.ok) {
-          throw new Error('Bài viết không tồn tại hoặc đã bị xóa');
-        }
-        const data = await response.json();
-        setArticle(data);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchArticle();
     window.scrollTo(0, 0);
   }, [id]);
 
@@ -52,7 +38,7 @@ const ArticleDetail = () => {
 
   return (
     <div className="bg-gray-50 flex-grow min-h-screen py-10">
-      <div className="container mx-auto px-4 max-w-4xl">
+      <div className="container mx-auto px-4 max-w-5xl">
         {/* Back Button */}
         <button 
           onClick={() => navigate(-1)}
@@ -67,10 +53,6 @@ const ArticleDetail = () => {
           
           {/* Header */}
           <div className="p-8 border-b border-gray-100">
-            <span className="inline-flex items-center gap-1.5 text-hepco-green font-bold text-sm bg-green-50 px-3 py-1 rounded-full mb-4">
-              <BookOpen className="w-3.5 h-3.5" />
-              {article.type === 'news' ? 'Tin Tức' : 'Thông tin Cổ đông'}
-            </span>
             <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 leading-tight mb-6">
               {article.title}
             </h1>
@@ -95,11 +77,6 @@ const ArticleDetail = () => {
 
           {/* Content Body */}
           <div className="p-8 md:p-12">
-            {/* Excerpt Summary */}
-            <div className="bg-gray-50 p-6 rounded-xl border-l-4 border-hepco-orange text-gray-700 italic font-medium leading-relaxed mb-10">
-              {article.excerpt}
-            </div>
-
             {/* Main HTML Content */}
             <div className="text-gray-800 text-base md:text-lg leading-relaxed font-light">
               {typeof article.content === 'string' ? (

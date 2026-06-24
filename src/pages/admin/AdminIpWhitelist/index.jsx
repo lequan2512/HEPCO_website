@@ -1,65 +1,47 @@
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { Shield, Plus, Trash2, ShieldAlert, Edit2, X } from 'lucide-react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import toast from 'react-hot-toast';
-import axiosInstance from '../../../utils/axios';
 import { getErrorMessage } from '../../../utils/errorMapper';
 import Loading from '../../../components/Loading';
+import { useGetIps, useAddIp, useUpdateIp, useDeleteIp } from '../../../apis/ip';
+import ConfirmModal from '../../../components/ConfirmModal';
 
 const AdminIpWhitelist = () => {
   const [editingId, setEditingId] = useState(null);
+  const [confirmConfig, setConfirmConfig] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
   const queryClient = useQueryClient();
 
-  const { data: ips = [], isLoading } = useQuery({
-    queryKey: ['ips'],
-    queryFn: async () => {
-      const response = await axiosInstance.get('/api/ip', {
-        params: { limit: 20 }
-      });
-      return response.data.data;
-    }
-  });
+  const { data: ips = [], isLoading } = useGetIps({ limit: 20 });
 
-  const addIpMutation = useMutation({
-    mutationFn: (newIp) => axiosInstance.post('/api/ip', newIp),
-    onSuccess: () => {
-      toast.success('Thêm IP vào danh sách trắng thành công');
-      queryClient.invalidateQueries({ queryKey: ['ips'] });
-      formik.resetForm();
-    },
-    onError: (error) => {
-      const errorCode = error.response?.data?.errorCode;
-      toast.error(getErrorMessage(errorCode) || 'Có lỗi xảy ra khi thêm IP');
-    }
-  });
+  const addIpMutation = useAddIp();
+  const updateIpMutation = useUpdateIp();
+  const deleteIpMutation = useDeleteIp();
 
-  const updateIpMutation = useMutation({
-    mutationFn: ({ id, ...data }) => axiosInstance.put(`/api/ip/${id}`, data),
-    onSuccess: () => {
-      toast.success('Cập nhật IP thành công');
-      queryClient.invalidateQueries({ queryKey: ['ips'] });
-      setEditingId(null);
-      formik.resetForm();
-    },
-    onError: (error) => {
-      const errorCode = error.response?.data?.errorCode;
-      toast.error(getErrorMessage(errorCode) || 'Có lỗi xảy ra khi cập nhật IP');
-    }
-  });
+  const handleAddSuccess = () => {
+    toast.success('Thêm IP vào danh sách trắng thành công');
+    queryClient.invalidateQueries({ queryKey: ['ips'] });
+    formik.resetForm();
+  };
 
-  const deleteIpMutation = useMutation({
-    mutationFn: (id) => axiosInstance.delete(`/api/ip/${id}`),
-    onSuccess: () => {
-      toast.success('Xóa IP thành công');
-      queryClient.invalidateQueries({ queryKey: ['ips'] });
-    },
-    onError: (error) => {
-      const errorCode = error.response?.data?.errorCode;
-      toast.error(getErrorMessage(errorCode) || 'Có lỗi xảy ra khi xóa IP');
-    }
-  });
+  const handleUpdateSuccess = () => {
+    toast.success('Cập nhật IP thành công');
+    queryClient.invalidateQueries({ queryKey: ['ips'] });
+    setEditingId(null);
+    formik.resetForm();
+  };
+
+  const handleDeleteSuccess = () => {
+    toast.success('Xóa IP thành công');
+    queryClient.invalidateQueries({ queryKey: ['ips'] });
+  };
+
+  const handleError = (error, defaultMsg) => {
+    const errorCode = error.response?.data?.errorCode;
+    toast.error(getErrorMessage(errorCode) || defaultMsg);
+  };
 
   const formik = useFormik({
     initialValues: {
@@ -73,12 +55,19 @@ const AdminIpWhitelist = () => {
       description: Yup.string()
     }),
     onSubmit: async (values, { setSubmitting }) => {
-      if (editingId) {
-        await updateIpMutation.mutateAsync({ id: editingId, ...values });
-      } else {
-        await addIpMutation.mutateAsync(values);
+      try {
+        if (editingId) {
+          await updateIpMutation.mutateAsync({ id: editingId, ...values });
+          handleUpdateSuccess();
+        } else {
+          await addIpMutation.mutateAsync(values);
+          handleAddSuccess();
+        }
+      } catch (error) {
+        handleError(error, editingId ? 'Có lỗi xảy ra khi cập nhật IP' : 'Có lỗi xảy ra khi thêm IP');
+      } finally {
+        setSubmitting(false);
       }
-      setSubmitting(false);
     }
   });
 
@@ -96,13 +85,23 @@ const AdminIpWhitelist = () => {
   };
 
   const handleDelete = (id) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa IP này khỏi danh sách trắng? Các IP bị xóa sẽ không thể đăng nhập quản trị nữa.')) {
-      deleteIpMutation.mutate(id);
-    }
+    setConfirmConfig({
+      isOpen: true,
+      title: 'Xóa IP',
+      message: 'Bạn có chắc chắn muốn xóa IP này khỏi danh sách trắng? Các IP bị xóa sẽ không thể đăng nhập quản trị nữa.',
+      onConfirm: async () => {
+        try {
+          await deleteIpMutation.mutateAsync(id);
+          handleDeleteSuccess();
+        } catch (error) {
+          handleError(error, 'Có lỗi xảy ra khi xóa IP');
+        }
+      }
+    });
   };
 
   return (
-    <div className="w-full max-w-5xl relative">
+    <div className="w-full relative">
       {(addIpMutation.isPending || deleteIpMutation.isPending || updateIpMutation.isPending) && <Loading fullScreen message="Đang xử lý..." />}
       
       <div className="mb-6 border-b pb-4">
@@ -235,6 +234,14 @@ const AdminIpWhitelist = () => {
           </div>
         </div>
       </div>
+
+      <ConfirmModal 
+        isOpen={confirmConfig.isOpen}
+        title={confirmConfig.title}
+        message={confirmConfig.message}
+        onConfirm={confirmConfig.onConfirm}
+        onClose={() => setConfirmConfig({ ...confirmConfig, isOpen: false })}
+      />
     </div>
   );
 };

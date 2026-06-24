@@ -28,6 +28,7 @@ const AppRoutes = () => {
           <Route index element={<Navigate to="news" replace />} />
           <Route path="news" element={<AdminNewsManager type="news" />} />
           <Route path="shareholders" element={<AdminNewsManager type="shareholders" />} />
+          <Route path="services" element={<AdminNewsManager type="service" />} />
           <Route path="ip-whitelist" element={<AdminIpWhitelist />} />
         </Route>
       </Routes>

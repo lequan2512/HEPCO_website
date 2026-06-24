@@ -69,6 +69,18 @@ const AdminLayout = () => {
             <span>Cổ Đông</span>
           </Link>
           <Link 
+            to={`${ROUTES.ADMIN_DASHBOARD}/services`} 
+            onClick={() => setIsSidebarOpen(false)}
+            className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+              location.pathname.includes('/services')
+                ? 'bg-green-800 text-white font-semibold' 
+                : 'text-green-100 hover:bg-green-700 hover:text-white'
+            }`}
+          >
+            <FileText className="w-5 h-5" />
+            <span>Dịch Vụ</span>
+          </Link>
+          <Link 
             to={`${ROUTES.ADMIN_DASHBOARD}/ip-whitelist`} 
             onClick={() => setIsSidebarOpen(false)}
             className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
