@@ -65,10 +65,10 @@ const ArticleDetail = () => {
           </div>
 
           {/* Banner/Thumbnail Image */}
-          {article.image && (
+          {article.thumbnail && (
             <div className="w-full bg-gray-100 relative max-h-[500px] overflow-hidden">
               <img 
-                src={article.image.startsWith('http') ? article.image : `${API_BASE_URL}${article.image}`} 
+                src={article.thumbnail.startsWith('http') ? article.thumbnail : `${API_BASE_URL}${article.thumbnail}`} 
                 alt={article.title} 
                 className="w-full h-full object-cover"
               />

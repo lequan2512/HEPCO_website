@@ -24,9 +24,9 @@ const NewsPartnersAwards = () => {
             {news.map((item, i) => (
               <div key={i} className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 flex flex-col group cursor-pointer hover:shadow-xl transition-shadow">
                 <div className="h-48 bg-gray-100 relative overflow-hidden">
-                   {item.image ? (
+                   {item.thumbnail ? (
                      <img 
-                       src={item.image?.startsWith('http') ? item.image : `${API_BASE_URL}${item.image}`} 
+                       src={item.thumbnail?.startsWith('http') ? item.thumbnail : `${API_BASE_URL}${item.thumbnail}`} 
                        alt={item.title} 
                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
                      />

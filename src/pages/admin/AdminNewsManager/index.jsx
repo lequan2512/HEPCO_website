@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useMemo, useCallback } from 'react';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 import { useFormik } from 'formik';
@@ -23,6 +23,13 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
 
   const { data: newsResponse = {}, isLoading } = useGetNews({ type, limit: 20 });
   const articles = newsResponse.data || [];
+
+  const [prevType, setPrevType] = useState(type);
+  if (type !== prevType) {
+    setPrevType(type);
+    setIsFormOpen(false);
+    setEditingId(null);
+  }
 
   const createNewsMutation = useCreateNews();
   const updateNewsMutation = useUpdateNews();
@@ -59,7 +66,6 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
     initialValues: {
       title: '',
       content: '',
-      image: '',
       thumbnail: '',
       type: type
     },
@@ -96,12 +102,13 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
     formik.setValues({
       title: article.title,
       content: article.content,
-      image: article.image || '',
       thumbnail: article.thumbnail || '',
       type: article.type
     });
     setIsFormOpen(true);
   };
+
+  const quillRef = useRef(null);
 
   const handleDelete = (article) => {
     setConfirmConfig({
@@ -110,13 +117,26 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
       message: 'Bạn có chắc chắn muốn xóa bài viết này? Hành động này không thể hoàn tác.',
       onConfirm: async () => {
         try {
+          if (article.content) {
+            const imgRegex = /<img[^>]+src="([^">]+)"/g;
+            let match;
+            while ((match = imgRegex.exec(article.content)) !== null) {
+              let imgUrl = match[1];
+              if (imgUrl.includes('/images/news/')) {
+                const relativePath = imgUrl.substring(imgUrl.indexOf('/images/news/'));
+                try {
+                  await deleteImageMutation.mutateAsync(relativePath);
+                } catch {
+                  console.error('Failed to delete content image:', relativePath);
+                }
+              }
+            }
+          }
+
           await deleteNewsMutation.mutateAsync(article.id);
           
-          if (article.thumbnail && article.thumbnail.startsWith('/uploads/')) {
+          if (article.thumbnail && article.thumbnail.startsWith('/images/news/')) {
             await deleteImageMutation.mutateAsync(article.thumbnail);
-          }
-          if (article.image && article.image.startsWith('/uploads/') && article.image !== article.thumbnail) {
-            await deleteImageMutation.mutateAsync(article.image);
           }
 
           handleDeleteSuccess();
@@ -133,17 +153,49 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
     formik.resetForm();
   };
 
-  const modules = {
-    toolbar: [
-      [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-      ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-      [{'list': 'ordered'}, {'list': 'bullet'}, {'indent': '-1'}, {'indent': '+1'}],
-      [{ 'color': [] }, { 'background': [] }],
-      [{ 'align': [] }],
-      ['link', 'image', 'video'],
-      ['clean']
-    ],
-  };
+  const imageHandler = useCallback(() => {
+    const input = document.createElement('input');
+    input.setAttribute('type', 'file');
+    input.setAttribute('accept', 'image/*');
+    input.click();
+
+    input.onchange = async () => {
+      const file = input.files[0];
+      if (file) {
+        const formData = new FormData();
+        formData.append('image', file);
+        try {
+          toast.loading('Đang tải ảnh...', { id: 'upload_quill' });
+          const res = await uploadImageMutation.mutateAsync(formData);
+          if (res.success) {
+            const quill = quillRef.current.getEditor();
+            const range = quill.getSelection(true);
+            quill.insertEmbed(range.index, 'image', `${API_BASE_URL}${res.url}`);
+            toast.success('Tải ảnh thành công!', { id: 'upload_quill' });
+          }
+        } catch {
+          toast.error('Lỗi tải ảnh', { id: 'upload_quill' });
+        }
+      }
+    };
+  }, [uploadImageMutation]);
+
+  const modules = useMemo(() => ({
+    toolbar: {
+      container: [
+        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+        ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+        [{'list': 'ordered'}, {'list': 'bullet'}, {'indent': '-1'}, {'indent': '+1'}],
+        [{ 'color': [] }, { 'background': [] }],
+        [{ 'align': [] }],
+        ['link', 'image', 'video'],
+        ['clean']
+      ],
+      handlers: {
+        image: imageHandler
+      }
+    }
+  }), [imageHandler]);
 
   if (isFormOpen) {
     return (
@@ -199,16 +251,12 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
                       const res = await uploadImageMutation.mutateAsync(formData);
                       if (res.success) {
                         const oldThumb = formik.values.thumbnail;
-                        const oldImage = formik.values.image;
                         
-                        if (oldThumb && oldThumb.startsWith('/uploads/')) {
+                        if (oldThumb && oldThumb.startsWith('/images/news/')) {
                           await deleteImageMutation.mutateAsync(oldThumb);
-                        } else if (oldImage && oldImage.startsWith('/uploads/') && oldImage !== oldThumb) {
-                          await deleteImageMutation.mutateAsync(oldImage);
                         }
 
                         formik.setFieldValue('thumbnail', res.url);
-                        formik.setFieldValue('image', res.url);
                         toast.success('Tải ảnh thành công!', { id: 'upload' });
                       }
                     } catch (error) {
@@ -221,9 +269,9 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
               {formik.submitCount > 0 && formik.errors.thumbnail ? (
                 <div className="text-red-500 text-sm mt-1">{formik.errors.thumbnail}</div>
               ) : null}
-              {(formik.values.thumbnail || formik.values.image) && (
+              {formik.values.thumbnail && (
                  <div className="mt-2 relative inline-block">
-                   <img src={(formik.values.thumbnail || formik.values.image).startsWith('http') ? (formik.values.thumbnail || formik.values.image) : `${API_BASE_URL}${(formik.values.thumbnail || formik.values.image)}`} alt="Thumbnail" className="h-32 object-cover rounded shadow" />
+                   <img src={formik.values.thumbnail.startsWith('http') ? formik.values.thumbnail : `${API_BASE_URL}${formik.values.thumbnail}`} alt="Thumbnail" className="h-32 object-cover rounded shadow" />
                    <button
                      type="button"
                      onClick={() => {
@@ -236,16 +284,12 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
                              toast.loading('Đang xóa ảnh...', { id: 'delete_upload' });
                              
                              const currThumb = formik.values.thumbnail;
-                             const currImage = formik.values.image;
                              
-                             if (currThumb && currThumb.startsWith('/uploads/')) {
+                             if (currThumb && currThumb.startsWith('/images/news/')) {
                                await deleteImageMutation.mutateAsync(currThumb);
-                             } else if (currImage && currImage.startsWith('/uploads/') && currImage !== currThumb) {
-                               await deleteImageMutation.mutateAsync(currImage);
                              }
 
                              formik.setFieldValue('thumbnail', '');
-                             formik.setFieldValue('image', '');
                              toast.success('Xóa ảnh thành công!', { id: 'delete_upload' });
                            } catch (error) {
                              console.error('Lỗi xóa ảnh:', error);
@@ -268,6 +312,7 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
             <label className="block text-lg font-medium text-gray-700 mb-2">Nội dung</label>
             <div className={`bg-white ${formik.touched.content && formik.errors.content ? 'border border-red-500 rounded' : ''}`}>
               <ReactQuill 
+                ref={quillRef}
                 theme="snow"
                 value={formik.values.content}
                 onChange={(content) => {
@@ -301,6 +346,14 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
             </button>
           </div>
         </form>
+
+        <ConfirmModal 
+          isOpen={confirmConfig.isOpen}
+          title={confirmConfig.title}
+          message={confirmConfig.message}
+          onConfirm={confirmConfig.onConfirm}
+          onClose={() => setConfirmConfig({ ...confirmConfig, isOpen: false })}
+        />
       </div>
     );
   }
@@ -310,7 +363,7 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
       {deleteNewsMutation.isPending && <Loading fullScreen message="Đang xóa..." />}
       
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b pb-4 gap-4">
-        <h1 className="text-2xl font-bold text-gray-800">Quản lý {titleText}</h1>
+        <h1 className="text-2xl font-bold text-gray-800">{titleText}</h1>
         {!editOnly && (
           <button 
             onClick={() => {
@@ -348,9 +401,9 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
                     <td className="px-6 py-4 text-sm text-gray-500 font-medium">#{item.id}</td>
                     {type !== 'service' && (
                       <td className="px-6 py-4">
-                        {item.thumbnail || item.image ? (
+                        {item.thumbnail ? (
                           <img 
-                            src={(item.thumbnail || item.image).startsWith('http') ? (item.thumbnail || item.image) : `${API_BASE_URL}${item.thumbnail || item.image}`} 
+                            src={item.thumbnail.startsWith('http') ? item.thumbnail : `${API_BASE_URL}${item.thumbnail}`} 
                             alt="Thumb" 
                             className="w-16 h-12 object-cover rounded-md shadow-sm border border-gray-200"
                           />

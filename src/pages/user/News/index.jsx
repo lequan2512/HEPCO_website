@@ -20,7 +20,7 @@ const FALLBACK_NEWS_DATA = [
     title: 'HEPCO đồng hành cùng ngày hội "Chủ Nhật Xanh" dọn sạch rác thải dọc hai bờ sông Hương',
     type: 'news',
     date: '14-06-2026',
-    image: '/images/news_cleanup.png',
+    thumbnail: '/images/news_cleanup.png',
     content: (
       <>
         <p className="mb-4">
@@ -46,7 +46,7 @@ const FALLBACK_NEWS_DATA = [
     title: 'HEPCO đưa vào vận hành dàn xe ép rác chuyên dụng thế hệ mới, giảm thiểu tiếng ồn và khí thải',
     type: 'news',
     date: '18-06-2026',
-    image: '/images/news_trucks.png',
+    thumbnail: '/images/news_trucks.png',
     content: (
       <>
         <p className="mb-4">
@@ -72,7 +72,7 @@ const FALLBACK_NEWS_DATA = [
     title: 'Xanh hóa Cố đô: HEPCO ra quân trồng hơn 1.000 cây xanh và hoa trang trí quanh Đại Nội Huế',
     type: 'news',
     date: '10-06-2026',
-    image: '/images/news_planting.png',
+    thumbnail: '/images/news_planting.png',
     content: (
       <>
         <p className="mb-4">
@@ -98,7 +98,7 @@ const FALLBACK_NEWS_DATA = [
     title: 'Đại hội đồng Cổ đông thường niên năm 2026 của HEPCO thành công tốt đẹp',
     type: 'shareholders',
     date: '28-05-2026',
-    image: '/images/news_meeting.png',
+    thumbnail: '/images/news_meeting.png',
     content: (
       <>
         <p className="mb-4">
@@ -231,7 +231,7 @@ const News = ({ pageType = 'news' }) => {
                     onClick={() => navigate(ROUTES.ARTICLE_DETAIL.replace(':id', article.id))}
                   >
                     <img 
-                      src={article.image?.startsWith('http') ? article.image : `${API_BASE_URL}${article.image}`} 
+                      src={article.thumbnail?.startsWith('http') ? article.thumbnail : `${API_BASE_URL}${article.thumbnail}`} 
                       alt={article.title} 
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />

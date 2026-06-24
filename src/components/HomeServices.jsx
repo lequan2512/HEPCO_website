@@ -1,5 +1,3 @@
-import React from 'react';
-
 const HomeServices = () => {
   const services = [
     { title: 'Thu gom vận chuyển xử lý rác sinh hoạt' },

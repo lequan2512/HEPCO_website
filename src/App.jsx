@@ -11,6 +11,7 @@ import AdminLogin from './pages/admin/AdminLogin';
 import AdminLayout from './components/AdminLayout';
 import AdminNewsManager from './pages/admin/AdminNewsManager';
 import AdminIpWhitelist from './pages/admin/AdminIpWhitelist';
+import AdminBannerManager from './pages/admin/AdminBannerManager';
 import { ROUTES } from './constants/routes';
 import { Toaster } from 'react-hot-toast';
 
@@ -29,6 +30,7 @@ const AppRoutes = () => {
           <Route path="news" element={<AdminNewsManager type="news" />} />
           <Route path="shareholders" element={<AdminNewsManager type="shareholders" />} />
           <Route path="services" element={<AdminNewsManager type="service" />} />
+          <Route path="banners" element={<AdminBannerManager />} />
           <Route path="ip-whitelist" element={<AdminIpWhitelist />} />
         </Route>
       </Routes>
