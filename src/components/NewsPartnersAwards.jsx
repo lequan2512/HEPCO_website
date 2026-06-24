@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../constants/api';
 
 const NewsPartnersAwards = () => {
@@ -13,29 +13,6 @@ const NewsPartnersAwards = () => {
         setNews(result.data || []);
       } catch (err) {
         console.error('Lỗi khi tải tin tức nổi bật, sử dụng dữ liệu tĩnh:', err);
-        setNews([
-          { 
-            title: 'Quy trình cấp phép đào lề, đục mương, đục hố ga, gửi nước thải sinh hoạt', 
-            date: '14-08-2023', 
-            author: 'Nhi Phan',
-            excerpt: 'Hướng dẫn chi tiết về các bước làm thủ tục, hồ sơ xin cấp phép thi công công trình hạ tầng và xử lý nước thải sinh hoạt đô thị.',
-            image: ''
-          },
-          { 
-            title: 'TƯNG BỪNG NGÀY HỘI TÁI CHẾ - HUẾ 2023 ♻️♻️', 
-            date: '14-05-2023', 
-            author: 'Nhi Phan',
-            excerpt: 'Ngày hội bảo vệ môi trường thu hút đông đảo bạn trẻ tham gia thu gom chai nhựa, giấy vụn để quy đổi những chậu sen đá xanh mát.',
-            image: ''
-          },
-          { 
-            title: 'LAN TOẢ THÔNG ĐIỆP BẢO VỆ MÔI TRƯỜNG TRONG GIẢI CHẠY QUY MÔ HƠN 10.000 NGƯỜI THAM DỰ TẠI HUẾ', 
-            date: '24-04-2023', 
-            author: 'Nhi Phan',
-            excerpt: 'HEPCO đồng hành dọn dẹp và giữ gìn vệ sinh, cung cấp nước sạch cho các vận động viên tham gia giải chạy quy mô lớn tại Cố Đô.',
-            image: ''
-          },
-        ]);
       }
     };
     fetchLatestNews();
