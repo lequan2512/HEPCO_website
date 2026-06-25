@@ -1,4 +1,3 @@
-import React from 'react';
 import { Target, Leaf } from 'lucide-react';
 
 const VisionMission = () => {
@@ -13,9 +12,8 @@ const VisionMission = () => {
         <div className="flex flex-col lg:flex-row items-center gap-16">
           {/* Left Content */}
           <div className="lg:w-1/2">
-            <h2 className="text-4xl font-bold text-gray-900 mb-12 flex items-center">
+            <h2 className="text-4xl font-bold text-gray-900 mb-12 inline-block relative">
               Tầm nhìn - Sứ mệnh
-              <div className="ml-4 h-1 w-16 bg-hepco-orange mt-2"></div>
             </h2>
 
             <div className="space-y-12">
@@ -50,7 +48,7 @@ const VisionMission = () => {
           </div>
 
           {/* Right Images */}
-          <div className="lg:w-1/2 relative h-[500px] w-full flex justify-center items-center">
+          <div className="lg:w-1/2 relative h-[300px] md:h-[500px] w-full flex justify-center items-center mt-8 lg:mt-0">
              {/* Play button overlay */}
              <div className="absolute z-30 w-20 h-20 bg-hepco-green/80 rounded-full flex items-center justify-center text-white cursor-pointer hover:bg-hepco-green transition-colors shadow-xl backdrop-blur-sm">
                 <svg className="w-8 h-8 ml-2" fill="currentColor" viewBox="0 0 20 20"><path d="M4 4l12 6-12 6z" /></svg>

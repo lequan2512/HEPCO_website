@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import { getErrorMessage } from '../../../utils/errorMapper';
 import Loading from '../../../components/Loading';
 import { useLogin } from '../../../apis/auth';
+import logo from '../../../assets/images/logo.png';
 
 const AdminLogin = () => {
   const navigate = useNavigate();
@@ -50,6 +51,9 @@ const AdminLogin = () => {
     <div className="flex items-center justify-center py-20 bg-gray-50 flex-grow relative">
       {formik.isSubmitting && <Loading fullScreen message="Đang đăng nhập..." />}
       <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md border border-gray-100">
+        <div className="flex justify-center mb-6">
+          <img src={logo} alt="HEPCO Logo" className="h-16 w-auto" />
+        </div>
         <h2 className="text-2xl font-bold text-center text-hepco-green mb-6">Đăng nhập Quản trị</h2>
         <form onSubmit={formik.handleSubmit} className="space-y-4">
           <div>

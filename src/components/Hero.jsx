@@ -26,22 +26,22 @@ const Hero = () => {
   if (banners.length === 0) {
     // Fallback if no banners are uploaded yet
     return (
-      <div className="relative w-full h-[700px] bg-[#3f9e4d] flex items-center justify-center overflow-hidden pt-20">
+      <div className="relative w-full h-[500px] md:h-[700px] bg-[#3f9e4d] flex items-center justify-center overflow-hidden pt-20">
         <div className="absolute inset-0 bg-gradient-to-b from-green-700/60 to-[#3f9e4d]/90 mix-blend-multiply z-0"></div>
         <div className="absolute inset-0 z-0 opacity-40">
           <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-yellow-300 rounded-full blur-[80px]"></div>
           <div className="absolute top-1/2 right-1/4 w-40 h-40 bg-yellow-400 rounded-full blur-[100px]"></div>
         </div>
         <div className="relative z-20 flex flex-col items-center text-center mt-[-180px] w-full px-4">
-          <h1 className="text-white text-5xl md:text-7xl font-extrabold tracking-wide mb-2 drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)]">
+          <h1 className="text-white text-4xl md:text-7xl font-extrabold tracking-wide mb-2 drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)]">
             CÁM ƠN QUÝ KHÁCH HÀNG
           </h1>
           <div className="flex flex-col md:flex-row items-center justify-center mt-2 relative">
-            <span className="text-[#f26522] font-[cursive] text-6xl md:text-[5.5rem] md:-rotate-12 md:-mr-4 drop-shadow-md z-10 md:translate-y-4">
+            <span className="text-[#f26522] font-[cursive] text-5xl md:text-[5.5rem] md:-rotate-12 md:-mr-4 drop-shadow-md z-10 md:translate-y-4">
               Đã đồng hành
             </span>
             <span 
-              className="text-[#f26522] font-black text-6xl md:text-[7rem] tracking-tight uppercase"
+              className="text-[#f26522] font-black text-5xl md:text-[7rem] tracking-tight uppercase"
               style={{ 
                  WebkitTextStroke: '3px white', 
                  textShadow: '0 8px 0px rgba(0,0,0,0.2), 0 15px 10px rgba(0,0,0,0.3)' 
@@ -56,7 +56,7 @@ const Hero = () => {
   }
 
   return (
-    <div className="relative w-full h-[700px] flex items-center justify-center overflow-hidden group">
+    <div className="relative w-full h-[500px] md:h-[700px] flex items-center justify-center overflow-hidden group">
       {/* Slider Images */}
       {banners.map((url, index) => (
         <div 

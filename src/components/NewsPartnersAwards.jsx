@@ -61,7 +61,6 @@ const NewsPartnersAwards = () => {
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 inline-block relative">
               Đối tác & Khách hàng
-              <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-hepco-orange"></div>
             </h2>
           </div>
           <div className="flex flex-wrap justify-center items-center gap-12 opacity-70">
@@ -79,11 +78,11 @@ const NewsPartnersAwards = () => {
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900">Thành tích & Khen thưởng</h2>
           </div>
-          <div className="flex justify-center gap-6 overflow-x-auto pb-8">
-             <div className="w-64 h-80 bg-yellow-100 border-4 border-yellow-300 rounded shadow-md flex-shrink-0 flex items-center justify-center">Bằng khen 1</div>
-             <div className="w-64 h-80 bg-yellow-100 border-4 border-yellow-300 rounded shadow-md flex-shrink-0 flex items-center justify-center">Bằng khen 2</div>
-             <div className="w-64 h-80 bg-yellow-100 border-4 border-yellow-300 rounded shadow-md flex-shrink-0 flex items-center justify-center">Bằng khen 3</div>
-             <div className="w-64 h-80 bg-yellow-100 border-4 border-yellow-300 rounded shadow-md flex-shrink-0 flex items-center justify-center">Bằng khen 4</div>
+          <div className="flex justify-start md:justify-center gap-6 overflow-x-auto pb-8 snap-x snap-mandatory px-2">
+             <div className="w-64 h-80 bg-yellow-100 border-4 border-yellow-300 rounded shadow-md flex-shrink-0 flex items-center justify-center snap-center">Bằng khen 1</div>
+             <div className="w-64 h-80 bg-yellow-100 border-4 border-yellow-300 rounded shadow-md flex-shrink-0 flex items-center justify-center snap-center">Bằng khen 2</div>
+             <div className="w-64 h-80 bg-yellow-100 border-4 border-yellow-300 rounded shadow-md flex-shrink-0 flex items-center justify-center snap-center">Bằng khen 3</div>
+             <div className="w-64 h-80 bg-yellow-100 border-4 border-yellow-300 rounded shadow-md flex-shrink-0 flex items-center justify-center snap-center">Bằng khen 4</div>
           </div>
         </div>
       </div>

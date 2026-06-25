@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
+import toast from 'react-hot-toast';
+import logo from '../assets/images/logo-white.png';
 
 const FaqContact = () => {
   const [openFaq, setOpenFaq] = useState(0);
@@ -29,10 +31,29 @@ const FaqContact = () => {
       subject: Yup.string().required('Vui lòng nhập tiêu đề'),
       message: Yup.string().required('Vui lòng nhập nội dung'),
     }),
-    onSubmit: (values, { resetForm }) => {
-      console.log('Form data submitted:', values);
-      alert('Câu hỏi của bạn đã được gửi thành công!');
-      resetForm();
+    onSubmit: async (values, { resetForm }) => {
+      try {
+        const GOOGLE_FORM_ACTION_URL = 'https://docs.google.com/forms/u/0/d/1BRxY1y5xSyZYX09Yn0v514ByMSfWNKHPdX58DzmQIBU/formResponse';
+
+        const formData = new FormData();
+        formData.append('entry.404545615', values.name);
+        formData.append('entry.710400486', values.email);
+        formData.append('entry.440170666', values.phone);
+        formData.append('entry.786099976', values.subject);
+        formData.append('entry.1701173373', values.message);
+
+        await fetch(GOOGLE_FORM_ACTION_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          body: formData
+        });
+
+        toast.success('Câu hỏi của bạn đã được gửi thành công!');
+        resetForm();
+      } catch (error) {
+        console.error('Lỗi khi gửi form:', error);
+        toast.error('Đã xảy ra lỗi khi gửi. Vui lòng thử lại sau.');
+      }
     },
   });
 
@@ -52,7 +73,7 @@ const FaqContact = () => {
             <div className="space-y-4">
               {faqs.map((faq, index) => (
                 <div key={index} className="border-b border-gray-200 pb-4">
-                  <button 
+                  <button
                     className="w-full flex justify-between items-center text-left focus:outline-none group"
                     onClick={() => setOpenFaq(openFaq === index ? -1 : index)}
                   >
@@ -78,34 +99,34 @@ const FaqContact = () => {
           {/* Contact Form */}
           <div className="w-full lg:w-1/2 bg-hepco-green/90 p-10 backdrop-blur-sm relative">
             {/* watermark logo */}
-            <div className="absolute top-4 right-4 w-16 h-16 opacity-20 border-2 border-white rounded-full flex items-center justify-center font-bold text-white">HEPCO</div>
+            <img src={logo} alt="HEPCO" className="absolute top-4 right-4 w-16 h-16 opacity-20 object-contain mix-blend-screen" />
             
             <h3 className="text-2xl font-bold text-white mb-8 text-center drop-shadow-md">Gửi câu hỏi</h3>
             <form onSubmit={formik.handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     name="name"
-                    placeholder="Tên" 
+                    placeholder="Tên"
                     value={formik.values.name}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    className={`w-full bg-transparent border text-white placeholder-white/70 px-4 py-3 rounded focus:outline-none transition-all ${formik.touched.name && formik.errors.name ? 'border-red-400 focus:border-red-400' : 'border-white/40 focus:border-white focus:ring-1 focus:ring-white'}`} 
+                    className={`w-full bg-transparent border text-white placeholder-white/70 px-4 py-3 rounded focus:outline-none transition-all ${formik.touched.name && formik.errors.name ? 'border-red-400 focus:border-red-400' : 'border-white/40 focus:border-white focus:ring-1 focus:ring-white'}`}
                   />
                   {formik.touched.name && formik.errors.name ? (
                     <div className="text-red-300 text-xs mt-1">{formik.errors.name}</div>
                   ) : null}
                 </div>
                 <div>
-                  <input 
-                    type="email" 
+                  <input
+                    type="email"
                     name="email"
-                    placeholder="Email" 
+                    placeholder="Email"
                     value={formik.values.email}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    className={`w-full bg-transparent border text-white placeholder-white/70 px-4 py-3 rounded focus:outline-none transition-all ${formik.touched.email && formik.errors.email ? 'border-red-400 focus:border-red-400' : 'border-white/40 focus:border-white focus:ring-1 focus:ring-white'}`} 
+                    className={`w-full bg-transparent border text-white placeholder-white/70 px-4 py-3 rounded focus:outline-none transition-all ${formik.touched.email && formik.errors.email ? 'border-red-400 focus:border-red-400' : 'border-white/40 focus:border-white focus:ring-1 focus:ring-white'}`}
                   />
                   {formik.touched.email && formik.errors.email ? (
                     <div className="text-red-300 text-xs mt-1">{formik.errors.email}</div>
@@ -114,28 +135,28 @@ const FaqContact = () => {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <input 
-                    type="tel" 
+                  <input
+                    type="tel"
                     name="phone"
-                    placeholder="Số điện thoại" 
+                    placeholder="Số điện thoại"
                     value={formik.values.phone}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    className={`w-full bg-transparent border text-white placeholder-white/70 px-4 py-3 rounded focus:outline-none transition-all ${formik.touched.phone && formik.errors.phone ? 'border-red-400 focus:border-red-400' : 'border-white/40 focus:border-white focus:ring-1 focus:ring-white'}`} 
+                    className={`w-full bg-transparent border text-white placeholder-white/70 px-4 py-3 rounded focus:outline-none transition-all ${formik.touched.phone && formik.errors.phone ? 'border-red-400 focus:border-red-400' : 'border-white/40 focus:border-white focus:ring-1 focus:ring-white'}`}
                   />
                   {formik.touched.phone && formik.errors.phone ? (
                     <div className="text-red-300 text-xs mt-1">{formik.errors.phone}</div>
                   ) : null}
                 </div>
                 <div>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     name="subject"
-                    placeholder="Tiêu đề" 
+                    placeholder="Tiêu đề"
                     value={formik.values.subject}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    className={`w-full bg-transparent border text-white placeholder-white/70 px-4 py-3 rounded focus:outline-none transition-all ${formik.touched.subject && formik.errors.subject ? 'border-red-400 focus:border-red-400' : 'border-white/40 focus:border-white focus:ring-1 focus:ring-white'}`} 
+                    className={`w-full bg-transparent border text-white placeholder-white/70 px-4 py-3 rounded focus:outline-none transition-all ${formik.touched.subject && formik.errors.subject ? 'border-red-400 focus:border-red-400' : 'border-white/40 focus:border-white focus:ring-1 focus:ring-white'}`}
                   />
                   {formik.touched.subject && formik.errors.subject ? (
                     <div className="text-red-300 text-xs mt-1">{formik.errors.subject}</div>
@@ -143,10 +164,10 @@ const FaqContact = () => {
                 </div>
               </div>
               <div>
-                <textarea 
+                <textarea
                   name="message"
-                  placeholder="Nội dung" 
-                  rows="4" 
+                  placeholder="Nội dung"
+                  rows="4"
                   value={formik.values.message}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}

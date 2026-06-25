@@ -15,7 +15,6 @@ const HomeServices = () => {
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-gray-900 inline-block relative">
             Dịch vụ của chúng tôi
-            <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-hepco-orange"></div>
           </h2>
         </div>
 

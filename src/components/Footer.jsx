@@ -1,6 +1,7 @@
 import { Mail, Phone, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ROUTES } from '../constants/routes';
+import logo from '../assets/images/logo.png';
 
 const Footer = () => {
   return (
@@ -16,14 +17,12 @@ const Footer = () => {
       </div>
 
       <div className="container mx-auto px-4 max-w-7xl relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
           
           {/* Column 1: Logo & Intro */}
-          <div className="lg:w-1/4 mb-10 lg:mb-0">
+          <div className="col-span-1 mb-10 md:mb-0">
             <div className="flex items-center gap-4 mb-6">
-              <div className="w-16 h-16 rounded-full border-2 border-white flex items-center justify-center font-bold text-xl relative bg-green-800">
-                <span className="z-10">HEPCO</span>
-              </div>
+              <img src={logo} alt="HEPCO" className="h-16 w-auto rounded-full bg-white p-1" />
               <span className="text-2xl font-bold tracking-wide">HEPCO</span>
             </div>
             <p className="text-sm leading-relaxed mb-6 opacity-90 text-justify">
@@ -36,18 +35,21 @@ const Footer = () => {
 
           {/* Column 2: Contact Info */}
           <div>
-            <h3 className="text-xl font-bold mb-6">Thông tin công ty:</h3>
+            <h3 className="text-xl font-bold mb-6 relative inline-block">
+              Cổng thông tin điện tử:
+              <div className="absolute -bottom-2 left-0 w-12 h-1 bg-hepco-orange"></div>
+            </h3>
             <div className="space-y-4 text-sm opacity-90">
               <p className="font-bold uppercase leading-snug">
                 CÔNG TY CỔ PHẦN MÔI TRƯỜNG VÀ CÔNG TRÌNH ĐÔ THỊ HUẾ
               </p>
               <div className="flex gap-3 mt-4">
                 <MapPin className="w-5 h-5 flex-shrink-0" />
-                <p>46 Trần Phú, Phường Phước Vĩnh, TP. Huế</p>
+                <p>46 Trần Phú, Phường Thuận Hóa, Thành phố Huế</p>
               </div>
               <div className="flex gap-3">
                 <Phone className="w-5 h-5 flex-shrink-0" />
-                <p>(0234) 3848242<br/>(0234) 3997799<br/>(0234) 3848075</p>
+                <p>Hotline: (0234) 3823896<br/>Đường dây nóng: (0234) 3997799</p>
               </div>
               <div className="flex gap-3">
                 <Mail className="w-5 h-5 flex-shrink-0" />

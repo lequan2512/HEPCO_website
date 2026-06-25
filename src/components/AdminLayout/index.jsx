@@ -3,6 +3,7 @@ import { Outlet, useNavigate, Link, useLocation } from 'react-router-dom';
 import { FileText, Shield, LogOut, Menu, X } from 'lucide-react';
 import useAuthStore from '../../store/useAuthStore';
 import { ROUTES } from '../../constants/routes';
+import logo from '../../assets/images/logo.png';
 
 const AdminLayout = () => {
   const { isAuthenticated, logout } = useAuthStore();
@@ -38,7 +39,7 @@ const AdminLayout = () => {
       {/* Sidebar */}
       <aside className={`fixed lg:static inset-y-0 left-0 w-64 bg-hepco-green text-white flex flex-col shadow-lg z-30 transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
         <div className="p-6 border-b border-green-800 flex items-center justify-between lg:justify-center">
-          <img src="/images/logo.png" alt="HEPCO" className="h-10 bg-white p-1 rounded" />
+          <img src={logo} alt="HEPCO" className="h-10 bg-white p-1 rounded" />
           <button className="lg:hidden text-white" onClick={() => setIsSidebarOpen(false)}>
             <X className="w-6 h-6" />
           </button>
@@ -127,7 +128,7 @@ const AdminLayout = () => {
             <span className="font-medium text-sm hidden sm:block">Hệ thống Quản trị HEPCO</span>
           </div>
           <div className="flex items-center gap-3">
-             <div className="w-8 h-8 bg-hepco-green text-white rounded-full flex items-center justify-center font-bold text-sm">A</div>
+             <img src={logo} alt="Admin" className="w-8 h-8 bg-gray-100 rounded-full border border-gray-200 p-0.5 object-contain" />
              <span className="text-sm font-semibold text-gray-700">Admin</span>
           </div>
         </header>
