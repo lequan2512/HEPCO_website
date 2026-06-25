@@ -66,7 +66,7 @@ const Hero = () => {
           }`}
         >
           <img 
-            src={`${API_BASE_URL}${url}`} 
+            src={url.startsWith('http') ? url : `${API_BASE_URL}${url}`} 
             alt={`Banner ${index}`} 
             className="w-full h-full object-cover"
           />

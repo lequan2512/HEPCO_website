@@ -88,7 +88,7 @@ const AdminBannerManager = () => {
             {banners.map((url, index) => (
               <div key={index} className="relative group rounded-lg overflow-hidden border border-gray-200 shadow-sm">
                 <img 
-                  src={`${API_BASE_URL}${url}`} 
+                  src={url.startsWith('http') ? url : `${API_BASE_URL}${url}`} 
                   alt={`Banner ${index}`} 
                   className="w-full h-48 object-cover"
                 />
