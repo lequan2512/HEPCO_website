@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo, useCallback } from 'react';
+import { useState, useRef, useMemo, useCallback, useEffect } from 'react';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 import { useFormik } from 'formik';
@@ -153,6 +153,11 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
     formik.resetForm();
   };
 
+  const mutateAsyncRef = useRef(uploadImageMutation.mutateAsync);
+  useEffect(() => {
+    mutateAsyncRef.current = uploadImageMutation.mutateAsync;
+  }, [uploadImageMutation.mutateAsync]);
+
   const imageHandler = useCallback(() => {
     const input = document.createElement('input');
     input.setAttribute('type', 'file');
@@ -166,7 +171,7 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
         formData.append('image', file);
         try {
           toast.loading('Đang tải ảnh...', { id: 'upload_quill' });
-          const res = await uploadImageMutation.mutateAsync(formData);
+          const res = await mutateAsyncRef.current(formData);
           if (res.success) {
             const quill = quillRef.current.getEditor();
             const range = quill.getSelection(true);
@@ -178,7 +183,7 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
         }
       }
     };
-  }, [uploadImageMutation]);
+  }, []);
 
   const modules = useMemo(() => ({
     toolbar: {
@@ -313,7 +318,7 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
               <ReactQuill 
                 ref={quillRef}
                 theme="snow"
-                value={formik.values.content}
+                defaultValue={formik.values.content}
                 onChange={(content) => {
                   formik.setFieldValue('content', content);
                 }}
