@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useCallback } from 'react';
+import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Calendar, X, Tag } from 'lucide-react';
 import PageBanner from '../../../components/PageBanner';
@@ -124,7 +124,15 @@ const FALLBACK_NEWS_DATA = [
 const News = ({ pageType = 'news' }) => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const observer = useRef();
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
 
   const bannerInfo = pageType === 'news' 
     ? { title: "Tin tức & Sự kiện", description: "Cập nhật những thông tin mới nhất về hoạt động và sự kiện của HEPCO." }
@@ -137,7 +145,7 @@ const News = ({ pageType = 'news' }) => {
     isFetchingNextPage,
     isLoading: loading,
     isError
-  } = useGetInfiniteNews({ type: pageType, limit: 9 });
+  } = useGetInfiniteNews({ type: pageType, limit: 9, search: debouncedSearch });
 
   const articles = useMemo(() => {
     if (isError) return FALLBACK_NEWS_DATA;
@@ -163,18 +171,8 @@ const News = ({ pageType = 'news' }) => {
     setSearchQuery('');
   };
 
-  // Filtered and Searched Articles
-  const filteredArticles = useMemo(() => {
-    return articles.filter((article) => {
-      // Use fallback string if content is a React element
-      const contentStr = typeof article.content === 'string' ? stripHtml(article.content) : '';
-      const matchesSearch = searchQuery.trim() === '' || 
-        article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        contentStr.toLowerCase().includes(searchQuery.toLowerCase());
-      
-      return matchesSearch;
-    });
-  }, [articles, searchQuery]);
+  // Articles
+  const filteredArticles = articles;
 
   return (
     <div className="bg-gray-50 pb-20 flex-grow min-h-screen">

@@ -4,7 +4,7 @@ import 'react-quill-new/dist/quill.snow.css';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useQueryClient } from '@tanstack/react-query';
-import { Plus, Trash2, Edit2, X, Image as ImageIcon, FileText } from 'lucide-react';
+import { Plus, Trash2, Edit2, X, Image as ImageIcon, FileText, Search } from 'lucide-react';
 import { API_BASE_URL } from '../../../constants/api';
 import toast from 'react-hot-toast';
 import { getErrorMessage } from '../../../utils/errorMapper';
@@ -21,7 +21,17 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
 
   const titleText = type === 'news' ? 'Tin Tức' : type === 'shareholders' ? 'Cổ Đông' : 'Dịch Vụ';
 
-  const { data: newsResponse = {}, isLoading } = useGetNews({ type, limit: 20 });
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
+  const { data: newsResponse = {}, isLoading } = useGetNews({ type, limit: 20, search: debouncedSearch });
   const articles = newsResponse.data || [];
 
   const [prevType, setPrevType] = useState(type);
@@ -368,20 +378,40 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
       
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b pb-4 gap-4">
         <h1 className="text-2xl font-bold text-gray-800">{titleText}</h1>
-        {!editOnly && (
-          <button 
-            onClick={() => {
-              setEditingId(null);
-              formik.resetForm();
-              formik.setFieldValue('type', type);
-              setIsFormOpen(true);
-            }}
-            className="flex items-center gap-2 px-4 py-2 bg-hepco-green text-white font-semibold rounded-lg hover:bg-green-700 transition-colors shadow-sm w-full sm:w-auto justify-center"
-          >
-            <Plus className="w-5 h-5" />
-            <span>Thêm Mới</span>
-          </button>
-        )}
+        <div className="flex items-center w-full sm:w-auto gap-4">
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <input
+              type="text"
+              placeholder="Tìm kiếm tiêu đề..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:outline-none focus:bg-white focus:ring-2 focus:ring-hepco-green focus:border-transparent transition-all"
+            />
+            {searchQuery && (
+              <button 
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5 rounded-full hover:bg-gray-200 transition-colors"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            )}
+          </div>
+          {!editOnly && (
+            <button 
+              onClick={() => {
+                setEditingId(null);
+                formik.resetForm();
+                formik.setFieldValue('type', type);
+                setIsFormOpen(true);
+              }}
+              className="flex items-center whitespace-nowrap gap-2 px-4 py-2 bg-hepco-green text-white font-semibold rounded-lg hover:bg-green-700 transition-colors shadow-sm w-full sm:w-auto justify-center"
+            >
+              <Plus className="w-5 h-5" />
+              <span>Thêm Mới</span>
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
