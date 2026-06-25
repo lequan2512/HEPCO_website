@@ -53,14 +53,16 @@ const Services = () => {
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-hepco-green"></div>
           </div>
         ) : services.length > 0 ? (
-          <div className="bg-white p-8 rounded-lg shadow-md">
-            <h2 className="text-3xl font-bold text-[#0066cc] text-center mb-8">
+          <div className="bg-white p-4 md:p-8 rounded-lg shadow-md w-full overflow-hidden">
+            <h2 className="text-2xl md:text-3xl font-bold text-[#0066cc] text-center mb-6 md:mb-8">
               {services[activeTab]?.title}
             </h2>
-            <div 
-              className="prose prose-lg max-w-none text-gray-800 mx-auto"
-              dangerouslySetInnerHTML={{ __html: services[activeTab]?.content }} 
-            />
+            <div className="w-full overflow-x-auto no-scrollbar">
+              <div 
+                className="prose prose-sm md:prose-lg max-w-none text-gray-800 mx-auto break-words"
+                dangerouslySetInnerHTML={{ __html: services[activeTab]?.content }} 
+              />
+            </div>
           </div>
         ) : (
           <p className="text-center text-gray-500">Đang cập nhật nội dung dịch vụ...</p>

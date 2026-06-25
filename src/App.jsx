@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Header from './components/Header';
@@ -21,6 +22,10 @@ const AppRoutes = () => {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin-dashboard');
   const isLoginRoute = location.pathname === ROUTES.ADMIN_LOGIN;
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
 
   if (isAdminRoute) {
     return (

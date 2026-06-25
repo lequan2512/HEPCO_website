@@ -15,16 +15,16 @@ const About = () => {
       <SubNav items={subNavItems} activeIndex={activeTab} onSelect={setActiveTab} />
       
       <div className="container mx-auto px-4 mt-16 max-w-6xl">
-        <div className="flex flex-col md:flex-row gap-12 items-start">
+        <div className="flex flex-col md:flex-row gap-8 md:gap-12 items-start">
           {/* Left Image Placeholder */}
-          <div className="w-full md:w-5/12 bg-gray-200 rounded-lg overflow-hidden shadow-lg h-96 relative flex items-center justify-center border border-gray-300">
+          <div className="w-full md:w-5/12 bg-gray-200 rounded-lg overflow-hidden shadow-lg h-64 md:h-96 relative flex items-center justify-center border border-gray-300">
             {/* Typically an image goes here `<img src={truSo} alt="Trụ sở" className="w-full h-full object-cover" />` */}
-            <span className="text-gray-400 font-bold text-xl">Hình ảnh Trụ Sở HEPCO</span>
+            <span className="text-gray-400 font-bold text-lg md:text-xl text-center px-4">Hình ảnh Trụ Sở HEPCO</span>
           </div>
 
           {/* Right Content */}
           <div className="w-full md:w-7/12">
-            <h2 className="text-4xl font-['cursive'] text-hepco-green mb-8">Thư ngỏ</h2>
+            <h2 className="text-3xl md:text-4xl font-['cursive'] text-hepco-green mb-6 md:mb-8 text-center md:text-left">Thư ngỏ</h2>
             
             <div className="prose prose-sm md:prose-base text-gray-700 space-y-4 text-justify">
               <p className="italic font-semibold">Kính gửi Quý khách hàng,</p>

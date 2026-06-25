@@ -55,4 +55,11 @@ body {
     color: #2563eb;
     text-decoration: underline;
   }
+  .prose * {
+    max-width: 100%;
+  }
+  .prose p, .prose span, .prose div {
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
 }
