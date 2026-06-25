@@ -72,7 +72,7 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
     enableReinitialize: true,
     validationSchema: Yup.object({
       title: Yup.string().required('Vui lòng nhập tiêu đề bài viết'),
-      thumbnail: type === 'service' ? Yup.string() : Yup.string().required('Vui lòng tải lên thumbnail'),
+      thumbnail: Yup.string().required('Vui lòng tải lên thumbnail'),
       content: Yup.string().test(
         'is-empty', 
         'Vui lòng nhập nội dung bài viết',
@@ -232,7 +232,7 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
             ) : null}
           </div>
 
-          {type !== 'service' && (
+
             <div>
               <label className="block text-lg font-medium text-gray-700 mb-2">Ảnh đại diện (Thumbnail)</label>
               <input 
@@ -306,7 +306,6 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
                  </div>
               )}
             </div>
-          )}
 
           <div>
             <label className="block text-lg font-medium text-gray-700 mb-2">Nội dung</label>
@@ -389,7 +388,7 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-100">
                   <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase w-16">ID</th>
-                  {type !== 'service' && <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Hình Ảnh</th>}
+                  <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Hình Ảnh</th>
                   <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Tiêu đề</th>
                   <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Ngày đăng</th>
                   <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase text-right"></th>
@@ -399,7 +398,7 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
                 {articles.map((item) => (
                   <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="px-6 py-4 text-sm text-gray-500 font-medium">#{item.id}</td>
-                    {type !== 'service' && (
+
                       <td className="px-6 py-4">
                         {item.thumbnail ? (
                           <img 
@@ -413,7 +412,6 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
                           </div>
                         )}
                       </td>
-                    )}
                     <td className="px-6 py-4">
                       <div className="text-sm text-gray-800 font-medium line-clamp-2 leading-tight max-w-[200px] sm:max-w-xs md:max-w-md" title={item.title}>
                         {item.title}

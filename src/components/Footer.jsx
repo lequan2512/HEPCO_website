@@ -1,6 +1,4 @@
 import { Mail, Phone, MapPin } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { ROUTES } from '../constants/routes';
 import logo from '../assets/images/logo.png';
 
 const Footer = () => {
@@ -28,9 +26,9 @@ const Footer = () => {
             <p className="text-sm leading-relaxed mb-6 opacity-90 text-justify">
               Phát huy thế mạnh và đa dạng hóa lĩnh vực hoạt động để trở thành Công ty môi trường hàng đầu khu vực miền Trung - Tây Nguyên
             </p>
-            <Link to={ROUTES.ABOUT} className="inline-block bg-hepco-orange hover:bg-orange-600 text-white font-bold py-2 px-8 rounded transition-colors shadow-md">
+            {/* <Link to={ROUTES.ABOUT} className="inline-block bg-hepco-orange hover:bg-orange-600 text-white font-bold py-2 px-8 rounded transition-colors shadow-md">
               GIỚI THIỆU
-            </Link>
+            </Link> */}
           </div>
 
           {/* Column 2: Contact Info */}
@@ -51,24 +49,22 @@ const Footer = () => {
                 <Phone className="w-5 h-5 flex-shrink-0" />
                 <p>Hotline: (0234) 3823896<br/>Đường dây nóng: (0234) 3997799</p>
               </div>
-              <div className="flex gap-3">
-                <Mail className="w-5 h-5 flex-shrink-0" />
-                <p>info@hepco.com.vn</p>
-              </div>
+
             </div>
             
             {/* Social Icons */}
             <div className="flex gap-4 mt-6">
-              <a href="#" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-hepco-orange transition-colors">
+              {/* <a href="#" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-hepco-orange transition-colors">
                 <span className="text-xs font-bold">Zalo</span>
-              </a>
-              <a href="#" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-hepco-orange transition-colors">
-                {/* Fallback to SVG since lucide removed Facebook */}
+              </a> */}
+              <a href="https://www.facebook.com/hepco.com.vn" target='_blank' className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-hepco-orange transition-colors">
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/></svg>
               </a>
-              <a href="#" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-hepco-orange transition-colors">
-                {/* Fallback to SVG since lucide removed Youtube */}
+              {/* <a href="#" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-hepco-orange transition-colors">
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+              </a> */}
+              <a href="mailto:info@hepco.com.vn" target='_blank' className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-hepco-orange transition-colors" title="Gửi Email">
+                <Mail className="w-4 h-4" />
               </a>
             </div>
           </div>

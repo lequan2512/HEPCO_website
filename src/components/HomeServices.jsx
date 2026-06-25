@@ -1,12 +1,12 @@
+import { useGetNews } from '../apis/news';
+import { API_BASE_URL } from '../constants/api';
+import { Link } from 'react-router-dom';
+
 const HomeServices = () => {
-  const services = [
-    { title: 'Thu gom vận chuyển xử lý rác sinh hoạt' },
-    { title: 'Thu gom vận chuyển xử lý rác nguy hại' },
-    { title: 'Cơ khí - Xây dựng công trình hạ tầng kỹ thuật đô thị' },
-    { title: 'Thoát nước - Điện chiếu sáng' },
-    { title: 'Quản lý nghĩa trang nhân dân' },
-    { title: 'Kinh doanh khác' },
-  ];
+  const { data: servicesResponse = {} } = useGetNews({ type: 'service', limit: 6 });
+  const rawServices = servicesResponse.data || [];
+  
+  const apiServices = [...rawServices].sort((a, b) => a.id - b.id);
 
   return (
     <section className="py-20 bg-gray-50 relative">
@@ -19,9 +19,7 @@ const HomeServices = () => {
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Left Quote Box */}
           <div className="lg:w-1/3 relative mt-16 lg:mt-0">
-            {/* Image extending out of the box */}
             <div className="absolute -top-16 left-1/2 transform -translate-x-1/2 w-4/5 h-48 bg-gray-300 rounded-t-xl z-10 border-4 border-white shadow-lg overflow-hidden flex items-end justify-center">
                <div className="w-16 h-16 bg-hepco-green rounded-full border-4 border-white mb-2 absolute -bottom-8"></div>
             </div>
@@ -34,23 +32,27 @@ const HomeServices = () => {
             </div>
           </div>
 
-          {/* Right Services Grid */}
           <div className="lg:w-2/3">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {services.map((service, index) => (
-                <div key={index} className="group relative h-64 rounded-xl overflow-hidden shadow-lg cursor-pointer">
-                  {/* Placeholder image background */}
-                  <div className="absolute inset-0 bg-gray-400 transition-transform duration-500 group-hover:scale-110"></div>
-                  {/* Gradient overlay */}
+              {apiServices.map((service, index) => (
+                <Link key={service.id || index} to="/dich-vu" state={{ serviceId: service.id }} className="group relative h-64 rounded-xl overflow-hidden shadow-lg cursor-pointer block">
+                  {service.thumbnail ? (
+                    <img 
+                      src={service.thumbnail.startsWith('http') ? service.thumbnail : `${API_BASE_URL}${service.thumbnail}`} 
+                      alt={service.title} 
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 bg-gray-400 transition-transform duration-500 group-hover:scale-110"></div>
+                  )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
                   
-                  {/* Content */}
                   <div className="absolute bottom-0 left-0 w-full p-6 text-center">
                     <h3 className="text-white font-bold text-lg drop-shadow-md transition-colors group-hover:text-yellow-400">
                       {service.title}
                     </h3>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           </div>

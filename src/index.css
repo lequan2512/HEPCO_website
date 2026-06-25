@@ -17,3 +17,42 @@ body {
     clip-path: polygon(10% 0, 100% 0, 100% 100%, 0% 100%);
   }
 }
+
+@layer components {
+  /* Rich Text Base Styles (Required for ReactQuill HTML output) */
+  .prose {
+    line-height: 1.6;
+  }
+  .prose p {
+    margin-bottom: 1em;
+  }
+  .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+    font-weight: 700;
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+    color: #1f2937;
+  }
+  .prose ul {
+    list-style-type: disc !important;
+    margin-left: 1.5em !important;
+    margin-bottom: 1em;
+  }
+  .prose ol {
+    list-style-type: decimal !important;
+    margin-left: 1.5em !important;
+    margin-bottom: 1em;
+  }
+  .prose li {
+    margin-bottom: 0.25em;
+  }
+  .prose img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.375rem;
+    margin: 1em 0;
+  }
+  .prose a {
+    color: #2563eb;
+    text-decoration: underline;
+  }
+}

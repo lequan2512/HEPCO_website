@@ -1,17 +1,36 @@
 import { useState, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import PageBanner from '../../../components/PageBanner';
 import SubNav from '../../../components/SubNav';
 import { useGetNews } from '../../../apis/news';
 
 const Services = () => {
-  const [activeTab, setActiveTab] = useState(0);
-
+  const location = useLocation();
+  
   const { data: newsResponse = {}, isLoading: loading } = useGetNews({ type: 'service', limit: 10 });
   
   const services = useMemo(() => {
     const items = newsResponse.data || [];
     return [...items].sort((a, b) => a.id - b.id);
   }, [newsResponse.data]);
+
+  const [userSelectedTab, setUserSelectedTab] = useState(null);
+  const [prevLocationKey, setPrevLocationKey] = useState(location.key);
+
+  if (location.key !== prevLocationKey) {
+    setPrevLocationKey(location.key);
+    setUserSelectedTab(null);
+  }
+
+  let activeTab = 0;
+  if (userSelectedTab !== null) {
+    activeTab = userSelectedTab;
+  } else if (location.state?.serviceId && services.length > 0) {
+    const idx = services.findIndex(s => s.id === location.state.serviceId);
+    activeTab = idx !== -1 ? idx : 0;
+  } else if (location.state?.tab !== undefined) {
+    activeTab = location.state.tab;
+  }
 
   const subNavItems = services.length > 0 
     ? services.map(s => s.title)
@@ -25,7 +44,7 @@ const Services = () => {
       />
 
       {!loading && services.length > 0 && (
-        <SubNav items={subNavItems} activeIndex={activeTab} onSelect={setActiveTab} />
+        <SubNav items={subNavItems} activeIndex={activeTab} onSelect={setUserSelectedTab} />
       )}
       
       <div className="container mx-auto px-4 mt-16 max-w-6xl">
