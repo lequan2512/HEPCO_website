@@ -46,7 +46,7 @@ const Header = () => {
               <Phone className="w-5 h-5 md:w-6 md:h-6" />
               <div className="flex flex-col">
                 <span className="text-[10px] md:text-xs font-bold leading-tight">Hotline</span>
-                <span className="text-xs md:text-sm font-bold leading-tight">(0234) 3997799</span>
+                <a href="tel:02343997799" className="text-xs md:text-sm font-bold leading-tight hover:underline">(0234) 3997799</a>
               </div>
             </div>
             {/* Vietnam Flag Placeholder */}
@@ -91,7 +91,7 @@ const Header = () => {
              <Phone className="w-5 h-5" />
              <div className="flex flex-col">
                <span className="text-xs font-bold leading-tight text-white">Hotline</span>
-               <span className="text-sm font-bold leading-tight">(0234) 3997799</span>
+               <a href="tel:02343997799" className="text-sm font-bold leading-tight hover:underline">(0234) 3997799</a>
              </div>
           </div>
         </nav>

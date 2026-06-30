@@ -1,5 +1,3 @@
-import React from 'react';
-
 const CoreValues = () => {
   const values = [
     { letter: 'H', text: 'TRUNG THỰC', color: 'text-green-500' },
@@ -10,9 +8,9 @@ const CoreValues = () => {
   ];
 
   return (
-    <section className="relative py-20 bg-hepco-green overflow-hidden">
+    <section className="relative py-20 bg-gradient-to-br from-green-500 via-hepco-green to-green-900 overflow-hidden">
       {/* Background overlay */}
-      <div className="absolute inset-0 bg-green-900/30 mix-blend-multiply"></div>
+      <div className="absolute inset-0 bg-green-500/30 mix-blend-multiply"></div>
       
       <div className="container mx-auto px-4 relative z-10">
         <div className="flex flex-wrap justify-center gap-6">

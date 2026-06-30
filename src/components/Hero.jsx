@@ -4,7 +4,7 @@ import { useGetBanners } from '../apis/banner';
 import { API_BASE_URL } from '../constants/api';
 
 const Hero = () => {
-  const { data: banners = [] } = useGetBanners();
+  const { data: banners = [], isLoading } = useGetBanners();
   const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
@@ -22,6 +22,15 @@ const Hero = () => {
   const prevSlide = () => {
     setCurrentSlide((prev) => (prev - 1 + banners.length) % banners.length);
   };
+
+  if (isLoading) {
+    return (
+      <div className="relative w-full h-[500px] md:h-[700px] bg-gray-200 flex items-center justify-center overflow-hidden">
+        <img src="/images/news_trucks.png" alt="Đang tải banner..." className="absolute inset-0 w-full h-full object-cover opacity-50 animate-pulse" />
+        <div className="absolute inset-0 bg-black/10"></div>
+      </div>
+    );
+  }
 
   if (banners.length === 0) {
     // Fallback if no banners are uploaded yet

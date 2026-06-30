@@ -3,7 +3,7 @@ import { API_BASE_URL } from '../constants/api';
 import { Link } from 'react-router-dom';
 
 const HomeServices = () => {
-  const { data: servicesResponse = {} } = useGetNews({ type: 'service', limit: 6 });
+  const { data: servicesResponse = {} } = useGetNews({ type: 'service', limit: 4 });
   const rawServices = servicesResponse.data || [];
   
   const apiServices = [...rawServices].sort((a, b) => a.id - b.id);
@@ -27,7 +27,7 @@ const HomeServices = () => {
                </div>
             </div>
             
-            <div className="bg-hepco-green rounded-xl p-8 pt-40 text-white shadow-xl h-full relative">
+            <div className="bg-gradient-to-br from-green-500 via-hepco-green to-green-900 rounded-xl p-8 pt-40 text-white shadow-xl h-full relative">
               <span className="text-6xl text-yellow-400 font-serif absolute top-32 left-8">"</span>
               <p className="text-lg leading-relaxed mt-4 text-justify relative z-10">
                 HEPCO với kinh nghiệm gần 50 năm kinh nghiệm trong lĩnh vực vệ sinh môi trường và công trình đô thị sẽ cung cấp đến quý khách hàng các dịch vụ với chất lượng tốt nhất, uy tín nhất. Cam kết luôn đồng hành cùng quý khách hàng trong hành trình bảo vệ môi trường và phát triển bền vững.

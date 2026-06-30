@@ -16,8 +16,9 @@ const NewsPartnersAwards = () => {
 
       <div className="container mx-auto px-4 max-w-7xl relative z-10">
         {/* News Section */}
-        <div className="mb-24">
-          <div className="text-center mb-12">
+        {news.length > 0 && (
+          <div className="mb-24">
+            <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Tin tức nổi bật</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -55,6 +56,7 @@ const NewsPartnersAwards = () => {
             ))}
           </div>
         </div>
+        )}
 
         {/* Partners Section */}
         <div className="mb-24">
