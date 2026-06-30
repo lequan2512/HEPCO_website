@@ -1,5 +1,4 @@
 import Hero from '../../../components/Hero';
-import Stats from '../../../components/Stats';
 import VisionMission from '../../../components/VisionMission';
 import CoreValues from '../../../components/CoreValues';
 import HomeServices from '../../../components/HomeServices';
@@ -10,7 +9,6 @@ const Home = () => {
   return (
     <>
       <Hero />
-      <Stats />
       <VisionMission />
       <CoreValues />
       <HomeServices />

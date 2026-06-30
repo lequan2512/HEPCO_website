@@ -27,7 +27,8 @@ const Hero = () => {
     // Fallback if no banners are uploaded yet
     return (
       <div className="relative w-full h-[500px] md:h-[700px] bg-[#3f9e4d] flex items-center justify-center overflow-hidden pt-20">
-        <div className="absolute inset-0 bg-gradient-to-b from-green-700/60 to-[#3f9e4d]/90 mix-blend-multiply z-0"></div>
+        <img src="/images/news_trucks.png" alt="HEPCO Default Banner" className="absolute inset-0 w-full h-full object-cover opacity-50 z-0" />
+        <div className="absolute inset-0 bg-gradient-to-b from-green-900/80 to-[#3f9e4d]/90 mix-blend-multiply z-0"></div>
         <div className="absolute inset-0 z-0 opacity-40">
           <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-yellow-300 rounded-full blur-[80px]"></div>
           <div className="absolute top-1/2 right-1/4 w-40 h-40 bg-yellow-400 rounded-full blur-[100px]"></div>
