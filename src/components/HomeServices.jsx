@@ -20,8 +20,11 @@ const HomeServices = () => {
 
         <div className="flex flex-col lg:flex-row gap-8">
           <div className="lg:w-1/3 relative mt-16 lg:mt-0">
-            <div className="absolute -top-16 left-1/2 transform -translate-x-1/2 w-4/5 h-48 bg-gray-300 rounded-t-xl z-10 border-4 border-white shadow-lg overflow-hidden flex items-end justify-center">
-               <div className="w-16 h-16 bg-hepco-green rounded-full border-4 border-white mb-2 absolute -bottom-8"></div>
+            <div className="absolute -top-16 left-1/2 transform -translate-x-1/2 w-4/5 h-48 bg-gray-300 rounded-t-xl z-10 border-4 border-white shadow-lg overflow-hidden flex items-end justify-center group">
+               <img src="/images/news_trucks.png" alt="Dịch vụ HEPCO" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+               <div className="w-16 h-16 bg-hepco-green rounded-full border-4 border-white mb-2 absolute -bottom-8 z-20 flex items-center justify-center shadow-md">
+                 <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
+               </div>
             </div>
             
             <div className="bg-hepco-green rounded-xl p-8 pt-40 text-white shadow-xl h-full relative">
@@ -43,7 +46,7 @@ const HomeServices = () => {
                       className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                   ) : (
-                    <div className="absolute inset-0 bg-gray-400 transition-transform duration-500 group-hover:scale-110"></div>
+                    <img src={['/images/news_cleanup.png', '/images/news_planting.png', '/images/news_meeting.png'][index % 3]} alt={service.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
                   
