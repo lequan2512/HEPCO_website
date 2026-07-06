@@ -1,6 +1,5 @@
-import { useState, useRef, useMemo, useCallback, useEffect } from 'react';
-import ReactQuill from 'react-quill-new';
-import 'react-quill-new/dist/quill.snow.css';
+import { useState, useEffect } from 'react';
+import RichTextEditor from '../../../components/RichTextEditor';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useQueryClient } from '@tanstack/react-query';
@@ -118,8 +117,6 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
     setIsFormOpen(true);
   };
 
-  const quillRef = useRef(null);
-
   const handleDelete = (article) => {
     setConfirmConfig({
       isOpen: true,
@@ -162,55 +159,6 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
     setEditingId(null);
     formik.resetForm();
   };
-
-  const mutateAsyncRef = useRef(uploadImageMutation.mutateAsync);
-  useEffect(() => {
-    mutateAsyncRef.current = uploadImageMutation.mutateAsync;
-  }, [uploadImageMutation.mutateAsync]);
-
-  const imageHandler = useCallback(() => {
-    const input = document.createElement('input');
-    input.setAttribute('type', 'file');
-    input.setAttribute('accept', 'image/*');
-    input.click();
-
-    input.onchange = async () => {
-      const file = input.files[0];
-      if (file) {
-        const formData = new FormData();
-        formData.append('image', file);
-        try {
-          toast.loading('Đang tải ảnh...', { id: 'upload_quill' });
-          const res = await mutateAsyncRef.current(formData);
-          if (res.success) {
-            const quill = quillRef.current.getEditor();
-            const range = quill.getSelection(true);
-            quill.insertEmbed(range.index, 'image', `${API_BASE_URL}${res.url}`);
-            toast.success('Tải ảnh thành công!', { id: 'upload_quill' });
-          }
-        } catch {
-          toast.error('Lỗi tải ảnh', { id: 'upload_quill' });
-        }
-      }
-    };
-  }, []);
-
-  const modules = useMemo(() => ({
-    toolbar: {
-      container: [
-        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-        ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-        [{'list': 'ordered'}, {'list': 'bullet'}, {'indent': '-1'}, {'indent': '+1'}],
-        [{ 'color': [] }, { 'background': [] }],
-        [{ 'align': [] }],
-        ['link', 'image', 'video'],
-        ['clean']
-      ],
-      handlers: {
-        image: imageHandler
-      }
-    }
-  }), [imageHandler]);
 
   if (isFormOpen) {
     return (
@@ -325,17 +273,14 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
           <div>
             <label className="block text-lg font-medium text-gray-700 mb-2">Nội dung</label>
             <div className={`bg-white ${formik.touched.content && formik.errors.content ? 'border border-red-500 rounded' : ''}`}>
-              <ReactQuill 
-                ref={quillRef}
-                theme="snow"
-                defaultValue={formik.values.content}
+              <RichTextEditor 
+                value={formik.values.content}
                 onChange={(content) => {
                   formik.setFieldValue('content', content);
                 }}
                 onBlur={() => {
                   formik.setFieldTouched('content', true);
                 }}
-                modules={modules}
                 className="h-96 mb-12"
               />
             </div>
