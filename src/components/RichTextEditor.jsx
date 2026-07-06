@@ -1,4 +1,4 @@
-import { useRef, useMemo, useCallback, useEffect } from 'react';
+import { useRef, useMemo, useCallback, useEffect, useState } from 'react';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 import toast from 'react-hot-toast';
@@ -8,6 +8,37 @@ import { useUploadImage } from '../apis/upload';
 const RichTextEditor = ({ value, onChange, onBlur, className }) => {
   const quillRef = useRef(null);
   const uploadImageMutation = useUploadImage();
+
+  const [linkModal, setLinkModal] = useState({ isOpen: false, url: '', text: '', range: null });
+
+  const handleInsertLink = useCallback(() => {
+    const { url, text, range } = linkModal;
+    if (!url) {
+      toast.error('Vui lòng nhập đường dẫn URL');
+      return;
+    }
+    
+    let validUrl = url;
+    if (!/^https?:\/\//i.test(validUrl) && !validUrl.startsWith('mailto:') && !validUrl.startsWith('tel:')) {
+      validUrl = 'http://' + validUrl;
+    }
+
+    const quill = quillRef.current.getEditor();
+    
+    if (range && range.length > 0) {
+      const currentText = quill.getText(range.index, range.length);
+      if (text !== currentText && text.trim() !== '') {
+        quill.deleteText(range.index, range.length);
+        quill.insertText(range.index, text, 'link', validUrl);
+      } else {
+        quill.formatText(range.index, range.length, 'link', validUrl);
+      }
+    } else {
+      quill.insertText(range ? range.index : 0, text || validUrl, 'link', validUrl);
+    }
+    
+    setLinkModal({ isOpen: false, url: '', text: '', range: null });
+  }, [linkModal]);
 
   const mutateAsyncRef = useRef(uploadImageMutation.mutateAsync);
   useEffect(() => {
@@ -56,21 +87,27 @@ const RichTextEditor = ({ value, onChange, onBlur, className }) => {
         image: imageHandler,
         link: function(val) {
           if (val) {
-            const href = prompt('Nhập đường dẫn URL:');
-            if (href) {
-              let range = this.quill.getSelection();
-              if (!range) {
-                this.quill.focus();
-                range = this.quill.getSelection() || { index: this.quill.getLength() - 1, length: 0 };
-              }
-              if (range.length > 0) {
-                this.quill.format('link', href);
-              } else {
-                this.quill.insertText(range.index, href, 'link', href);
-              }
+            const quill = quillRef.current.getEditor();
+            let range = quill.getSelection();
+            if (!range) {
+              quill.focus();
+              range = quill.getSelection() || { index: quill.getLength() - 1, length: 0 };
             }
+            
+            let currentText = '';
+            if (range.length > 0) {
+              currentText = quill.getText(range.index, range.length);
+            }
+            
+            setLinkModal({
+              isOpen: true,
+              url: '',
+              text: currentText,
+              range: range
+            });
           } else {
-            this.quill.format('link', false);
+            const quill = quillRef.current.getEditor();
+            quill.format('link', false);
           }
         }
       }
@@ -78,15 +115,63 @@ const RichTextEditor = ({ value, onChange, onBlur, className }) => {
   }), [imageHandler]);
 
   return (
-    <ReactQuill 
-      ref={quillRef}
-      theme="snow"
-      value={value}
-      onChange={onChange}
-      onBlur={onBlur}
-      modules={modules}
-      className={className}
-    />
+    <>
+      <ReactQuill 
+        ref={quillRef}
+        theme="snow"
+        value={value}
+        onChange={onChange}
+        onBlur={onBlur}
+        modules={modules}
+        className={className}
+      />
+      {linkModal.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-xl p-6 w-96 shadow-2xl border border-gray-100">
+            <h3 className="text-xl font-bold text-gray-800 mb-5">Chèn Liên Kết</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Đường dẫn (URL) <span className="text-red-500">*</span></label>
+                <input 
+                  type="text"
+                  className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hepco-green focus:border-transparent outline-none transition-all"
+                  placeholder="https://example.com"
+                  value={linkModal.url}
+                  onChange={(e) => setLinkModal({...linkModal, url: e.target.value})}
+                  autoFocus
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Văn bản hiển thị</label>
+                <input 
+                  type="text"
+                  className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hepco-green focus:border-transparent outline-none transition-all"
+                  placeholder="Để trống sẽ dùng URL làm văn bản"
+                  value={linkModal.text}
+                  onChange={(e) => setLinkModal({...linkModal, text: e.target.value})}
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 mt-8">
+              <button 
+                type="button"
+                className="px-5 py-2.5 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                onClick={() => setLinkModal({ ...linkModal, isOpen: false })}
+              >
+                Hủy Bỏ
+              </button>
+              <button 
+                type="button"
+                className="px-5 py-2.5 text-white bg-hepco-green rounded-lg hover:bg-green-700 transition-colors font-medium shadow-sm"
+                onClick={handleInsertLink}
+              >
+                Xác Nhận
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
