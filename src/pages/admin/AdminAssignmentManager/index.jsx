@@ -1,25 +1,27 @@
 import { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { ClipboardList, Plus, RotateCcw, X, Search } from 'lucide-react';
+import { ClipboardList, Plus, RotateCcw, X, Search, Package } from 'lucide-react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import toast from 'react-hot-toast';
 import Loading from '../../../components/Loading';
 import { useGetAssignments, useAddAssignment, useReturnAssignment } from '../../../apis/assignment';
-import { useGetDevices } from '../../../apis/device';
+import { useGetDevices, useGetCategories, useUpdateDevice } from '../../../apis/device';
 import { useGetEmployees } from '../../../apis/employee';
 import { useGetDepartments } from '../../../apis/department';
 import ConfirmModal from '../../../components/ConfirmModal';
 import Pagination from '../../../components/Pagination';
-import { PC_COMPONENTS, DEVICE_STATUS, ASSIGNMENT_STATUS } from '../../../constants/device';
+import { PC_COMPONENTS, DEVICE_CATEGORY_CODES, DEVICE_STATUS, ASSIGNMENT_STATUS } from '../../../constants/device';
 
 const AdminAssignmentManager = () => {
   const [page, setPage] = useState(1);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isAssembleModalOpen, setIsAssembleModalOpen] = useState(false);
+  const [assembleDevice, setAssembleDevice] = useState(null);
   const [returnItem, setReturnItem] = useState(null);
   const [confirmConfig, setConfirmConfig] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
   const queryClient = useQueryClient();
-  const [filters, setFilters] = useState({ search: '', department_id: '', year: '', status: '' });
+  const [filters, setFilters] = useState({ search: '', department_id: '', category_id: '', start_date: '', end_date: '', status: '' });
   const [debouncedFilters, setDebouncedFilters] = useState(filters);
 
   useEffect(() => {
@@ -39,11 +41,32 @@ const AdminAssignmentManager = () => {
   const employees = employeesRes?.data || [];
   const { data: departmentsRes = {}, isLoading: isLoadingDept } = useGetDepartments({ limit: 1000 });
   const departments = departmentsRes?.data || [];
+  const { data: categories = [], isLoading: isLoadingCategories } = useGetCategories();
+  const { data: availableComponentsRes } = useGetDevices({ status: DEVICE_STATUS.IN_STOCK, hide_assembled: true, limit: 1000 });
+  const availableComponents = availableComponentsRes?.data || [];
 
-  const isLoading = isLoadingAssignments || isLoadingDevices || isLoadingEmployees || isLoadingDept;
+  const updateDeviceMutation = useUpdateDevice();
+
+  const isLoading = isLoadingAssignments || isLoadingDevices || isLoadingEmployees || isLoadingDept || isLoadingCategories;
 
   const addAssignment = useAddAssignment();
   const returnAssignment = useReturnAssignment();
+
+  const calculateTimeAssigned = (assignedDate) => {
+    const start = new Date(assignedDate);
+    const end = new Date();
+    if (start > end) return 'Chưa đến hạn';
+    let years = end.getFullYear() - start.getFullYear();
+    let months = end.getMonth() - start.getMonth();
+    if (months < 0) {
+      years--;
+      months += 12;
+    }
+    if (years === 0 && months === 0) return 'Dưới 1 tháng';
+    if (years === 0) return `${months} tháng`;
+    if (months === 0) return `${years} năm`;
+    return `${years} năm ${months} tháng`;
+  };
 
   const formik = useFormik({
     initialValues: { device_id: '', employee_id: '', assigned_date: new Date().toISOString().split('T')[0], assigned_by: 'Admin', note: '' },
@@ -94,7 +117,7 @@ const AdminAssignmentManager = () => {
         <button onClick={() => setIsFormOpen(true)} className="flex items-center whitespace-nowrap gap-2 px-4 py-2 bg-hepco-green text-white font-semibold rounded-lg hover:bg-green-700 transition-colors shadow-sm w-full sm:w-auto justify-center"><Plus className="w-5 h-5" /> <span>Cấp Phát Mới</span></button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           <input
@@ -115,20 +138,38 @@ const AdminAssignmentManager = () => {
         </div>
         <select
           className="w-full py-2 px-3 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:outline-none focus:bg-white focus:ring-2 focus:ring-hepco-green"
+          value={filters.category_id}
+          onChange={(e) => setFilters(f => ({ ...f, category_id: e.target.value }))}
+        >
+          <option value="">Tất cả danh mục</option>
+          {categories.filter(c => c.parent_id === null).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+        </select>
+        <select
+          className="w-full py-2 px-3 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:outline-none focus:bg-white focus:ring-2 focus:ring-hepco-green"
           value={filters.department_id}
           onChange={(e) => setFilters(f => ({ ...f, department_id: e.target.value }))}
         >
           <option value="">Tất cả phòng ban</option>
           {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
         </select>
-        <select
-          className="w-full py-2 px-3 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:outline-none focus:bg-white focus:ring-2 focus:ring-hepco-green"
-          value={filters.year}
-          onChange={(e) => setFilters(f => ({ ...f, year: e.target.value }))}
-        >
-          <option value="">Tất cả năm</option>
-          {[2023, 2024, 2025, 2026].map(y => <option key={y} value={y}>{y}</option>)}
-        </select>
+        <div className="flex gap-2">
+          <input
+            type="date"
+            className="w-full py-2 px-3 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-500 focus:outline-none focus:bg-white focus:ring-2 focus:ring-hepco-green"
+            value={filters.start_date}
+            onChange={(e) => setFilters(f => ({ ...f, start_date: e.target.value }))}
+            title="Từ ngày"
+          />
+        </div>
+        <div className="flex gap-2">
+          <input
+            type="date"
+            className="w-full py-2 px-3 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-500 focus:outline-none focus:bg-white focus:ring-2 focus:ring-hepco-green"
+            value={filters.end_date}
+            onChange={(e) => setFilters(f => ({ ...f, end_date: e.target.value }))}
+            title="Đến ngày"
+          />
+        </div>
         <select
           className="w-full py-2 px-3 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:outline-none focus:bg-white focus:ring-2 focus:ring-hepco-green"
           value={filters.status}
@@ -217,7 +258,10 @@ const AdminAssignmentManager = () => {
               <tbody className="divide-y divide-gray-100">
                 {filteredAssignments.map(a => (
                   <tr key={a.id} className="hover:bg-gray-50/50 transition-colors">
-                    <td className="px-6 py-4 text-sm text-gray-800">{new Date(a.assigned_date).toLocaleDateString('vi-VN')}</td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-800">{new Date(a.assigned_date).toLocaleDateString('vi-VN')}</div>
+                      <div className="text-xs text-hepco-green font-medium mt-1">{!a.returned_date && calculateTimeAssigned(a.assigned_date)}</div>
+                    </td>
                     <td className="px-6 py-4 font-medium text-gray-800">{a.device?.name} <span className="text-gray-400 text-xs font-normal ml-1">(ID: {a.device_id})</span></td>
                     <td className="px-6 py-4 text-sm text-gray-800">{a.employee?.full_name} <span className="text-gray-400 text-xs font-normal ml-1">(ID: {a.employee_id})</span></td>
                     <td className="px-6 py-4">
@@ -228,9 +272,16 @@ const AdminAssignmentManager = () => {
                     </td>
                     <td className="px-6 py-4 text-right">
                       {!a.returned_date && (
-                        <button onClick={() => handleReturn(a)} className="bg-yellow-500 text-white px-3 py-1.5 rounded text-sm font-medium flex items-center gap-1.5 ml-auto hover:bg-yellow-600 transition-colors shadow-sm">
-                          <RotateCcw className="w-3.5 h-3.5" /> Thu hồi
-                        </button>
+                        <div className="flex items-center justify-end gap-2">
+                          {a.device?.category?.parent_id === null && (
+                            <button onClick={() => { setAssembleDevice(a.device); setIsAssembleModalOpen(true); }} className="p-2 text-gray-400 hover:text-hepco-green hover:bg-green-50 rounded-lg transition-colors" title="Cấu hình thiết bị">
+                              <Package className="w-4 h-4" />
+                            </button>
+                          )}
+                          <button onClick={() => handleReturn(a)} className="bg-yellow-500 text-white px-3 py-1.5 rounded text-sm font-medium flex items-center gap-1.5 hover:bg-yellow-600 transition-colors shadow-sm">
+                            <RotateCcw className="w-3.5 h-3.5" /> Thu hồi
+                          </button>
+                        </div>
                       )}
                     </td>
                   </tr>
@@ -307,7 +358,102 @@ const AdminAssignmentManager = () => {
           </div>
         </div>
       )}
+      {isAssembleModalOpen && assembleDevice && (() => {
+        const existingCategories = assembleDevice.child_devices?.map(c => c.category?.code) || [];
+        const checkCanAssemble = (compCode) => {
+          if (!compCode) return true;
+          if (!PC_COMPONENTS.includes(compCode)) return false;
+
+          const singleLimitCodes = [DEVICE_CATEGORY_CODES.CPU, DEVICE_CATEGORY_CODES.MAINBOARD, DEVICE_CATEGORY_CODES.PSU, DEVICE_CATEGORY_CODES.CASE, DEVICE_CATEGORY_CODES.COOLER];
+          return !(singleLimitCodes.includes(compCode) && existingCategories.includes(compCode));
+        };
+
+        return (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col relative">
+              <div className="flex justify-between items-center p-6 border-b">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                    <Package className="w-6 h-6 text-hepco-green" /> Lắp ráp cấu hình
+                  </h2>
+                  <p className="text-sm text-gray-500 mt-1">Cấu hình linh kiện cho: <span className="font-semibold text-gray-800">{assembleDevice.name}</span></p>
+                </div>
+                <button onClick={() => { setIsAssembleModalOpen(false); setAssembleDevice(null); }} className="text-gray-400 hover:text-red-500 transition-colors p-2 rounded-lg hover:bg-red-50">
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-6 flex flex-col lg:flex-row gap-6 bg-gray-50/50">
+                {/* Linh kiện đang lắp */}
+                <div className="flex-1 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+                  <h3 className="font-semibold text-gray-800 mb-4 pb-2 border-b">Linh kiện đang lắp trong máy ({assembleDevice.child_devices?.length || 0})</h3>
+                  <div className="space-y-3">
+                    {assembleDevice.child_devices?.length > 0 ? assembleDevice.child_devices.map(comp => (
+                      <div key={comp.id} className="flex justify-between items-center p-3 bg-purple-50 border border-purple-100 rounded-lg">
+                        <div>
+                          <p className="text-sm font-semibold text-gray-800">{comp.name}</p>
+                        </div>
+                        <button
+                          onClick={async () => {
+                            await updateDeviceMutation.mutateAsync({ id: comp.id, parent_device_id: null, status: DEVICE_STATUS.IN_STOCK });
+                            toast.success('Đã tháo linh kiện');
+                            setAssembleDevice(prev => ({ ...prev, child_devices: prev.child_devices.filter(c => c.id !== comp.id) }));
+                            queryClient.invalidateQueries({ queryKey: ['assignments'] });
+                          }}
+                          className="text-xs font-semibold text-red-600 bg-red-100 hover:bg-red-200 px-3 py-1.5 rounded transition-colors"
+                        >
+                          Tháo ra
+                        </button>
+                      </div>
+                    )) : (
+                      <p className="text-sm text-gray-500 italic text-center py-4">Máy này chưa được lắp linh kiện nào.</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Linh kiện trong kho */}
+                <div className="flex-1 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+                  <h3 className="font-semibold text-gray-800 mb-4 pb-2 border-b">Kho linh kiện sẵn có ({availableComponents.length})</h3>
+                  <div className="space-y-3">
+                    {availableComponents.length > 0 ? availableComponents.map(comp => {
+                      const canAdd = checkCanAssemble(comp.category?.code);
+                      return (
+                        <div key={comp.id} className="flex justify-between items-center p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                          <div>
+                            <p className="text-sm font-semibold text-gray-800">{comp.name}</p>
+                          </div>
+                          <button
+                            disabled={!canAdd}
+                            onClick={async () => {
+                              await updateDeviceMutation.mutateAsync({ id: comp.id, parent_device_id: assembleDevice.id, status: assembleDevice.status });
+                              toast.success('Đã lắp linh kiện vào máy');
+                              setAssembleDevice(prev => ({ ...prev, child_devices: [...(prev.child_devices || []), comp] }));
+                              queryClient.invalidateQueries({ queryKey: ['assignments'] });
+                            }}
+                            className={`text-xs font-semibold px-3 py-1.5 rounded transition-colors ${canAdd ? 'text-hepco-green bg-green-100 hover:bg-green-200' : 'text-gray-400 bg-gray-200 cursor-not-allowed'}`}
+                          >
+                            {canAdd ? 'Lắp vào' : 'Đã có'}
+                          </button>
+                        </div>
+                      )
+                    }) : (
+                      <p className="text-sm text-gray-500 italic text-center py-4">Kho hiện tại không có linh kiện nào trống.</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 border-t bg-white flex justify-end">
+                <button onClick={() => { setIsAssembleModalOpen(false); setAssembleDevice(null); }} className="py-2 px-6 bg-gray-100 text-gray-700 font-semibold rounded-lg hover:bg-gray-200 transition-colors">
+                  Hoàn tất
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 };
+
 export default AdminAssignmentManager;
