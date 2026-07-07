@@ -91,7 +91,7 @@ const AdminLayout = () => {
             }`}
           >
             <FileText className="w-5 h-5" />
-            <span>Banner</span>
+            <span>Hình Ảnh (Slider)</span>
           </Link>
           <Link 
             to={`${ROUTES.ADMIN_DASHBOARD}/ip-whitelist`} 
