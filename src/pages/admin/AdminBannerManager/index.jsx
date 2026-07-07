@@ -12,7 +12,8 @@ const AdminBannerManager = () => {
   const queryClient = useQueryClient();
   const fileInputRef = useRef(null);
 
-  const { data: banners = [], isLoading } = useGetBanners();
+  const { data: bannersRes, isLoading } = useGetBanners({ limit: 1000 });
+  const banners = bannersRes?.data || [];
   const uploadBannerMutation = useUploadBanner();
   const deleteBannerMutation = useDeleteBanner();
 

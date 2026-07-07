@@ -11,10 +11,12 @@ import Loading from '../../../components/Loading';
 import { useGetNews, useCreateNews, useUpdateNews, useDeleteNews } from '../../../apis/news';
 import { useUploadImage, useDeleteImage } from '../../../apis/upload';
 import ConfirmModal from '../../../components/ConfirmModal';
+import Pagination from '../../../components/Pagination';
 
 const AdminNewsManager = ({ type, editOnly = false }) => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [page, setPage] = useState(1);
   const [confirmConfig, setConfirmConfig] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
   const queryClient = useQueryClient();
 
@@ -26,18 +28,21 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearch(searchQuery);
+      setPage(1);
     }, 500);
     return () => clearTimeout(handler);
   }, [searchQuery]);
 
-  const { data: newsResponse = {}, isLoading } = useGetNews({ type, limit: 20, search: debouncedSearch });
+  const { data: newsResponse = {}, isLoading } = useGetNews({ type, limit: 20, search: debouncedSearch, page });
   const articles = newsResponse.data || [];
+  const meta = newsResponse.meta;
 
   const [prevType, setPrevType] = useState(type);
   if (type !== prevType) {
     setPrevType(type);
     setIsFormOpen(false);
     setEditingId(null);
+    setPage(1);
   }
 
   const createNewsMutation = useCreateNews();
@@ -424,6 +429,9 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
                 ))}
               </tbody>
             </table>
+            <div className="p-4 border-t border-gray-100">
+              <Pagination meta={meta} onPageChange={setPage} />
+            </div>
           </div>
         ) : (
           <div className="p-12 text-center flex flex-col items-center">

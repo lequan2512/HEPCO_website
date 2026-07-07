@@ -1,21 +1,37 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Users, Plus, Trash2, Edit2, X, Search } from 'lucide-react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import toast from 'react-hot-toast';
 import Loading from '../../../components/Loading';
-import { useGetEmployees, useGetDepartments, useAddEmployee, useUpdateEmployee, useDeleteEmployee } from '../../../apis/employee';
+import { useGetEmployees, useAddEmployee, useUpdateEmployee, useDeleteEmployee } from '../../../apis/employee';
+import { useGetDepartments } from '../../../apis/department';
 import ConfirmModal from '../../../components/ConfirmModal';
+import Pagination from '../../../components/Pagination';
+import { EMPLOYEE_STATUS } from '../../../constants/employee';
 
 const AdminEmployeeManager = () => {
   const [editingId, setEditingId] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [page, setPage] = useState(1);
   const [confirmConfig, setConfirmConfig] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
   const queryClient = useQueryClient();
 
-  const { data: employees = [], isLoading: isLoadingEmp } = useGetEmployees();
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
+  const { data: employeesRes, isLoading: isLoadingEmp } = useGetEmployees({ search: debouncedSearch, page, limit: 20 });
+  const employees = employeesRes?.data || [];
+  const meta = employeesRes?.meta;
   const { data: departments = [], isLoading: isLoadingDept } = useGetDepartments();
 
   const addEmployeeMutation = useAddEmployee();
@@ -35,9 +51,13 @@ const AdminEmployeeManager = () => {
   };
 
   const formik = useFormik({
-    initialValues: { employee_code: '', full_name: '', department_id: '', email: '', phone: '', status: 'active' },
+    initialValues: { employee_code: '', full_name: '', department_id: '', email: '', phone: '', status: EMPLOYEE_STATUS.ACTIVE },
     validationSchema: Yup.object({
-      full_name: Yup.string().required('Bắt buộc'),
+      employee_code: Yup.string().required('Vui lòng nhập mã nhân viên'),
+      full_name: Yup.string().required('Vui lòng nhập họ tên'),
+      department_id: Yup.string().required('Vui lòng chọn phòng ban'),
+      email: Yup.string().email('Email không hợp lệ'),
+      phone: Yup.string(),
     }),
     onSubmit: async (values, { setSubmitting }) => {
       try {
@@ -88,10 +108,7 @@ const AdminEmployeeManager = () => {
 
   if (isLoadingEmp || isLoadingDept) return <Loading />;
 
-  const filteredEmployees = employees.filter(e => 
-    e.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    e.employee_code?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredEmployees = employees;
 
   return (
     <div className="w-full relative">
@@ -146,23 +163,27 @@ const AdminEmployeeManager = () => {
               </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Mã NV</label>
-                    <input type="text" name="employee_code" placeholder="Để trống để tự tạo" className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-hepco-green/50" value={formik.values.employee_code} onChange={formik.handleChange} />
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Mã NV <span className="text-red-500">*</span></label>
+                    <input type="text" name="employee_code" placeholder="Nhập mã nhân viên" className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-hepco-green/50" value={formik.values.employee_code} onChange={formik.handleChange} />
+                    {formik.touched.employee_code && formik.errors.employee_code && <div className="text-red-500 text-xs mt-1">{formik.errors.employee_code}</div>}
                   </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Họ Tên <span className="text-red-500">*</span></label>
                   <input type="text" name="full_name" className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-hepco-green/50" value={formik.values.full_name} onChange={formik.handleChange} />
+                  {formik.touched.full_name && formik.errors.full_name && <div className="text-red-500 text-xs mt-1">{formik.errors.full_name}</div>}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                   <input type="email" name="email" className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-hepco-green/50" value={formik.values.email} onChange={formik.handleChange} />
+                  {formik.touched.email && formik.errors.email && <div className="text-red-500 text-xs mt-1">{formik.errors.email}</div>}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Điện Thoại</label>
                   <input type="text" name="phone" className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-hepco-green/50" value={formik.values.phone} onChange={formik.handleChange} />
+                  {formik.touched.phone && formik.errors.phone && <div className="text-red-500 text-xs mt-1">{formik.errors.phone}</div>}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Phòng Ban</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Phòng Ban <span className="text-red-500">*</span></label>
                   <select 
                     name="department_id" 
                     className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-hepco-green/50 bg-white" 
@@ -174,12 +195,13 @@ const AdminEmployeeManager = () => {
                       <option key={d.id} value={d.id}>{d.name}</option>
                     ))}
                   </select>
+                  {formik.touched.department_id && formik.errors.department_id && <div className="text-red-500 text-xs mt-1">{formik.errors.department_id}</div>}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
                   <select name="status" className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-hepco-green/50 bg-white" value={formik.values.status} onChange={formik.handleChange}>
-                    <option value="active">Hoạt động</option>
-                    <option value="inactive">Đã nghỉ</option>
+                    <option value={EMPLOYEE_STATUS.ACTIVE}>Hoạt động</option>
+                    <option value={EMPLOYEE_STATUS.INACTIVE}>Đã nghỉ</option>
                   </select>
                 </div>
               </div>
@@ -194,34 +216,38 @@ const AdminEmployeeManager = () => {
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         {filteredEmployees.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse min-w-[600px]">
-              <thead className="bg-gray-50">
-                <tr className="border-b border-gray-100">
-                  <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Mã NV</th>
-                  <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Họ Tên</th>
-                  <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Liên Hệ</th>
-                  <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Phòng Ban</th>
-                  <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase text-right">Thao tác</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {filteredEmployees.map(e => (
-                  <tr key={e.id} className="hover:bg-gray-50/50 transition-colors">
-                    <td className="px-6 py-4 text-sm font-mono text-gray-800 font-bold">{e.employee_code}</td>
-                    <td className="px-6 py-4 text-sm font-medium text-gray-800">{e.full_name}</td>
-                    <td className="px-6 py-4 text-sm text-gray-500">{e.email}<br/>{e.phone}</td>
-                    <td className="px-6 py-4 text-sm text-gray-500">{e.department?.name || 'Chưa xếp'}</td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button onClick={() => handleEdit(e)} className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"><Edit2 className="w-4 h-4" /></button>
-                        <button onClick={() => handleDelete(e.id)} className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"><Trash2 className="w-4 h-4" /></button>
-                      </div>
-                    </td>
+          <div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse min-w-[600px]">
+                <thead className="bg-gray-50">
+                  <tr className="border-b border-gray-100">
+                    <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Mã NV</th>
+                    <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Họ Tên</th>
+                    <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Liên Hệ</th>
+                    <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Phòng Ban</th>
+                    <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase text-right">Thao tác</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {filteredEmployees.map(e => (
+                    <tr key={e.id} className="hover:bg-gray-50/50 transition-colors">
+                      <td className="px-6 py-4 text-sm font-mono text-gray-800 font-bold">{e.employee_code}</td>
+                      <td className="px-6 py-4 text-sm font-medium text-gray-800">{e.full_name}</td>
+                      <td className="px-6 py-4 text-sm text-gray-500">{e.email}<br/>{e.phone}</td>
+                      <td className="px-6 py-4 text-sm text-gray-500">{e.department?.name || 'Chưa xếp'}</td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <button onClick={() => handleEdit(e)} className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"><Edit2 className="w-4 h-4" /></button>
+                          <button onClick={() => handleDelete(e.id)} className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"><Trash2 className="w-4 h-4" /></button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            
+            <Pagination meta={meta} onPageChange={setPage} />
           </div>
         ) : (
           <div className="p-12 text-center flex flex-col items-center">

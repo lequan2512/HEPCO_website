@@ -1,11 +1,11 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
 import axiosInstance from '../utils/axios';
 
-export const useGetSuppliers = () => {
+export const useGetSuppliers = (params) => {
   return useQuery({
-    queryKey: ['suppliers'],
+    queryKey: ['suppliers', params],
     queryFn: async () => {
-      const response = await axiosInstance.get('/api/suppliers');
+      const response = await axiosInstance.get('/api/suppliers', { params });
       return response.data;
     },
   });

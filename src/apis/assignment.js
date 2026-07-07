@@ -1,11 +1,11 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
 import axiosInstance from '../utils/axios';
 
-export const useGetAssignments = () => {
+export const useGetAssignments = (params) => {
   return useQuery({
-    queryKey: ['assignments'],
+    queryKey: ['assignments', params],
     queryFn: async () => {
-      const response = await axiosInstance.get('/api/assignments');
+      const response = await axiosInstance.get('/api/assignments', { params });
       return response.data;
     },
   });

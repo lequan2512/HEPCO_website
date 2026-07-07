@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Building2, Plus, Trash2, Edit2, X, Search } from 'lucide-react';
 import { useFormik } from 'formik';
@@ -7,15 +7,29 @@ import toast from 'react-hot-toast';
 import Loading from '../../../components/Loading';
 import { useGetSuppliers, useAddSupplier, useUpdateSupplier, useDeleteSupplier } from '../../../apis/supplier';
 import ConfirmModal from '../../../components/ConfirmModal';
+import Pagination from '../../../components/Pagination';
 
 const AdminSupplierManager = () => {
+  const [page, setPage] = useState(1);
   const [editingId, setEditingId] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [confirmConfig, setConfirmConfig] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
   const queryClient = useQueryClient();
 
-  const { data: suppliers = [], isLoading } = useGetSuppliers();
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
+  const { data: suppliersRes, isLoading } = useGetSuppliers({ search: debouncedSearch, page, limit: 20 });
+  const suppliers = suppliersRes?.data || [];
+  const meta = suppliersRes?.meta;
   const addSupplier = useAddSupplier();
   const updateSupplier = useUpdateSupplier();
   const deleteSupplier = useDeleteSupplier();
@@ -45,10 +59,7 @@ const AdminSupplierManager = () => {
 
   if (isLoading) return <Loading />;
 
-  const filteredSuppliers = suppliers.filter(s => 
-    s.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    s.contact_person?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredSuppliers = suppliers;
 
   return (
     <div className="w-full relative">
@@ -149,6 +160,7 @@ const AdminSupplierManager = () => {
                 ))}
               </tbody>
             </table>
+            <Pagination meta={meta} onPageChange={setPage} />
           </div>
         ) : (
           <div className="p-12 text-center flex flex-col items-center">

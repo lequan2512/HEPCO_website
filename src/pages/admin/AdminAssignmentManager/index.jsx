@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { ClipboardList, Plus, RotateCcw, X, Search } from 'lucide-react';
 import { useFormik } from 'formik';
@@ -8,18 +8,35 @@ import Loading from '../../../components/Loading';
 import { useGetAssignments, useAddAssignment, useReturnAssignment } from '../../../apis/assignment';
 import { useGetDevices } from '../../../apis/device';
 import { useGetEmployees } from '../../../apis/employee';
+import { useGetDepartments } from '../../../apis/department';
 import ConfirmModal from '../../../components/ConfirmModal';
+import Pagination from '../../../components/Pagination';
+import { PC_COMPONENTS, DEVICE_STATUS, ASSIGNMENT_STATUS } from '../../../constants/device';
 
 const AdminAssignmentManager = () => {
+  const [page, setPage] = useState(1);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [returnItem, setReturnItem] = useState(null);
   const [confirmConfig, setConfirmConfig] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
   const queryClient = useQueryClient();
+  const [filters, setFilters] = useState({ search: '', department_id: '', year: '', status: '' });
+  const [debouncedFilters, setDebouncedFilters] = useState(filters);
 
-  const { data: assignments = [], isLoading: isLoadingAssignments } = useGetAssignments();
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedFilters(filters);
+      setPage(1);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [filters]);
+
+  const { data: assignmentsRes = {}, isLoading: isLoadingAssignments } = useGetAssignments({ ...debouncedFilters, page, limit: 20 });
+  const assignments = assignmentsRes?.data || [];
+  const meta = assignmentsRes?.meta;
   const { data: devices = [], isLoading: isLoadingDevices } = useGetDevices({});
   const { data: employees = [], isLoading: isLoadingEmployees } = useGetEmployees();
-  
+  const { data: departments = [] } = useGetDepartments();
+
   const isLoading = isLoadingAssignments || isLoadingDevices || isLoadingEmployees;
 
   const addAssignment = useAddAssignment();
@@ -39,52 +56,85 @@ const AdminAssignmentManager = () => {
     }
   });
 
+  const returnFormik = useFormik({
+    initialValues: { returned_date: new Date().toISOString().split('T')[0], note: '', return_status: 'in_stock' },
+    validationSchema: Yup.object({
+      returned_date: Yup.date().required('Bắt buộc'),
+      return_status: Yup.string().required('Bắt buộc')
+    }),
+    onSubmit: async (values, { setSubmitting }) => {
+      if (!returnItem) return;
+      try {
+        await returnAssignment.mutateAsync({ id: returnItem.id, data: values });
+        toast.success('Đã thu hồi thiết bị thành công');
+        queryClient.invalidateQueries(['assignments', 'devices']);
+        setReturnItem(null);
+      } catch { toast.error('Lỗi khi thu hồi thiết bị'); }
+      finally { setSubmitting(false); }
+    }
+  });
+
   const handleReturn = (item) => {
-    setConfirmConfig({
-      isOpen: true, title: 'Thu hồi thiết bị', message: `Bạn xác nhận thu hồi thiết bị ID ${item.device_id} từ nhân viên ID ${item.employee_id}?`,
-      onConfirm: async () => {
-        try {
-          await returnAssignment.mutateAsync({ id: item.id, data: { returned_date: new Date().toISOString().split('T')[0], note: 'Đã thu hồi' } });
-          toast.success('Đã thu hồi'); queryClient.invalidateQueries(['assignments', 'devices']);
-        } catch { toast.error('Lỗi'); }
-      }
-    });
+    setReturnItem(item);
+    returnFormik.resetForm();
+    returnFormik.setValues({ returned_date: new Date().toISOString().split('T')[0], note: 'Đã thu hồi', return_status: 'in_stock' });
   };
 
   if (isLoading) return <Loading />;
 
-  const filteredAssignments = assignments.filter(a => 
-    a.device?.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    a.employee?.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    String(a.device_id).includes(searchQuery) ||
-    String(a.employee_id).includes(searchQuery)
-  );
+  const filteredAssignments = assignments;
 
   return (
     <div className="w-full relative">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b pb-4 gap-4">
         <h1 className="text-2xl font-bold flex items-center gap-2"><ClipboardList className="w-6 h-6 text-hepco-green" /> Cấp Phát Thiết Bị</h1>
-        <div className="flex items-center w-full sm:w-auto gap-4">
-          <div className="relative w-full sm:w-64">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <input
-              type="text"
-              placeholder="Tìm thiết bị, nhân viên..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:outline-none focus:bg-white focus:ring-2 focus:ring-hepco-green focus:border-transparent transition-all"
-            />
-            {searchQuery && (
-              <button 
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5 rounded-full hover:bg-gray-200 transition-colors"
-              >
-                <X className="w-3 h-3" />
-              </button>
-            )}
-          </div>
-          <button onClick={() => setIsFormOpen(true)} className="flex items-center whitespace-nowrap gap-2 px-4 py-2 bg-hepco-green text-white font-semibold rounded-lg hover:bg-green-700 transition-colors shadow-sm w-full sm:w-auto justify-center"><Plus className="w-5 h-5"/> <span>Cấp Phát Mới</span></button>
+        <button onClick={() => setIsFormOpen(true)} className="flex items-center whitespace-nowrap gap-2 px-4 py-2 bg-hepco-green text-white font-semibold rounded-lg hover:bg-green-700 transition-colors shadow-sm w-full sm:w-auto justify-center"><Plus className="w-5 h-5" /> <span>Cấp Phát Mới</span></button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <input
+            type="text"
+            placeholder="Tìm thiết bị, nhân viên..."
+            value={filters.search}
+            onChange={(e) => setFilters(f => ({ ...f, search: e.target.value }))}
+            className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:outline-none focus:bg-white focus:ring-2 focus:ring-hepco-green focus:border-transparent transition-all"
+          />
+          {filters.search && (
+            <button
+              onClick={() => setFilters(f => ({ ...f, search: '' }))}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5 rounded-full hover:bg-gray-200 transition-colors"
+            >
+              <X className="w-3 h-3" />
+            </button>
+          )}
         </div>
+        <select
+          className="w-full py-2 px-3 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:outline-none focus:bg-white focus:ring-2 focus:ring-hepco-green"
+          value={filters.department_id}
+          onChange={(e) => setFilters(f => ({ ...f, department_id: e.target.value }))}
+        >
+          <option value="">Tất cả phòng ban</option>
+          {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+        </select>
+        <select
+          className="w-full py-2 px-3 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:outline-none focus:bg-white focus:ring-2 focus:ring-hepco-green"
+          value={filters.year}
+          onChange={(e) => setFilters(f => ({ ...f, year: e.target.value }))}
+        >
+          <option value="">Tất cả năm</option>
+          {[2023, 2024, 2025, 2026].map(y => <option key={y} value={y}>{y}</option>)}
+        </select>
+        <select
+          className="w-full py-2 px-3 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:outline-none focus:bg-white focus:ring-2 focus:ring-hepco-green"
+          value={filters.status}
+          onChange={(e) => setFilters(f => ({ ...f, status: e.target.value }))}
+        >
+          <option value="">Tất cả trạng thái</option>
+          <option value={ASSIGNMENT_STATUS.IN_USE}>Đang mượn</option>
+          <option value={ASSIGNMENT_STATUS.RETURNED}>Đã trả</option>
+        </select>
       </div>
 
       {isFormOpen && (
@@ -100,24 +150,24 @@ const AdminAssignmentManager = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Thiết Bị <span className="text-red-500">*</span></label>
-                  <select 
-                    name="device_id" 
-                    className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-hepco-green/50 bg-white" 
-                    value={formik.values.device_id} 
+                  <select
+                    name="device_id"
+                    className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-hepco-green/50 bg-white"
+                    value={formik.values.device_id}
                     onChange={formik.handleChange}
                   >
                     <option value="">-- Chọn thiết bị --</option>
-                    {devices.filter(d => d.status === 'in_stock').map(d => (
-                      <option key={d.id} value={d.id}>{d.name} (S/N: {d.serial_number || 'N/A'})</option>
+                    {devices.filter(d => d.status === DEVICE_STATUS.IN_STOCK && !d.parent_device_id && d.category?.parent_id === null).map(d => (
+                      <option key={d.id} value={d.id}>{d.name}</option>
                     ))}
                   </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Nhân Viên <span className="text-red-500">*</span></label>
-                  <select 
-                    name="employee_id" 
-                    className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-hepco-green/50 bg-white" 
-                    value={formik.values.employee_id} 
+                  <select
+                    name="employee_id"
+                    className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-hepco-green/50 bg-white"
+                    value={formik.values.employee_id}
                     onChange={formik.handleChange}
                   >
                     <option value="">-- Chọn nhân viên --</option>
@@ -168,15 +218,15 @@ const AdminAssignmentManager = () => {
                     <td className="px-6 py-4 font-medium text-gray-800">{a.device?.name} <span className="text-gray-400 text-xs font-normal ml-1">(ID: {a.device_id})</span></td>
                     <td className="px-6 py-4 text-sm text-gray-800">{a.employee?.full_name} <span className="text-gray-400 text-xs font-normal ml-1">(ID: {a.employee_id})</span></td>
                     <td className="px-6 py-4">
-                      {a.returned_date ? 
-                        <span className="text-gray-600 bg-gray-100 px-2 py-1 rounded text-xs font-medium">Đã trả</span> : 
+                      {a.returned_date ?
+                        <span className="text-gray-600 bg-gray-100 px-2 py-1 rounded text-xs font-medium">Đã trả</span> :
                         <span className="text-blue-700 bg-blue-100 px-2 py-1 rounded text-xs font-medium">Đang mượn</span>
                       }
                     </td>
                     <td className="px-6 py-4 text-right">
                       {!a.returned_date && (
                         <button onClick={() => handleReturn(a)} className="bg-yellow-500 text-white px-3 py-1.5 rounded text-sm font-medium flex items-center gap-1.5 ml-auto hover:bg-yellow-600 transition-colors shadow-sm">
-                          <RotateCcw className="w-3.5 h-3.5"/> Thu hồi
+                          <RotateCcw className="w-3.5 h-3.5" /> Thu hồi
                         </button>
                       )}
                     </td>
@@ -184,6 +234,7 @@ const AdminAssignmentManager = () => {
                 ))}
               </tbody>
             </table>
+            <Pagination meta={meta} onPageChange={setPage} />
           </div>
         ) : (
           <div className="p-12 text-center flex flex-col items-center">
@@ -196,6 +247,63 @@ const AdminAssignmentManager = () => {
         )}
       </div>
       <ConfirmModal isOpen={confirmConfig.isOpen} title={confirmConfig.title} message={confirmConfig.message} onConfirm={confirmConfig.onConfirm} onClose={() => setConfirmConfig({ ...confirmConfig, isOpen: false })} />
+
+      {returnItem && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden">
+            <div className="p-4 border-b flex justify-between items-center">
+              <h3 className="font-bold text-lg flex items-center gap-2"><RotateCcw className="w-5 h-5 text-yellow-600" /> Thu hồi thiết bị</h3>
+              <button onClick={() => setReturnItem(null)} className="text-gray-400 hover:text-red-500"><X className="w-5 h-5" /></button>
+            </div>
+            <form onSubmit={returnFormik.handleSubmit} className="p-4">
+              <p className="text-sm text-gray-600 mb-4">Bạn đang thu hồi <span className="font-semibold">{returnItem.device?.name}</span> từ <span className="font-semibold">{returnItem.employee?.full_name}</span></p>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Trạng thái thiết bị sau khi thu hồi <span className="text-red-500">*</span></label>
+                  <select
+                    name="return_status"
+                    className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-yellow-500"
+                    value={returnFormik.values.return_status}
+                    onChange={returnFormik.handleChange}
+                  >
+                    <option value="in_stock">Tồn kho (Bình thường)</option>
+                    <option value="broken">Hỏng</option>
+                    <option value="maintenance">Đang bảo trì</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Ngày thu hồi <span className="text-red-500">*</span></label>
+                  <input
+                    type="date"
+                    name="returned_date"
+                    className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-yellow-500"
+                    value={returnFormik.values.returned_date}
+                    onChange={returnFormik.handleChange}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Ghi chú</label>
+                  <textarea
+                    name="note"
+                    rows={2}
+                    className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-yellow-500"
+                    value={returnFormik.values.note}
+                    onChange={returnFormik.handleChange}
+                  />
+                </div>
+              </div>
+
+              <div className="mt-6 flex justify-end gap-2">
+                <button type="button" onClick={() => setReturnItem(null)} className="px-4 py-2 border rounded-lg text-gray-700 bg-white hover:bg-gray-50">Hủy</button>
+                <button type="submit" disabled={returnFormik.isSubmitting} className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 font-medium">Xác nhận Thu Hồi</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

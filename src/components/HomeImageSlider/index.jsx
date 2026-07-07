@@ -4,7 +4,8 @@ import { useGetBanners } from '../../apis/banner';
 import { API_BASE_URL } from '../../constants/api';
 
 const HomeImageSlider = () => {
-  const { data: banners = [], isLoading } = useGetBanners();
+  const { data: bannersRes, isLoading } = useGetBanners({ limit: 1000 });
+  const banners = bannersRes?.data || [];
   const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {

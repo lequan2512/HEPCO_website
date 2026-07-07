@@ -8,13 +8,17 @@ import { getErrorMessage } from '../../../utils/errorMapper';
 import Loading from '../../../components/Loading';
 import { useGetIps, useAddIp, useUpdateIp, useDeleteIp } from '../../../apis/ip';
 import ConfirmModal from '../../../components/ConfirmModal';
+import Pagination from '../../../components/Pagination';
 
 const AdminIpWhitelist = () => {
+  const [page, setPage] = useState(1);
   const [editingId, setEditingId] = useState(null);
   const [confirmConfig, setConfirmConfig] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
   const queryClient = useQueryClient();
 
-  const { data: ips = [], isLoading } = useGetIps({ limit: 20 });
+  const { data: ipsRes, isLoading } = useGetIps({ page, limit: 20 });
+  const ips = ipsRes?.data || [];
+  const meta = ipsRes?.meta;
 
   const addIpMutation = useAddIp();
   const updateIpMutation = useUpdateIp();
@@ -223,6 +227,7 @@ const AdminIpWhitelist = () => {
                   ))}
                 </tbody>
               </table>
+              <Pagination meta={meta} onPageChange={setPage} />
               </div>
             ) : (
               <div className="p-12 text-center flex flex-col items-center">

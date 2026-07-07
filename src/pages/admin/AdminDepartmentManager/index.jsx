@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Building2, Plus, Trash2, Edit2, X, Search } from 'lucide-react';
 import { useFormik } from 'formik';
@@ -7,15 +7,29 @@ import toast from 'react-hot-toast';
 import Loading from '../../../components/Loading';
 import { useGetDepartments, useAddDepartment, useUpdateDepartment, useDeleteDepartment } from '../../../apis/department';
 import ConfirmModal from '../../../components/ConfirmModal';
+import Pagination from '../../../components/Pagination';
 
 const AdminDepartmentManager = () => {
   const [editingId, setEditingId] = useState(null);
+  const [page, setPage] = useState(1);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [confirmConfig, setConfirmConfig] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
   const queryClient = useQueryClient();
 
-  const { data: departments = [], isLoading } = useGetDepartments();
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
+  const { data: departmentsRes, isLoading } = useGetDepartments({ search: debouncedSearch, page, limit: 20 });
+  const departments = departmentsRes?.data || [];
+  const meta = departmentsRes?.meta;
   const addMutation = useAddDepartment();
   const updateMutation = useUpdateDepartment();
   const deleteMutation = useDeleteDepartment();
@@ -35,7 +49,8 @@ const AdminDepartmentManager = () => {
   const formik = useFormik({
     initialValues: { code: '', name: '', description: '' },
     validationSchema: Yup.object({
-      name: Yup.string().required('Bắt buộc nhập tên phòng ban'),
+      code: Yup.string().required('Vui lòng nhập mã phòng ban'),
+      name: Yup.string().required('Vui lòng nhập tên phòng ban'),
     }),
     onSubmit: async (values, { setSubmitting }) => {
       try {
@@ -83,10 +98,7 @@ const AdminDepartmentManager = () => {
 
   if (isLoading) return <Loading />;
 
-  const filteredDepartments = departments.filter(d => 
-    d.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    d.code?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredDepartments = departments;
 
   return (
     <div className="w-full relative">
@@ -162,6 +174,7 @@ const AdminDepartmentManager = () => {
                 ))}
               </tbody>
             </table>
+            <Pagination meta={meta} onPageChange={setPage} />
           </div>
         ) : (
           <div className="p-12 text-center flex flex-col items-center">
@@ -198,11 +211,11 @@ const AdminDepartmentManager = () => {
               
               <div className="p-6 space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Mã Phòng Ban</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Mã Phòng Ban <span className="text-red-500">*</span></label>
                   <input 
                     type="text" 
                     name="code"
-                    placeholder="Để trống để tự tạo"
+                    placeholder="Nhập mã phòng ban..."
                     className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-hepco-green/50"
                     value={formik.values.code}
                     onChange={formik.handleChange}
