@@ -33,11 +33,14 @@ const AdminAssignmentManager = () => {
   const { data: assignmentsRes = {}, isLoading: isLoadingAssignments } = useGetAssignments({ ...debouncedFilters, page, limit: 20 });
   const assignments = assignmentsRes?.data || [];
   const meta = assignmentsRes?.meta;
-  const { data: devices = [], isLoading: isLoadingDevices } = useGetDevices({});
-  const { data: employees = [], isLoading: isLoadingEmployees } = useGetEmployees();
-  const { data: departments = [] } = useGetDepartments();
+  const { data: devicesRes = {}, isLoading: isLoadingDevices } = useGetDevices({ limit: 1000 });
+  const devices = devicesRes?.data || [];
+  const { data: employeesRes = {}, isLoading: isLoadingEmployees } = useGetEmployees({ limit: 1000 });
+  const employees = employeesRes?.data || [];
+  const { data: departmentsRes = {}, isLoading: isLoadingDept } = useGetDepartments({ limit: 1000 });
+  const departments = departmentsRes?.data || [];
 
-  const isLoading = isLoadingAssignments || isLoadingDevices || isLoadingEmployees;
+  const isLoading = isLoadingAssignments || isLoadingDevices || isLoadingEmployees || isLoadingDept;
 
   const addAssignment = useAddAssignment();
   const returnAssignment = useReturnAssignment();

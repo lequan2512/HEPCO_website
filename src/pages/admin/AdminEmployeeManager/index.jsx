@@ -32,7 +32,8 @@ const AdminEmployeeManager = () => {
   const { data: employeesRes, isLoading: isLoadingEmp } = useGetEmployees({ search: debouncedSearch, page, limit: 20 });
   const employees = employeesRes?.data || [];
   const meta = employeesRes?.meta;
-  const { data: departments = [], isLoading: isLoadingDept } = useGetDepartments();
+  const { data: departmentsRes = {}, isLoading: isLoadingDept } = useGetDepartments({ limit: 1000 });
+  const departments = departmentsRes?.data || [];
 
   const addEmployeeMutation = useAddEmployee();
   const updateEmployeeMutation = useUpdateEmployee();

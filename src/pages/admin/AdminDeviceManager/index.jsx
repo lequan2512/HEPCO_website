@@ -50,7 +50,8 @@ const AdminDeviceManager = () => {
   const { data: componentsRes } = useGetDevices({ status: DEVICE_STATUS.IN_STOCK, hide_assembled: true, limit: 1000 });
   const components = componentsRes?.data || [];
   const { data: categories = [], isLoading: isLoadingCategories } = useGetCategories();
-  const { data: suppliers = [], isLoading: isLoadingSuppliers } = useGetSuppliers({});
+  const { data: suppliersRes = {}, isLoading: isLoadingSuppliers } = useGetSuppliers({ limit: 1000 });
+  const suppliers = suppliersRes?.data || [];
 
   const isLoading = isLoadingDevices || isLoadingCategories || isLoadingSuppliers;
 
