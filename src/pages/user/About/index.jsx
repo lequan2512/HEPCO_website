@@ -25,7 +25,7 @@ const About = () => {
               <div className="w-full lg:w-5/12 relative group">
                 <div className="absolute inset-0 bg-hepco-green rounded-2xl transform translate-x-4 translate-y-4 group-hover:translate-x-6 group-hover:translate-y-6 transition-transform duration-500"></div>
                 <div className="relative bg-white rounded-2xl overflow-hidden shadow-2xl h-[400px] border-4 border-white flex flex-col items-center justify-center">
-                  <div className="w-full h-full bg-[url('/public/cover.jpg')] bg-cover bg-center">
+                  <div className="w-full h-full bg-[url('/public/images/cover.png')] bg-cover bg-center">
                     <div className="absolute inset-0 bg-black/30 flex items-center justify-center backdrop-blur-[2px]">
                       <div className="text-center p-6 bg-white/90 rounded-xl shadow-lg transform group-hover:scale-105 transition-transform duration-500">
                         <Building2 className="w-12 h-12 text-hepco-green mx-auto mb-2" />
