@@ -18,6 +18,9 @@ const AdminAssignmentManager = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isAssembleModalOpen, setIsAssembleModalOpen] = useState(false);
   const [assembleDevice, setAssembleDevice] = useState(null);
+  const [assembleSearch, setAssembleSearch] = useState('');
+  const [debouncedAssembleSearch, setDebouncedAssembleSearch] = useState('');
+  const [assembleCategory, setAssembleCategory] = useState('');
   const [returnItem, setReturnItem] = useState(null);
   const [confirmConfig, setConfirmConfig] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
   const queryClient = useQueryClient();
@@ -32,6 +35,13 @@ const AdminAssignmentManager = () => {
     return () => clearTimeout(handler);
   }, [filters]);
 
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedAssembleSearch(assembleSearch);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [assembleSearch]);
+
   const { data: assignmentsRes = {}, isLoading: isLoadingAssignments } = useGetAssignments({ ...debouncedFilters, page, limit: 20 });
   const assignments = assignmentsRes?.data || [];
   const meta = assignmentsRes?.meta;
@@ -42,7 +52,7 @@ const AdminAssignmentManager = () => {
   const { data: departmentsRes = {}, isLoading: isLoadingDept } = useGetDepartments({ limit: 1000 });
   const departments = departmentsRes?.data || [];
   const { data: categories = [], isLoading: isLoadingCategories } = useGetCategories();
-  const { data: availableComponentsRes } = useGetDevices({ status: DEVICE_STATUS.IN_STOCK, hide_assembled: true, limit: 1000 });
+  const { data: availableComponentsRes } = useGetDevices({ status: DEVICE_STATUS.IN_STOCK, hide_assembled: true, is_component: true, search: debouncedAssembleSearch, category_id: assembleCategory, limit: 1000 });
   const availableComponents = availableComponentsRes?.data || [];
 
   const updateDeviceMutation = useUpdateDevice();
@@ -274,8 +284,8 @@ const AdminAssignmentManager = () => {
                       {!a.returned_date && (
                         <div className="flex items-center justify-end gap-2">
                           {a.device?.category?.parent_id === null && (
-                            <button onClick={() => { setAssembleDevice(a.device); setIsAssembleModalOpen(true); }} className="p-2 text-gray-400 hover:text-hepco-green hover:bg-green-50 rounded-lg transition-colors" title="Cấu hình thiết bị">
-                              <Package className="w-4 h-4" />
+                            <button onClick={() => { setAssembleDevice(a.device); setIsAssembleModalOpen(true); }} className="px-3 py-1.5 bg-gray-100 text-gray-700 font-medium rounded text-sm hover:bg-gray-200 transition-colors flex items-center gap-1.5 shadow-sm" title="Cấu hình thiết bị">
+                              <Package className="w-3.5 h-3.5" /> Cấu hình
                             </button>
                           )}
                           <button onClick={() => handleReturn(a)} className="bg-yellow-500 text-white px-3 py-1.5 rounded text-sm font-medium flex items-center gap-1.5 hover:bg-yellow-600 transition-colors shadow-sm">
@@ -412,11 +422,34 @@ const AdminAssignmentManager = () => {
                 </div>
 
                 {/* Linh kiện trong kho */}
-                <div className="flex-1 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+                <div className="flex-1 bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col">
                   <h3 className="font-semibold text-gray-800 mb-4 pb-2 border-b">Kho linh kiện sẵn có ({availableComponents.length})</h3>
-                  <div className="space-y-3">
-                    {availableComponents.length > 0 ? availableComponents.map(comp => {
-                      const canAdd = checkCanAssemble(comp.category?.code);
+                  <div className="flex flex-col sm:flex-row gap-2 mb-4">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
+                      <input
+                        type="text"
+                        placeholder="Tìm linh kiện, S/N..."
+                        className="w-full pl-8 pr-3 py-1.5 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:outline-none focus:bg-white focus:ring-2 focus:ring-hepco-green"
+                        value={assembleSearch}
+                        onChange={(e) => setAssembleSearch(e.target.value)}
+                      />
+                    </div>
+                    <select
+                      className="w-full sm:w-auto py-1.5 px-3 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:outline-none focus:bg-white focus:ring-2 focus:ring-hepco-green"
+                      value={assembleCategory}
+                      onChange={(e) => setAssembleCategory(e.target.value)}
+                    >
+                      <option value="">Tất cả danh mục</option>
+                      {categories.filter(c => c.is_component).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                    </select>
+                  </div>
+                  <div className="space-y-3 overflow-y-auto flex-1 max-h-[400px] pr-1">
+                    {(() => {
+                      if (availableComponents.length === 0) return <p className="text-sm text-gray-500 italic text-center py-4">Không tìm thấy linh kiện phù hợp.</p>;
+
+                      return availableComponents.map(comp => {
+                        const canAdd = checkCanAssemble(comp.category?.code);
                       return (
                         <div key={comp.id} className="flex justify-between items-center p-3 bg-gray-50 border border-gray-200 rounded-lg">
                           <div>
@@ -436,9 +469,7 @@ const AdminAssignmentManager = () => {
                           </button>
                         </div>
                       )
-                    }) : (
-                      <p className="text-sm text-gray-500 italic text-center py-4">Kho hiện tại không có linh kiện nào trống.</p>
-                    )}
+                    })})()}
                   </div>
                 </div>
               </div>
