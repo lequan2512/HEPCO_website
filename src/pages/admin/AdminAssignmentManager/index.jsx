@@ -262,8 +262,8 @@ const AdminAssignmentManager = () => {
                       <div className="text-sm text-gray-800">{new Date(a.assigned_date).toLocaleDateString('vi-VN')}</div>
                       <div className="text-xs text-hepco-green font-medium mt-1">{!a.returned_date && calculateTimeAssigned(a.assigned_date)}</div>
                     </td>
-                    <td className="px-6 py-4 font-medium text-gray-800">{a.device?.name} <span className="text-gray-400 text-xs font-normal ml-1">(ID: {a.device_id})</span></td>
-                    <td className="px-6 py-4 text-sm text-gray-800">{a.employee?.full_name} <span className="text-gray-400 text-xs font-normal ml-1">(ID: {a.employee_id})</span></td>
+                    <td className="px-6 py-4 font-medium text-gray-800">{a.device?.name}</td>
+                    <td className="px-6 py-4 text-sm text-gray-800">{a.employee?.full_name}</td>
                     <td className="px-6 py-4">
                       {a.returned_date ?
                         <span className="text-gray-600 bg-gray-100 px-2 py-1 rounded text-xs font-medium">Đã trả</span> :
