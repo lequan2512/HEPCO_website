@@ -16,7 +16,7 @@ const Header = () => {
   ];
 
   return (
-    <header className="bg-hepco-green text-white relative z-50">
+    <header className="bg-hepco-green text-white sticky top-0 w-full z-50 shadow-xl">
       <div className="flex items-center justify-between h-20 pl-4 md:pl-8">
         {/* Logo */}
         <Link to={ROUTES.HOME} className="flex-shrink-0 z-50">

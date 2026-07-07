@@ -10,8 +10,7 @@ const Services = () => {
   const { data: newsResponse = {}, isLoading: loading } = useGetNews({ type: 'service', limit: 10 });
   
   const services = useMemo(() => {
-    const items = newsResponse.data || [];
-    return [...items].sort((a, b) => a.id - b.id);
+    return newsResponse.data || [];
   }, [newsResponse.data]);
 
   const [userSelectedTab, setUserSelectedTab] = useState(null);
