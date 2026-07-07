@@ -60,6 +60,9 @@ src/
 - **Custom Brand Colors:**
   - Green: `bg-hepco-green`, `text-hepco-green`
   - Orange: `bg-hepco-orange`, `text-hepco-orange`
+- **UI Consistency Rule (CRITICAL):**
+  - When creating a new screen (e.g., an Admin List, Form, Modal, Table, Search Bar, or Empty State), it **MUST exactly mirror** the HTML structure, DOM nesting, and Tailwind CSS classes of existing screens with similar functionalities. 
+  - **Do not invent new layout structures or use different utility classes.** Always cross-reference an existing functional page (e.g., `AdminEmployeeManager`) and perfectly clone its structural implementation for headers, tables, empty states, and action buttons.
 - **When to use SCSS:**
   - Use SCSS only for complex animations, highly customized pseudo-elements (`::before`, `::after`), or nested component styles that are too verbose for Tailwind utility classes.
   - Complex custom shapes (like `clip-path`) can be defined in a `.scss` or `.css` utility layer.

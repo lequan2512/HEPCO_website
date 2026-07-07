@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Outlet, useNavigate, Link, useLocation } from 'react-router-dom';
-import { FileText, Shield, LogOut, Menu, X } from 'lucide-react';
+import { FileText, Shield, LogOut, Menu, X, Laptop, Users, Building2, ClipboardList } from 'lucide-react';
 import useAuthStore from '../../store/useAuthStore';
 import { ROUTES } from '../../constants/routes';
 import logo from '../../assets/images/logo.png';
@@ -44,7 +44,11 @@ const AdminLayout = () => {
             <X className="w-6 h-6" />
           </button>
         </div>
-        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+          {/* Nhóm 1: Quản lý trang chủ */}
+          <div className="text-xs uppercase font-bold text-green-300 tracking-wider mb-2 mt-4 px-4">
+            Quản lý trang chủ
+          </div>
           <Link 
             to={ROUTES.ADMIN_NEWS} 
             onClick={() => setIsSidebarOpen(false)}
@@ -104,6 +108,76 @@ const AdminLayout = () => {
           >
             <Shield className="w-5 h-5" />
             <span>IP Whitelist</span>
+          </Link>
+
+          {/* Nhóm 2: Quản lý thiết bị */}
+          <div className="text-xs uppercase font-bold text-green-300 tracking-wider mb-2 mt-8 px-4 border-t border-green-800 pt-6">
+            Quản lý thiết bị
+          </div>
+          <Link 
+            to={`${ROUTES.ADMIN_DASHBOARD}/devices`} 
+            onClick={() => setIsSidebarOpen(false)}
+            className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+              location.pathname.includes('devices')
+                ? 'bg-green-800 text-white font-semibold' 
+                : 'text-green-100 hover:bg-green-700 hover:text-white'
+            }`}
+          >
+            <Laptop className="w-5 h-5" />
+            <span>Thiết Bị</span>
+          </Link>
+          <Link 
+            to={`${ROUTES.ADMIN_DASHBOARD}/suppliers`} 
+            onClick={() => setIsSidebarOpen(false)}
+            className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+              location.pathname.includes('suppliers')
+                ? 'bg-green-800 text-white font-semibold' 
+                : 'text-green-100 hover:bg-green-700 hover:text-white'
+            }`}
+          >
+            <Building2 className="w-5 h-5" />
+            <span>Nhà Cung Cấp</span>
+          </Link>
+          <Link 
+            to={`${ROUTES.ADMIN_DASHBOARD}/assignments`} 
+            onClick={() => setIsSidebarOpen(false)}
+            className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+              location.pathname.includes('assignments')
+                ? 'bg-green-800 text-white font-semibold' 
+                : 'text-green-100 hover:bg-green-700 hover:text-white'
+            }`}
+          >
+            <ClipboardList className="w-5 h-5" />
+            <span>Cấp Phát</span>
+          </Link>
+
+          {/* Nhóm 3: Quản lý nhân sự */}
+          <div className="text-xs uppercase font-bold text-green-300 tracking-wider mb-2 mt-8 px-4 border-t border-green-800 pt-6">
+            Quản lý nhân sự
+          </div>
+          <Link 
+            to={`${ROUTES.ADMIN_DASHBOARD}/employees`} 
+            onClick={() => setIsSidebarOpen(false)}
+            className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+              location.pathname.includes('employees')
+                ? 'bg-green-800 text-white font-semibold' 
+                : 'text-green-100 hover:bg-green-700 hover:text-white'
+            }`}
+          >
+            <Users className="w-5 h-5" />
+            <span>Danh Sách Nhân Sự</span>
+          </Link>
+          <Link 
+            to={`${ROUTES.ADMIN_DASHBOARD}/departments`} 
+            onClick={() => setIsSidebarOpen(false)}
+            className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+              location.pathname.includes('departments')
+                ? 'bg-green-800 text-white font-semibold' 
+                : 'text-green-100 hover:bg-green-700 hover:text-white'
+            }`}
+          >
+            <Building2 className="w-5 h-5" />
+            <span>Phòng Ban</span>
           </Link>
         </nav>
         <div className="p-4 border-t border-green-800">

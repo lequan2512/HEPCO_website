@@ -13,6 +13,11 @@ import AdminLayout from './components/AdminLayout';
 import AdminNewsManager from './pages/admin/AdminNewsManager';
 import AdminIpWhitelist from './pages/admin/AdminIpWhitelist';
 import AdminBannerManager from './pages/admin/AdminBannerManager';
+import AdminDeviceManager from './pages/admin/AdminDeviceManager';
+import AdminEmployeeManager from './pages/admin/AdminEmployeeManager';
+import AdminSupplierManager from './pages/admin/AdminSupplierManager';
+import AdminAssignmentManager from './pages/admin/AdminAssignmentManager';
+import AdminDepartmentManager from './pages/admin/AdminDepartmentManager';
 import { ROUTES } from './constants/routes';
 import { Toaster } from 'react-hot-toast';
 
@@ -45,6 +50,11 @@ const AppRoutes = () => {
           <Route path="services" element={<AdminNewsManager type="service" />} />
           <Route path="banners" element={<AdminBannerManager />} />
           <Route path="ip-whitelist" element={<AdminIpWhitelist />} />
+          <Route path="devices" element={<AdminDeviceManager />} />
+          <Route path="employees" element={<AdminEmployeeManager />} />
+          <Route path="departments" element={<AdminDepartmentManager />} />
+          <Route path="suppliers" element={<AdminSupplierManager />} />
+          <Route path="assignments" element={<AdminAssignmentManager />} />
         </Route>
       </Routes>
     );
