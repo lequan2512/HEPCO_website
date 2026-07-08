@@ -8,13 +8,13 @@ import { getErrorMessage } from '../../../utils/errorMapper';
 import Loading from '../../../components/Loading';
 import { useGetAssignments, useAddAssignment, useReturnAssignment } from '../../../apis/assignment';
 import { useGetDevices, useGetCategories, useUpdateDevice } from '../../../apis/device';
-import { useGetEmployees } from '../../../apis/employee';
 import { useGetDepartments } from '../../../apis/department';
 import ConfirmModal from '../../../components/ConfirmModal';
 import Pagination from '../../../components/Pagination';
 import { PC_COMPONENTS, DEVICE_CATEGORY_CODES, DEVICE_STATUS, ASSIGNMENT_STATUS } from '../../../constants/device';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
+import AsyncSelect from 'react-select/async';
 import axiosInstance from '../../../utils/axios';
 
 const AdminAssignmentManager = () => {
@@ -49,19 +49,44 @@ const AdminAssignmentManager = () => {
   const { data: assignmentsRes = {}, isLoading: isLoadingAssignments } = useGetAssignments({ ...debouncedFilters, page, limit: 20 });
   const assignments = assignmentsRes?.data || [];
   const meta = assignmentsRes?.meta;
-  const { data: devicesRes = {}, isLoading: isLoadingDevices } = useGetDevices({ limit: 1000 });
-  const devices = devicesRes?.data || [];
-  const { data: employeesRes = {}, isLoading: isLoadingEmployees } = useGetEmployees({ limit: 1000 });
-  const employees = employeesRes?.data || [];
   const { data: departmentsRes = {}, isLoading: isLoadingDept } = useGetDepartments({ limit: 1000 });
   const departments = departmentsRes?.data || [];
   const { data: categories = [], isLoading: isLoadingCategories } = useGetCategories();
-  const { data: availableComponentsRes } = useGetDevices({ status: DEVICE_STATUS.IN_STOCK, hide_assembled: true, is_component: true, search: debouncedAssembleSearch, category_id: assembleCategory, limit: 1000 });
+  const { data: availableComponentsRes } = useGetDevices(
+    { status: DEVICE_STATUS.IN_STOCK, hide_assembled: true, is_component: true, search: debouncedAssembleSearch, category_id: assembleCategory, limit: 1000 },
+    { enabled: isAssembleModalOpen }
+  );
   const availableComponents = availableComponentsRes?.data || [];
 
   const updateDeviceMutation = useUpdateDevice();
 
-  const isLoading = isLoadingAssignments || isLoadingDevices || isLoadingEmployees || isLoadingDept || isLoadingCategories;
+  const isLoading = isLoadingAssignments || isLoadingDept || isLoadingCategories;
+
+  const loadDevices = async (inputValue) => {
+    try {
+      const res = await axiosInstance.get('/api/devices', {
+        params: { search: inputValue, limit: 20, status: DEVICE_STATUS.IN_STOCK }
+      });
+      const filtered = (res.data.data || []).filter(d => !d.parent_device_id && d.category?.parent_id === null);
+      return filtered.map(d => ({ value: d.id, label: `${d.asset_code} - ${d.name}` }));
+    } catch {
+      return [];
+    }
+  };
+
+  const loadEmployees = async (inputValue) => {
+    try {
+      const res = await axiosInstance.get('/api/employees', {
+        params: { search: inputValue, limit: 20 }
+      });
+      return (res.data.data || []).map(e => ({ 
+        value: e.id, 
+        label: `${e.full_name || e.name} (${e.employee_code}) - ${e.position ? `${e.position} ` : ''}${e.department?.name || 'Không có PB'}` 
+      }));
+    } catch {
+      return [];
+    }
+  };
 
   const addAssignment = useAddAssignment();
   const returnAssignment = useReturnAssignment();
@@ -329,31 +354,35 @@ const AdminAssignmentManager = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Thiết Bị <span className="text-red-500">*</span></label>
-                  <select
-                    name="device_id"
-                    className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-hepco-green/50 bg-white"
-                    value={formik.values.device_id}
-                    onChange={formik.handleChange}
-                  >
-                    <option value="">-- Chọn thiết bị --</option>
-                    {devices.filter(d => d.status === DEVICE_STATUS.IN_STOCK && !d.parent_device_id && d.category?.parent_id === null).map(d => (
-                      <option key={d.id} value={d.id}>{d.name}</option>
-                    ))}
-                  </select>
+                  <AsyncSelect
+                    key={isFormOpen ? 'device-open' : 'device-closed'}
+                    cacheOptions
+                    defaultOptions
+                    loadOptions={loadDevices}
+                    onChange={(option) => formik.setFieldValue('device_id', option ? option.value : '')}
+                    placeholder="-- Tìm kiếm thiết bị --"
+                    isClearable
+                    noOptionsMessage={() => "Không tìm thấy thiết bị"}
+                    styles={{
+                      control: (base) => ({ ...base, borderColor: '#D1D5DB', borderRadius: '0.5rem', padding: '2px', outline: 'none', boxShadow: 'none', '&:hover': { borderColor: '#10B981' } })
+                    }}
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Nhân Viên <span className="text-red-500">*</span></label>
-                  <select
-                    name="employee_id"
-                    className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-hepco-green/50 bg-white"
-                    value={formik.values.employee_id}
-                    onChange={formik.handleChange}
-                  >
-                    <option value="">-- Chọn nhân viên --</option>
-                    {employees.map(e => (
-                      <option key={e.id} value={e.id}>{e.full_name} ({e.employee_code}) - {e.position ? `${e.position} ` : ''}{e.department?.name || 'Không có PB'}</option>
-                    ))}
-                  </select>
+                  <AsyncSelect
+                    key={isFormOpen ? 'employee-open' : 'employee-closed'}
+                    cacheOptions
+                    defaultOptions
+                    loadOptions={loadEmployees}
+                    onChange={(option) => formik.setFieldValue('employee_id', option ? option.value : '')}
+                    placeholder="-- Tìm kiếm nhân viên --"
+                    isClearable
+                    noOptionsMessage={() => "Không tìm thấy nhân viên"}
+                    styles={{
+                      control: (base) => ({ ...base, borderColor: '#D1D5DB', borderRadius: '0.5rem', padding: '2px', outline: 'none', boxShadow: 'none', '&:hover': { borderColor: '#10B981' } })
+                    }}
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Ngày bàn giao <span className="text-red-500">*</span></label>

@@ -1,23 +1,25 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
 import axiosInstance from '../utils/axios';
 
-export const useGetEmployees = (params) => {
+export const useGetEmployees = (params, options) => {
   return useQuery({
     queryKey: ['employees', params],
     queryFn: async () => {
       const response = await axiosInstance.get('/api/employees', { params });
       return response.data;
     },
+    ...options
   });
 };
 
-export const useGetDepartments = (params) => {
+export const useGetDepartments = (params, options) => {
   return useQuery({
     queryKey: ['departments', params],
     queryFn: async () => {
       const response = await axiosInstance.get('/api/departments', { params });
       return response.data;
     },
+    ...options
   });
 };
 
