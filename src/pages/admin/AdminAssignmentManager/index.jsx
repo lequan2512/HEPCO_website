@@ -121,7 +121,7 @@ const AdminAssignmentManager = () => {
   const handleReturn = (item) => {
     setReturnItem(item);
     returnFormik.resetForm();
-    returnFormik.setValues({ returned_date: new Date().toISOString().split('T')[0], note: 'Đã thu hồi', return_status: 'in_stock' });
+    returnFormik.setValues({ returned_date: new Date().toISOString().split('T')[0], note: 'Đã thu hồi', return_status: DEVICE_STATUS.IN_STOCK });
   };
 
   if (isLoading) return <Loading />;
@@ -339,9 +339,8 @@ const AdminAssignmentManager = () => {
                     value={returnFormik.values.return_status}
                     onChange={returnFormik.handleChange}
                   >
-                    <option value="in_stock">Tồn kho (Bình thường)</option>
-                    <option value="broken">Hỏng</option>
-                    <option value="maintenance">Đang bảo trì</option>
+                    <option value={DEVICE_STATUS.IN_STOCK}>Tồn kho (Bình thường)</option>
+                    <option value={DEVICE_STATUS.BROKEN}>Hỏng</option>
                   </select>
                 </div>
 

@@ -38,7 +38,6 @@ export const PC_COMPONENTS = [
 export const DEVICE_STATUS = {
   IN_STOCK: 'in_stock',
   IN_USE: 'in_use',
-  MAINTENANCE: 'maintenance',
   BROKEN: 'broken',
   RETIRED: 'retired'
 };

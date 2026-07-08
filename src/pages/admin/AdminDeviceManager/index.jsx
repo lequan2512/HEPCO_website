@@ -166,11 +166,10 @@ const AdminDeviceManager = () => {
 
   const getStatusLabel = (status) => {
     const statusMap = {
-      in_stock: { label: 'Tồn kho', color: 'bg-green-100 text-green-700' },
-      in_use: { label: 'Đang sử dụng', color: 'bg-blue-100 text-blue-700' },
-      maintenance: { label: 'Đang bảo trì', color: 'bg-yellow-100 text-yellow-700' },
-      broken: { label: 'Hỏng', color: 'bg-red-100 text-red-700' },
-      retired: { label: 'Đã thanh lý', color: 'bg-gray-100 text-gray-700' },
+      [DEVICE_STATUS.IN_STOCK]: { label: 'Tồn kho', color: 'bg-green-100 text-green-700' },
+      [DEVICE_STATUS.IN_USE]: { label: 'Đang sử dụng', color: 'bg-blue-100 text-blue-700' },
+      [DEVICE_STATUS.BROKEN]: { label: 'Hỏng', color: 'bg-red-100 text-red-700' },
+      [DEVICE_STATUS.RETIRED]: { label: 'Đã thanh lý', color: 'bg-gray-100 text-gray-700' },
     };
     const s = statusMap[status] || { label: status, color: 'bg-gray-100 text-gray-700' };
     return <span className={`px-2 py-1 rounded text-xs font-semibold ${s.color}`}>{s.label}</span>;
@@ -181,7 +180,7 @@ const AdminDeviceManager = () => {
     total: devices.length,
     inStock: devices.filter(d => d.status === DEVICE_STATUS.IN_STOCK).length,
     inUse: devices.filter(d => d.status === DEVICE_STATUS.IN_USE).length,
-    broken: devices.filter(d => d.status === DEVICE_STATUS.BROKEN || d.status === DEVICE_STATUS.MAINTENANCE).length,
+    broken: devices.filter(d => d.status === DEVICE_STATUS.BROKEN).length,
   };
 
   const selectedCategoryName = filters.category_id
@@ -314,10 +313,9 @@ const AdminDeviceManager = () => {
               className="w-full p-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
               <option value="">Tất cả trạng thái</option>
-              <option value="in_stock">Tồn kho</option>
-              <option value="in_use">Đang sử dụng</option>
-              <option value="maintenance">Đang bảo trì</option>
-              <option value="broken">Hỏng</option>
+              <option value={DEVICE_STATUS.IN_STOCK}>Tồn kho</option>
+              <option value={DEVICE_STATUS.IN_USE}>Đang sử dụng</option>
+              <option value={DEVICE_STATUS.BROKEN}>Hỏng</option>
             </select>
           </div>
           <div>
