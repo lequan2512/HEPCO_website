@@ -123,7 +123,7 @@ const AdminDeviceManager = () => {
     validationSchema: Yup.object({
       name: Yup.string().required('Vui lòng nhập tên thiết bị'),
       category_id: Yup.number().required('Vui lòng nhập ID danh mục'),
-      purchase_price: Yup.number().required('Vui lòng nhập giá nhập').typeError('Giá nhập phải là số')
+      purchase_price: Yup.number().nullable().typeError('Giá nhập phải là số'),
     }),
     onSubmit: async (values, { setSubmitting }) => {
       try {
