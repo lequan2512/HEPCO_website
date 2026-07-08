@@ -26,6 +26,9 @@ export const ERROR_MESSAGES = {
   DUPLICATE_ENTRY: 'Dữ liệu này đã tồn tại trong hệ thống.',
   DELETE_FAILED: 'Xóa không thành công. Có thể dữ liệu đang được sử dụng.',
   
+  // Employees
+  EMPLOYEE_HAS_DEVICES: 'Không thể vô hiệu hóa vì nhân viên này đang giữ thiết bị chưa trả.',
+  
   // Devices & Hardware
   HAS_CHILDREN: 'Không thể thực hiện vì thiết bị này đang chứa linh kiện bên trong. Vui lòng tháo linh kiện ra trước.',
   DEVICE_IN_USE: 'Thiết bị đang được sử dụng hoặc đã bàn giao, không thể thay đổi.',

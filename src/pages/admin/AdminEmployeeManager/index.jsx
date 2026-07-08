@@ -95,12 +95,12 @@ const AdminEmployeeManager = () => {
   const handleDelete = (id) => {
     setConfirmConfig({
       isOpen: true,
-      title: 'Xóa Nhân Viên',
-      message: 'Bạn có chắc chắn xóa?',
+      title: 'Vô hiệu hóa Nhân Viên',
+      message: 'Bạn có chắc chắn muốn vô hiệu hóa nhân viên này?',
       onConfirm: async () => {
         try {
           await deleteEmployeeMutation.mutateAsync(id);
-          toast.success('Đã xóa');
+          toast.success('Đã vô hiệu hóa thành công');
           queryClient.invalidateQueries({ queryKey: ['employees'] });
         } catch (error) {
           handleError(error);
@@ -235,13 +235,26 @@ const AdminEmployeeManager = () => {
                   {filteredEmployees.map(e => (
                     <tr key={e.id} className="hover:bg-gray-50/50 transition-colors">
                       <td className="px-6 py-4 text-sm font-mono text-gray-800 font-bold">{e.employee_code}</td>
-                      <td className="px-6 py-4 text-sm font-medium text-gray-800">{e.full_name}</td>
+                      <td className="px-6 py-4 text-sm font-medium text-gray-800">
+                        {e.full_name}
+                        {e.status === 'inactive' && (
+                          <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+                            Đã nghỉ việc
+                          </span>
+                        )}
+                      </td>
                       <td className="px-6 py-4 text-sm text-gray-500">{e.email}<br/>{e.phone}</td>
                       <td className="px-6 py-4 text-sm text-gray-500">{e.department?.name || 'Chưa xếp'}</td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <button onClick={() => handleEdit(e)} className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"><Edit2 className="w-4 h-4" /></button>
-                          <button onClick={() => handleDelete(e.id)} className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"><Trash2 className="w-4 h-4" /></button>
+                          <button 
+                            onClick={() => handleDelete(e.id)}
+                            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                            title="Vô hiệu hóa nhân viên"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                         </div>
                       </td>
                     </tr>
