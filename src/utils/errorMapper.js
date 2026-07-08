@@ -18,6 +18,18 @@ export const ERROR_MESSAGES = {
   // IP Whitelist
   INVALID_IPV4_FORMAT: 'Định dạng IP không hợp lệ.',
   IP_ALREADY_EXISTS: 'Địa chỉ IP này đã tồn tại.',
+
+  // Generic Data & Database
+  NOT_FOUND: 'Không tìm thấy dữ liệu yêu cầu.',
+  BAD_REQUEST: 'Yêu cầu không hợp lệ. Vui lòng kiểm tra lại.',
+  DATABASE_ERROR: 'Lỗi truy xuất cơ sở dữ liệu. Vui lòng thử lại.',
+  DUPLICATE_ENTRY: 'Dữ liệu này đã tồn tại trong hệ thống.',
+  DELETE_FAILED: 'Xóa không thành công. Có thể dữ liệu đang được sử dụng.',
+  
+  // Devices & Hardware
+  HAS_CHILDREN: 'Không thể thực hiện vì thiết bị này đang chứa linh kiện bên trong. Vui lòng tháo linh kiện ra trước.',
+  DEVICE_IN_USE: 'Thiết bị đang được sử dụng hoặc đã bàn giao, không thể thay đổi.',
+  ASSEMBLY_CONSTRAINT_FAILED: 'Cấu hình linh kiện không hợp lệ.',
 };
 
 export const getErrorMessage = (errorCode) => {

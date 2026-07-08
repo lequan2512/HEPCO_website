@@ -4,6 +4,7 @@ import { Building2, Plus, Trash2, Edit2, X, Search } from 'lucide-react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import toast from 'react-hot-toast';
+import { getErrorMessage } from '../../../utils/errorMapper';
 import Loading from '../../../components/Loading';
 import { useGetDepartments, useAddDepartment, useUpdateDepartment, useDeleteDepartment } from '../../../apis/department';
 import ConfirmModal from '../../../components/ConfirmModal';
@@ -43,7 +44,8 @@ const AdminDepartmentManager = () => {
   };
 
   const handleError = (error) => {
-    toast.error(error?.response?.data?.message || 'Có lỗi xảy ra');
+    const errorCode = error?.response?.data?.errorCode;
+    toast.error(errorCode ? getErrorMessage(errorCode) : (error?.response?.data?.message || 'Có lỗi xảy ra'));
   };
 
   const formik = useFormik({

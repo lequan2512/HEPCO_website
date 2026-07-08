@@ -4,6 +4,7 @@ import { ClipboardList, Plus, RotateCcw, X, Search, Package } from 'lucide-react
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import toast from 'react-hot-toast';
+import { getErrorMessage } from '../../../utils/errorMapper';
 import Loading from '../../../components/Loading';
 import { useGetAssignments, useAddAssignment, useReturnAssignment } from '../../../apis/assignment';
 import { useGetDevices, useGetCategories, useUpdateDevice } from '../../../apis/device';
@@ -78,6 +79,11 @@ const AdminAssignmentManager = () => {
     return `${years} năm ${months} tháng`;
   };
 
+  const handleError = (error) => {
+    const errorCode = error?.response?.data?.errorCode;
+    toast.error(errorCode ? getErrorMessage(errorCode) : (error?.response?.data?.message || 'Có lỗi xảy ra'));
+  };
+
   const formik = useFormik({
     initialValues: { device_id: '', employee_id: '', assigned_date: new Date().toISOString().split('T')[0], assigned_by: 'Admin', note: '' },
     validationSchema: Yup.object({ device_id: Yup.number().required('Bắt buộc'), employee_id: Yup.number().required('Bắt buộc'), assigned_date: Yup.date().required('Bắt buộc') }),
@@ -85,9 +91,10 @@ const AdminAssignmentManager = () => {
       try {
         await addAssignment.mutateAsync(values);
         toast.success('Cấp phát thành công');
-        queryClient.invalidateQueries(['assignments', 'devices']);
+        queryClient.invalidateQueries({ queryKey: ['assignments'] });
+        queryClient.invalidateQueries({ queryKey: ['devices'] });
         setIsFormOpen(false); formik.resetForm();
-      } catch { toast.error('Lỗi'); }
+      } catch (error) { handleError(error); }
       finally { setSubmitting(false); }
     }
   });
@@ -103,9 +110,10 @@ const AdminAssignmentManager = () => {
       try {
         await returnAssignment.mutateAsync({ id: returnItem.id, data: values });
         toast.success('Đã thu hồi thiết bị thành công');
-        queryClient.invalidateQueries(['assignments', 'devices']);
+        queryClient.invalidateQueries({ queryKey: ['assignments'] });
+        queryClient.invalidateQueries({ queryKey: ['devices'] });
         setReturnItem(null);
-      } catch { toast.error('Lỗi khi thu hồi thiết bị'); }
+      } catch (error) { handleError(error); }
       finally { setSubmitting(false); }
     }
   });

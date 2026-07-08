@@ -4,6 +4,7 @@ import { Building2, Plus, Trash2, Edit2, X, Search } from 'lucide-react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import toast from 'react-hot-toast';
+import { getErrorMessage } from '../../../utils/errorMapper';
 import Loading from '../../../components/Loading';
 import { useGetSuppliers, useAddSupplier, useUpdateSupplier, useDeleteSupplier } from '../../../apis/supplier';
 import ConfirmModal from '../../../components/ConfirmModal';
@@ -34,6 +35,11 @@ const AdminSupplierManager = () => {
   const updateSupplier = useUpdateSupplier();
   const deleteSupplier = useDeleteSupplier();
 
+  const handleError = (error) => {
+    const errorCode = error?.response?.data?.errorCode;
+    toast.error(errorCode ? getErrorMessage(errorCode) : (error?.response?.data?.message || 'Có lỗi xảy ra'));
+  };
+
   const formik = useFormik({
     initialValues: { name: '', contact_person: '', phone: '', email: '', address: '' },
     validationSchema: Yup.object({ name: Yup.string().required('Bắt buộc') }),
@@ -42,9 +48,9 @@ const AdminSupplierManager = () => {
         if (editingId) await updateSupplier.mutateAsync({ id: editingId, ...values });
         else await addSupplier.mutateAsync(values);
         toast.success('Thành công');
-        queryClient.invalidateQueries(['suppliers']);
+        queryClient.invalidateQueries({ queryKey: ['suppliers'] });
         setIsFormOpen(false); setEditingId(null); formik.resetForm();
-      } catch { toast.error('Lỗi'); }
+      } catch (error) { handleError(error); }
       finally { setSubmitting(false); }
     }
   });
@@ -53,7 +59,13 @@ const AdminSupplierManager = () => {
   const handleDelete = (id) => {
     setConfirmConfig({
       isOpen: true, title: 'Xóa', message: 'Bạn có chắc muốn xóa?',
-      onConfirm: async () => { await deleteSupplier.mutateAsync(id); toast.success('Đã xóa'); queryClient.invalidateQueries(['suppliers']); }
+      onConfirm: async () => { 
+        try {
+          await deleteSupplier.mutateAsync(id); 
+          toast.success('Đã xóa'); 
+          queryClient.invalidateQueries({ queryKey: ['suppliers'] }); 
+        } catch (error) { handleError(error); }
+      }
     });
   };
 

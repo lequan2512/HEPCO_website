@@ -648,6 +648,7 @@ const AdminDeviceManager = () => {
                 ))}
               </tbody>
             </table>
+            <Pagination meta={meta} onPageChange={setPage} />
           </div>
         ) : (
           <div className="p-12 text-center flex flex-col items-center">
