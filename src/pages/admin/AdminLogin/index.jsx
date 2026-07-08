@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
@@ -12,6 +13,13 @@ import logo from '../../../assets/images/logo.png';
 const AdminLogin = () => {
   const navigate = useNavigate();
   const setAuth = useAuthStore((state) => state.setAuth);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate(ROUTES.ADMIN_DASHBOARD, { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   const { mutateAsync: loginMutation } = useLogin();
 

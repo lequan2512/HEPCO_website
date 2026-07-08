@@ -26,7 +26,7 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      if (error.config && error.config.url !== '/api/login') {
+      if (error.config && !error.config.url?.includes('/api/login')) {
         useAuthStore.getState().logout();
         window.location.href = '/admin-login';
       }

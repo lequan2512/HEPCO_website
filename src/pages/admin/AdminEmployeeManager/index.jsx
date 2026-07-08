@@ -232,7 +232,8 @@ const AdminEmployeeManager = () => {
                     <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Mã NV</th>
                     <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Họ Tên</th>
                     <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Liên Hệ</th>
-                    <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Chức vụ / Phòng Ban</th>
+                    <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Chức vụ</th>
+                    <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Phòng Ban</th>
                     <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase text-right">Thao tác</th>
                   </tr>
                 </thead>
@@ -249,9 +250,15 @@ const AdminEmployeeManager = () => {
                         )}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-500">{e.email}<br/>{e.phone}</td>
-                      <td className="px-6 py-4 text-sm text-gray-500">
-                        {e.position && <div className="font-medium text-gray-700">{e.position}</div>}
-                        <div>{e.department?.name || 'Chưa xếp'}</div>
+                      <td className="px-6 py-4 text-sm font-medium text-gray-700">
+                        {e.position || '-'}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-600">
+                        {e.department?.name ? (
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-800 whitespace-nowrap">{e.department.name}</span>
+                        ) : (
+                          <span className="text-gray-400 italic">Chưa xếp</span>
+                        )}
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">

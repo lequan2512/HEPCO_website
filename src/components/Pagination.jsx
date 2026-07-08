@@ -1,7 +1,7 @@
 import React from 'react';
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 
-const Pagination = ({ meta, onPageChange }) => {
+const Pagination = ({ meta, onPageChange, hideTotal = false, size = 'md' }) => {
   if (!meta || meta.totalPages <= 1) return null;
 
   const { page, totalPages, total } = meta;
@@ -28,7 +28,7 @@ const Pagination = ({ meta, onPageChange }) => {
         <button
           key={i}
           onClick={() => handlePageChange(i)}
-          className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${
+          className={`${size === 'sm' ? 'w-6 h-6 text-xs' : 'w-8 h-8 text-sm'} flex items-center justify-center rounded-lg font-medium transition-colors ${
             page === i
               ? 'bg-hepco-green text-white shadow-sm'
               : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
@@ -42,12 +42,14 @@ const Pagination = ({ meta, onPageChange }) => {
   };
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 bg-white border-t border-gray-200 sm:px-6">
-      <div className="hidden sm:block">
-        <p className="text-sm text-gray-700">
-          Hiển thị tổng cộng <span className="font-semibold text-hepco-green">{total}</span> kết quả
-        </p>
-      </div>
+    <div className={`flex flex-col sm:flex-row items-center justify-between bg-white border-t border-gray-200 ${size === 'sm' ? 'px-2 py-2' : 'px-4 py-3 sm:px-6'}`}>
+      {!hideTotal && (
+        <div className="hidden sm:block">
+          <p className="text-sm text-gray-700">
+            Hiển thị tổng cộng <span className="font-semibold text-hepco-green">{total}</span> kết quả
+          </p>
+        </div>
+      )}
       <div className="flex flex-1 justify-between sm:justify-end items-center gap-2">
         <div className="flex items-center gap-1">
           <button
@@ -56,7 +58,7 @@ const Pagination = ({ meta, onPageChange }) => {
             className="p-1 rounded-lg text-gray-500 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             title="Trang đầu"
           >
-            <ChevronsLeft className="w-5 h-5" />
+            <ChevronsLeft className={size === 'sm' ? 'w-4 h-4' : 'w-5 h-5'} />
           </button>
           <button
             onClick={() => handlePageChange(page - 1)}
@@ -64,7 +66,7 @@ const Pagination = ({ meta, onPageChange }) => {
             className="p-1 rounded-lg text-gray-500 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             title="Trang trước"
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className={size === 'sm' ? 'w-4 h-4' : 'w-5 h-5'} />
           </button>
         </div>
 
@@ -79,7 +81,7 @@ const Pagination = ({ meta, onPageChange }) => {
             className="p-1 rounded-lg text-gray-500 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             title="Trang sau"
           >
-            <ChevronRight className="w-5 h-5" />
+            <ChevronRight className={size === 'sm' ? 'w-4 h-4' : 'w-5 h-5'} />
           </button>
           <button
             onClick={() => handlePageChange(totalPages)}
@@ -87,7 +89,7 @@ const Pagination = ({ meta, onPageChange }) => {
             className="p-1 rounded-lg text-gray-500 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             title="Trang cuối"
           >
-            <ChevronsRight className="w-5 h-5" />
+            <ChevronsRight className={size === 'sm' ? 'w-4 h-4' : 'w-5 h-5'} />
           </button>
         </div>
       </div>

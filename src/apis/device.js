@@ -59,3 +59,12 @@ export const useDeleteDevice = () => {
     },
   });
 };
+
+export const useDeleteMultipleDevices = () => {
+  return useMutation({
+    mutationFn: async (ids) => {
+      const response = await axiosInstance.post('/api/devices/delete-multiple', { ids });
+      return response.data;
+    },
+  });
+};

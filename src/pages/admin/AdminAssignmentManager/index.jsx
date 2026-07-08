@@ -11,7 +11,8 @@ import { useGetDevices, useGetCategories, useUpdateDevice } from '../../../apis/
 import { useGetDepartments } from '../../../apis/department';
 import ConfirmModal from '../../../components/ConfirmModal';
 import Pagination from '../../../components/Pagination';
-import { PC_COMPONENTS, DEVICE_CATEGORY_CODES, DEVICE_STATUS, ASSIGNMENT_STATUS } from '../../../constants/device';
+import { DEVICE_CATEGORY_CODES, DEVICE_STATUS, ASSIGNMENT_STATUS } from '../../../constants/device';
+import AssembleDeviceModal from '../../../components/AssembleDeviceModal';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import AsyncSelect from 'react-select/async';
@@ -22,10 +23,8 @@ const AdminAssignmentManager = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isAssembleModalOpen, setIsAssembleModalOpen] = useState(false);
   const [assembleDevice, setAssembleDevice] = useState(null);
-  const [assembleSearch, setAssembleSearch] = useState('');
-  const [debouncedAssembleSearch, setDebouncedAssembleSearch] = useState('');
-  const [assembleCategory, setAssembleCategory] = useState('');
   const [returnItem, setReturnItem] = useState(null);
+  const [viewAssignmentDetail, setViewAssignmentDetail] = useState(null);
   const [confirmConfig, setConfirmConfig] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
   const queryClient = useQueryClient();
   const [filters, setFilters] = useState({ search: '', department_id: '', category_id: '', start_date: '', end_date: '', status: '' });
@@ -39,12 +38,7 @@ const AdminAssignmentManager = () => {
     return () => clearTimeout(handler);
   }, [filters]);
 
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedAssembleSearch(assembleSearch);
-    }, 500);
-    return () => clearTimeout(handler);
-  }, [assembleSearch]);
+
 
   const { data: assignmentsRes = {}, isLoading: isLoadingAssignments } = useGetAssignments({ ...debouncedFilters, page, limit: 20 });
   const assignments = assignmentsRes?.data || [];
@@ -52,11 +46,7 @@ const AdminAssignmentManager = () => {
   const { data: departmentsRes = {}, isLoading: isLoadingDept } = useGetDepartments({ limit: 1000 });
   const departments = departmentsRes?.data || [];
   const { data: categories = [], isLoading: isLoadingCategories } = useGetCategories();
-  const { data: availableComponentsRes } = useGetDevices(
-    { status: DEVICE_STATUS.IN_STOCK, hide_assembled: true, is_component: true, search: debouncedAssembleSearch, category_id: assembleCategory, limit: 1000 },
-    { enabled: isAssembleModalOpen }
-  );
-  const availableComponents = availableComponentsRes?.data || [];
+
 
   const updateDeviceMutation = useUpdateDevice();
 
@@ -79,9 +69,9 @@ const AdminAssignmentManager = () => {
       const res = await axiosInstance.get('/api/employees', {
         params: { search: inputValue, limit: 20 }
       });
-      return (res.data.data || []).map(e => ({ 
-        value: e.id, 
-        label: `${e.full_name || e.name} (${e.employee_code}) - ${e.position ? `${e.position} ` : ''}${e.department?.name || 'Không có PB'}` 
+      return (res.data.data || []).map(e => ({
+        value: e.id,
+        label: `${e.full_name || e.name} (${e.employee_code}) - ${e.position ? `${e.position} ` : ''}${e.department?.name || 'Không có PB'}`
       }));
     } catch {
       return [];
@@ -205,7 +195,7 @@ const AdminAssignmentManager = () => {
         cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
         cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1F497D' } }; // Formal dark blue
         cell.alignment = { vertical: 'middle', horizontal: 'center' };
-        cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+        cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
       });
 
       let currentRow = 2;
@@ -216,9 +206,9 @@ const AdminAssignmentManager = () => {
         deptRow.getCell(1).font = { bold: true, size: 12, color: { argb: 'FF000000' } };
         deptRow.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD9E1F2' } }; // Light blueish gray
         deptRow.getCell(1).alignment = { vertical: 'middle', horizontal: 'left' };
-        
+
         for (let c = 1; c <= 15; c++) {
-          deptRow.getCell(c).border = { top: {style:'thin', color: {argb:'FFB4C6E7'}}, left: {style:'thin', color: {argb:'FFB4C6E7'}}, bottom: {style:'thin', color: {argb:'FFB4C6E7'}}, right: {style:'thin', color: {argb:'FFB4C6E7'}} };
+          deptRow.getCell(c).border = { top: { style: 'thin', color: { argb: 'FFB4C6E7' } }, left: { style: 'thin', color: { argb: 'FFB4C6E7' } }, bottom: { style: 'thin', color: { argb: 'FFB4C6E7' } }, right: { style: 'thin', color: { argb: 'FFB4C6E7' } } };
         }
         currentRow++;
 
@@ -226,7 +216,7 @@ const AdminAssignmentManager = () => {
         items.forEach((item, i) => {
           const isAlternate = i % 2 !== 0;
           const color = isAlternate ? 'FFF2F2F2' : 'FFFFFFFF'; // Alternate rows within department
-          
+
           const row = sheet.addRow({
             employee_code: item.employee?.employee_code || '-',
             employee: item.employee?.full_name || item.employee?.name || '-',
@@ -247,7 +237,7 @@ const AdminAssignmentManager = () => {
 
           row.eachCell((cell) => {
             cell.alignment = { vertical: 'middle', wrapText: true };
-            cell.border = { top: {style:'thin', color: {argb:'FFBFBFBF'}}, left: {style:'thin', color: {argb:'FFBFBFBF'}}, bottom: {style:'thin', color: {argb:'FFBFBFBF'}}, right: {style:'thin', color: {argb:'FFBFBFBF'}} };
+            cell.border = { top: { style: 'thin', color: { argb: 'FFBFBFBF' } }, left: { style: 'thin', color: { argb: 'FFBFBFBF' } }, bottom: { style: 'thin', color: { argb: 'FFBFBFBF' } }, right: { style: 'thin', color: { argb: 'FFBFBFBF' } } };
             cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: color } };
           });
           currentRow++;
@@ -336,7 +326,7 @@ const AdminAssignmentManager = () => {
           onChange={(e) => setFilters(f => ({ ...f, status: e.target.value }))}
         >
           <option value="">Tất cả trạng thái</option>
-          <option value={ASSIGNMENT_STATUS.IN_USE}>Đang mượn</option>
+          <option value={ASSIGNMENT_STATUS.IN_USE}>Đang sử dụng</option>
           <option value={ASSIGNMENT_STATUS.RETURNED}>Đã trả</option>
         </select>
       </div>
@@ -413,28 +403,30 @@ const AdminAssignmentManager = () => {
               <thead className="bg-gray-50">
                 <tr className="border-b border-gray-100">
                   <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Ngày Cấp</th>
-                  <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Thiết Bị</th>
+                  <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Mã NV</th>
                   <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Nhân Viên</th>
+                  <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Chức Vụ</th>
                   <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Trạng thái</th>
                   <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase text-right">Tác vụ</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {filteredAssignments.map(a => (
-                  <tr key={a.id} className="hover:bg-gray-50/50 transition-colors">
+                  <tr key={a.id} onClick={() => setViewAssignmentDetail(a)} className="hover:bg-gray-50/50 transition-colors cursor-pointer">
                     <td className="px-6 py-4">
                       <div className="text-sm text-gray-800">{new Date(a.assigned_date).toLocaleDateString('vi-VN')}</div>
                       <div className="text-xs text-hepco-green font-medium mt-1">{!a.returned_date && calculateTimeAssigned(a.assigned_date)}</div>
                     </td>
-                    <td className="px-6 py-4 font-medium text-gray-800">{a.device?.name}</td>
+                    <td className="px-6 py-4 font-medium text-gray-800">{a.employee?.employee_code || '-'}</td>
                     <td className="px-6 py-4 text-sm text-gray-800">{a.employee?.full_name}</td>
+                    <td className="px-6 py-4 text-sm text-gray-800">{a.employee?.position || '-'}</td>
                     <td className="px-6 py-4">
                       {a.returned_date ?
-                        <span className="text-gray-600 bg-gray-100 px-2 py-1 rounded text-xs font-medium">Đã trả</span> :
-                        <span className="text-blue-700 bg-blue-100 px-2 py-1 rounded text-xs font-medium">Đang mượn</span>
+                        <span className="inline-flex items-center text-gray-600 bg-gray-100 px-2.5 py-1 rounded-md text-xs font-medium whitespace-nowrap">Đã trả</span> :
+                        <span className="inline-flex items-center text-blue-700 bg-blue-100 px-2.5 py-1 rounded-md text-xs font-medium whitespace-nowrap">Đang sử dụng</span>
                       }
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
                       {!a.returned_date && (
                         <div className="flex items-center justify-end gap-2">
                           {a.device?.category?.parent_id === null && (
@@ -464,7 +456,72 @@ const AdminAssignmentManager = () => {
           </div>
         )}
       </div>
-      <ConfirmModal isOpen={confirmConfig.isOpen} title={confirmConfig.title} message={confirmConfig.message} onConfirm={confirmConfig.onConfirm} onClose={() => setConfirmConfig({ ...confirmConfig, isOpen: false })} />
+      <ConfirmModal
+        isOpen={confirmConfig.isOpen}
+        title={confirmConfig.title}
+        message={confirmConfig.message}
+        onConfirm={confirmConfig.onConfirm}
+        onCancel={() => setConfirmConfig(prev => ({ ...prev, isOpen: false }))}
+      />
+
+      {viewAssignmentDetail && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col relative">
+            <div className="p-4 border-b flex justify-between items-center bg-gray-50">
+              <div>
+                <h3 className="font-bold text-lg text-gray-800">Chi tiết thiết bị sử dụng</h3>
+                <p className="text-sm text-gray-500 mt-1">
+                  Nhân viên: <span className="font-semibold">{viewAssignmentDetail.employee?.full_name}</span> - {viewAssignmentDetail.employee?.employee_code}
+                </p>
+              </div>
+              <button onClick={() => setViewAssignmentDetail(null)} className="text-gray-400 hover:text-red-500 transition-colors p-2 rounded-lg hover:bg-red-50">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="overflow-y-auto p-4 flex-1 bg-white">
+              <div className="border border-gray-200 rounded-lg overflow-hidden">
+                <table className="w-full text-left border-collapse min-w-[500px]">
+                  <thead className="bg-gray-50">
+                    <tr className="border-b border-gray-200">
+                      <th className="px-4 py-3 text-sm font-bold text-gray-700">Mã TS</th>
+                      <th className="px-4 py-3 text-sm font-bold text-gray-700">Tên Thiết Bị</th>
+                      <th className="px-4 py-3 text-sm font-bold text-gray-700">Danh Mục</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {/* Parent Device (Highlighted) */}
+                    <tr className="bg-blue-50/40">
+                      <td className="px-4 py-3 font-mono text-sm text-blue-800 font-semibold">{viewAssignmentDetail.device?.asset_code}</td>
+                      <td className="px-4 py-3 text-sm text-blue-900 font-bold">
+                        {viewAssignmentDetail.device?.name} 
+                        <span className="ml-2 text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded uppercase font-bold">Thiết bị chính</span>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-blue-800 font-semibold">{viewAssignmentDetail.device?.category?.name}</td>
+                    </tr>
+                    {/* Child Devices */}
+                    {(viewAssignmentDetail.device?.child_devices || []).map(child => (
+                      <tr key={child.id} className="hover:bg-gray-50">
+                        <td className="px-4 py-3 font-mono text-sm text-gray-600 pl-8 relative">
+                          <div className="absolute left-4 top-1/2 -translate-y-1/2 w-2 h-px bg-gray-300"></div>
+                          <div className="absolute left-4 top-0 h-1/2 w-px bg-gray-300"></div>
+                          {child.asset_code}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-700 font-medium">{child.name}</td>
+                        <td className="px-4 py-3 text-sm text-gray-500">{child.category?.name}</td>
+                      </tr>
+                    ))}
+                    {(viewAssignmentDetail.device?.child_devices || []).length === 0 && (
+                      <tr>
+                        <td colSpan="3" className="px-4 py-6 text-center text-gray-500 text-sm">Không có linh kiện đi kèm</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {returnItem && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
@@ -521,121 +578,13 @@ const AdminAssignmentManager = () => {
           </div>
         </div>
       )}
-      {isAssembleModalOpen && assembleDevice && (() => {
-        const existingCategories = assembleDevice.child_devices?.map(c => c.category?.code) || [];
-        const checkCanAssemble = (compCode) => {
-          if (!compCode) return true;
-          if (!PC_COMPONENTS.includes(compCode)) return false;
-
-          const singleLimitCodes = [DEVICE_CATEGORY_CODES.CPU, DEVICE_CATEGORY_CODES.MAINBOARD, DEVICE_CATEGORY_CODES.PSU, DEVICE_CATEGORY_CODES.CASE, DEVICE_CATEGORY_CODES.COOLER];
-          return !(singleLimitCodes.includes(compCode) && existingCategories.includes(compCode));
-        };
-
-        return (
-          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col relative">
-              <div className="flex justify-between items-center p-6 border-b">
-                <div>
-                  <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                    <Package className="w-6 h-6 text-hepco-green" /> Lắp ráp cấu hình
-                  </h2>
-                  <p className="text-sm text-gray-500 mt-1">Cấu hình linh kiện cho: <span className="font-semibold text-gray-800">{assembleDevice.name}</span></p>
-                </div>
-                <button onClick={() => { setIsAssembleModalOpen(false); setAssembleDevice(null); }} className="text-gray-400 hover:text-red-500 transition-colors p-2 rounded-lg hover:bg-red-50">
-                  <X className="w-6 h-6" />
-                </button>
-              </div>
-
-              <div className="flex-1 overflow-y-auto p-6 flex flex-col lg:flex-row gap-6 bg-gray-50/50">
-                {/* Linh kiện đang lắp */}
-                <div className="flex-1 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-                  <h3 className="font-semibold text-gray-800 mb-4 pb-2 border-b">Linh kiện đang lắp trong máy ({assembleDevice.child_devices?.length || 0})</h3>
-                  <div className="space-y-3">
-                    {assembleDevice.child_devices?.length > 0 ? assembleDevice.child_devices.map(comp => (
-                      <div key={comp.id} className="flex justify-between items-center p-3 bg-purple-50 border border-purple-100 rounded-lg">
-                        <div>
-                          <p className="text-sm font-semibold text-gray-800">{comp.name}</p>
-                        </div>
-                        <button
-                          onClick={async () => {
-                            await updateDeviceMutation.mutateAsync({ id: comp.id, parent_device_id: null, status: DEVICE_STATUS.IN_STOCK });
-                            toast.success('Đã tháo linh kiện');
-                            setAssembleDevice(prev => ({ ...prev, child_devices: prev.child_devices.filter(c => c.id !== comp.id) }));
-                            queryClient.invalidateQueries({ queryKey: ['assignments'] });
-                          }}
-                          className="text-xs font-semibold text-red-600 bg-red-100 hover:bg-red-200 px-3 py-1.5 rounded transition-colors"
-                        >
-                          Tháo ra
-                        </button>
-                      </div>
-                    )) : (
-                      <p className="text-sm text-gray-500 italic text-center py-4">Máy này chưa được lắp linh kiện nào.</p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Linh kiện trong kho */}
-                <div className="flex-1 bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col">
-                  <h3 className="font-semibold text-gray-800 mb-4 pb-2 border-b">Kho linh kiện sẵn có ({availableComponents.length})</h3>
-                  <div className="flex flex-col sm:flex-row gap-2 mb-4">
-                    <div className="relative flex-1">
-                      <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
-                      <input
-                        type="text"
-                        placeholder="Tìm linh kiện, S/N..."
-                        className="w-full pl-8 pr-3 py-1.5 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:outline-none focus:bg-white focus:ring-2 focus:ring-hepco-green"
-                        value={assembleSearch}
-                        onChange={(e) => setAssembleSearch(e.target.value)}
-                      />
-                    </div>
-                    <select
-                      className="w-full sm:w-auto py-1.5 px-3 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:outline-none focus:bg-white focus:ring-2 focus:ring-hepco-green"
-                      value={assembleCategory}
-                      onChange={(e) => setAssembleCategory(e.target.value)}
-                    >
-                      <option value="">Tất cả danh mục</option>
-                      {categories.filter(c => c.is_component).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                    </select>
-                  </div>
-                  <div className="space-y-3 overflow-y-auto flex-1 max-h-[400px] pr-1">
-                    {(() => {
-                      if (availableComponents.length === 0) return <p className="text-sm text-gray-500 italic text-center py-4">Không tìm thấy linh kiện phù hợp.</p>;
-
-                      return availableComponents.map(comp => {
-                        const canAdd = checkCanAssemble(comp.category?.code);
-                      return (
-                        <div key={comp.id} className="flex justify-between items-center p-3 bg-gray-50 border border-gray-200 rounded-lg">
-                          <div>
-                            <p className="text-sm font-semibold text-gray-800">{comp.name}</p>
-                          </div>
-                          <button
-                            disabled={!canAdd}
-                            onClick={async () => {
-                              await updateDeviceMutation.mutateAsync({ id: comp.id, parent_device_id: assembleDevice.id, status: assembleDevice.status });
-                              toast.success('Đã lắp linh kiện vào máy');
-                              setAssembleDevice(prev => ({ ...prev, child_devices: [...(prev.child_devices || []), comp] }));
-                              queryClient.invalidateQueries({ queryKey: ['assignments'] });
-                            }}
-                            className={`text-xs font-semibold px-3 py-1.5 rounded transition-colors ${canAdd ? 'text-hepco-green bg-green-100 hover:bg-green-200' : 'text-gray-400 bg-gray-200 cursor-not-allowed'}`}
-                          >
-                            {canAdd ? 'Lắp vào' : 'Đã có'}
-                          </button>
-                        </div>
-                      )
-                    })})()}
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-4 border-t bg-white flex justify-end">
-                <button onClick={() => { setIsAssembleModalOpen(false); setAssembleDevice(null); }} className="py-2 px-6 bg-gray-100 text-gray-700 font-semibold rounded-lg hover:bg-gray-200 transition-colors">
-                  Hoàn tất
-                </button>
-              </div>
-            </div>
-          </div>
-        );
-      })()}
+      <AssembleDeviceModal
+        isOpen={isAssembleModalOpen}
+        onClose={() => { setIsAssembleModalOpen(false); setAssembleDevice(null); }}
+        assembleDevice={assembleDevice}
+        setAssembleDevice={setAssembleDevice}
+        categories={categories}
+      />
     </div>
   );
 };

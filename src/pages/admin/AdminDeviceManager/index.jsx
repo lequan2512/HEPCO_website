@@ -6,11 +6,12 @@ import * as Yup from 'yup';
 import toast from 'react-hot-toast';
 import { getErrorMessage } from '../../../utils/errorMapper';
 import Loading from '../../../components/Loading';
-import { useGetDevices, useAddDevice, useUpdateDevice, useDeleteDevice, useGetCategories } from '../../../apis/device';
+import { useGetDevices, useAddDevice, useUpdateDevice, useDeleteDevice, useGetCategories, useDeleteMultipleDevices } from '../../../apis/device';
 import { useGetSuppliers } from '../../../apis/supplier';
 import ConfirmModal from '../../../components/ConfirmModal';
 import Pagination from '../../../components/Pagination';
-import { DEVICE_CATEGORY_CODES, DEVICE_STATUS, PC_COMPONENTS } from '../../../constants/device';
+import { DEVICE_CATEGORY_CODES, DEVICE_STATUS } from '../../../constants/device';
+import AssembleDeviceModal from '../../../components/AssembleDeviceModal';
 
 const AdminDeviceManager = () => {
   const [page, setPage] = useState(1);
@@ -31,14 +32,14 @@ const AdminDeviceManager = () => {
   const [debouncedFilters, setDebouncedFilters] = useState(filters);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [hideAssembled, setHideAssembled] = useState(true);
-  const [isGrouped, setIsGrouped] = useState(false);
+  const [isGrouped, setIsGrouped] = useState(true);
   const [isAssembleModalOpen, setIsAssembleModalOpen] = useState(false);
   const [assembleDevice, setAssembleDevice] = useState(null);
-  const [assembleSearch, setAssembleSearch] = useState('');
-  const [debouncedAssembleSearch, setDebouncedAssembleSearch] = useState('');
-  const [assembleCategory, setAssembleCategory] = useState('');
   const [viewGroup, setViewGroup] = useState(null);
   const [confirmConfig, setConfirmConfig] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [selectedGroupIds, setSelectedGroupIds] = useState([]);
+  const [isDefaultSet, setIsDefaultSet] = useState(false);
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -49,40 +50,56 @@ const AdminDeviceManager = () => {
     return () => clearTimeout(timer);
   }, [filters]);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedAssembleSearch(assembleSearch);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [assembleSearch]);
-
-  const { data: devicesRes, isLoading: isLoadingDevices } = useGetDevices({ ...debouncedFilters, hide_assembled: hideAssembled, group_by: isGrouped, page, limit: 20 });
+  const { data: devicesRes, isLoading: isLoadingDevices } = useGetDevices(
+    { ...debouncedFilters, hide_assembled: hideAssembled, group_by: isGrouped, page, limit: 20 },
+    { enabled: isDefaultSet }
+  );
   const devices = devicesRes?.data || [];
   const meta = devicesRes?.meta;
 
   const { data: groupedDevicesRes, isLoading: isLoadingGroupedDevices } = useGetDevices(
-    { 
+    {
       exact_name: viewGroup?.name,
       exact_model: viewGroup?.model || 'null',
       exact_spec_detail: viewGroup?.spec_detail || 'null',
       category_id: viewGroup?.category_id,
       brand: viewGroup?.brand || '',
-      limit: 1000 
+      limit: 1000
     },
     { enabled: !!viewGroup }
   );
   const groupedDevicesList = groupedDevicesRes?.data || [];
-  const { data: componentsRes } = useGetDevices({ status: DEVICE_STATUS.IN_STOCK, hide_assembled: true, is_component: true, search: debouncedAssembleSearch, category_id: assembleCategory, limit: 1000 });
-  const components = componentsRes?.data || [];
   const { data: categories = [], isLoading: isLoadingCategories } = useGetCategories();
   const { data: suppliersRes = {}, isLoading: isLoadingSuppliers } = useGetSuppliers({ limit: 1000 });
   const suppliers = suppliersRes?.data || [];
 
-  const isLoading = isLoadingDevices || isLoadingCategories || isLoadingSuppliers;
+  const isLoading = isLoadingDevices || isLoadingCategories || isLoadingSuppliers || !isDefaultSet;
 
   const addDeviceMutation = useAddDevice();
   const updateDeviceMutation = useUpdateDevice();
   const deleteDeviceMutation = useDeleteDevice();
+  const deleteMultipleMutation = useDeleteMultipleDevices();
+
+  useEffect(() => {
+    if (!isLoadingCategories && !isDefaultSet) {
+      if (categories.length > 0) {
+        const pcCategory = categories.find(c => c.code === DEVICE_CATEGORY_CODES.PC);
+        if (pcCategory) {
+          setFilters(prev => ({ ...prev, category_id: pcCategory.id }));
+          setDebouncedFilters(prev => ({ ...prev, category_id: pcCategory.id }));
+        }
+      }
+      setIsDefaultSet(true);
+    }
+  }, [categories, isLoadingCategories, isDefaultSet]);
+
+  useEffect(() => {
+    setSelectedIds([]); // Clear selection when page or filters change
+  }, [page, debouncedFilters, isGrouped]);
+
+  useEffect(() => {
+    setSelectedGroupIds([]);
+  }, [viewGroup]);
 
   const handleAddSuccess = () => {
     toast.success('Thêm thiết bị thành công');
@@ -179,6 +196,48 @@ const AdminDeviceManager = () => {
     });
   };
 
+  const handleBulkDelete = () => {
+    setConfirmConfig({
+      isOpen: true,
+      title: 'Xóa Nhiều Thiết Bị',
+      message: `Bạn có chắc chắn muốn xóa ${selectedIds.length} thiết bị đã chọn?`,
+      onConfirm: async () => {
+        try {
+          await deleteMultipleMutation.mutateAsync(selectedIds);
+          handleDeleteSuccess();
+          setSelectedIds([]);
+        } catch (error) {
+          handleError(error, 'Có lỗi xảy ra khi xóa các thiết bị');
+        }
+      }
+    });
+  };
+
+  const handleGroupBulkDelete = () => {
+    setConfirmConfig({
+      isOpen: true,
+      title: 'Xóa Nhiều Thiết Bị (Trong Nhóm)',
+      message: `Bạn có chắc chắn muốn xóa ${selectedGroupIds.length} thiết bị đã chọn?`,
+      onConfirm: async () => {
+        try {
+          await deleteMultipleMutation.mutateAsync(selectedGroupIds);
+          handleDeleteSuccess();
+          setSelectedGroupIds([]);
+        } catch (error) {
+          handleError(error, 'Có lỗi xảy ra khi xóa các thiết bị');
+        }
+      }
+    });
+  };
+
+  const isDeletable = (item) => {
+    if (item.is_grouped) return false;
+    if (item.status === DEVICE_STATUS.IN_USE) return false;
+    if (item.child_devices && item.child_devices.length > 0) return false;
+    if (item._count && item._count.assignments > 0) return false;
+    return true;
+  };
+
   const getStatusLabel = (status) => {
     const statusMap = {
       [DEVICE_STATUS.IN_STOCK]: { label: 'Tồn kho', color: 'bg-green-100 text-green-700' },
@@ -190,12 +249,11 @@ const AdminDeviceManager = () => {
     return <span className={`px-2 py-1 rounded text-xs font-semibold ${s.color}`}>{s.label}</span>;
   };
 
-
   const stats = {
-    total: devices.length,
-    inStock: devices.filter(d => d.status === DEVICE_STATUS.IN_STOCK).length,
-    inUse: devices.filter(d => d.status === DEVICE_STATUS.IN_USE).length,
-    broken: devices.filter(d => d.status === DEVICE_STATUS.BROKEN).length,
+    total: meta?.stats?.total || 0,
+    inStock: meta?.stats?.in_stock || 0,
+    inUse: meta?.stats?.in_use || 0,
+    broken: meta?.stats?.broken || 0,
   };
 
   const selectedCategoryName = filters.category_id
@@ -236,26 +294,11 @@ const AdminDeviceManager = () => {
     setIsAssembleModalOpen(true);
   };
 
-  const availableComponents = components.filter(d => {
-    if (d.parent_device_id || d.status !== DEVICE_STATUS.IN_STOCK) return false;
 
-    // If the device's category is explicitly marked as not a component, filter it out immediately
-    if (d.category && d.category.is_component === false) {
-      return false;
-    }
-
-    // Only allow components that belong to the PC_COMPONENTS list
-    if (d.category?.code) {
-      return PC_COMPONENTS.includes(d.category.code);
-    }
-
-    // Fallback if no code: only allow if it's explicitly marked as a component
-    return d.category?.is_component === true;
-  });
 
   return (
     <div className="w-full relative">
-      {(addDeviceMutation.isPending || deleteDeviceMutation.isPending || updateDeviceMutation.isPending) && <Loading fullScreen message="Đang xử lý..." />}
+      {(addDeviceMutation.isPending || deleteDeviceMutation.isPending || deleteMultipleMutation.isPending || updateDeviceMutation.isPending) && <Loading fullScreen message="Đang xử lý..." />}
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b pb-4 gap-4">
         <div>
@@ -264,7 +307,7 @@ const AdminDeviceManager = () => {
           </h1>
           <p className="text-gray-500 text-sm mt-2 hidden sm:block">Quản lý phần cứng, cấp phát và bảo trì trong công ty.</p>
         </div>
-        <div className="flex items-center w-full sm:w-auto gap-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center w-full sm:w-auto gap-3 sm:gap-4">
           <div className="relative w-full sm:w-64">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
@@ -285,13 +328,21 @@ const AdminDeviceManager = () => {
           </div>
           <button
             onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-            className={`flex items-center whitespace-nowrap gap-2 px-3 py-2 border rounded-lg text-sm transition-colors ${showAdvancedFilters ? 'bg-blue-50 border-blue-200 text-blue-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}`}
+            className={`flex items-center justify-center w-full sm:w-auto whitespace-nowrap gap-2 px-3 py-2 border rounded-lg text-sm transition-colors ${showAdvancedFilters ? 'bg-blue-50 border-blue-200 text-blue-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}`}
           >
             <Filter className="w-4 h-4" /> <span>Bộ Lọc Nâng Cao</span>
           </button>
+          {selectedIds.length > 0 && (
+            <button
+              onClick={handleBulkDelete}
+              className="flex items-center justify-center w-full sm:w-auto whitespace-nowrap gap-2 px-4 py-2 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition-colors shadow-sm"
+            >
+              <Trash2 className="w-5 h-5" /> <span>Xóa đã chọn ({selectedIds.length})</span>
+            </button>
+          )}
           <button
             onClick={() => { setIsFormOpen(true); setEditingId(null); formik.resetForm(); }}
-            className="flex items-center whitespace-nowrap gap-2 px-4 py-2 bg-hepco-green text-white font-semibold rounded-lg hover:bg-green-700 transition-colors shadow-sm w-full sm:w-auto justify-center"
+            className="flex items-center justify-center w-full sm:w-auto whitespace-nowrap gap-2 px-4 py-2 bg-hepco-green text-white font-semibold rounded-lg hover:bg-green-700 transition-colors shadow-sm"
           >
             <Plus className="w-5 h-5" /> <span>Thêm Mới</span>
           </button>
@@ -601,6 +652,21 @@ const AdminDeviceManager = () => {
             <table className="w-full text-left border-collapse min-w-[800px]">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-100">
+                  <th className="px-6 py-4 w-12 text-center">
+                    <input
+                      type="checkbox"
+                      className="w-4 h-4 text-hepco-green focus:ring-hepco-green rounded border-gray-300"
+                      checked={devices.length > 0 && devices.filter(isDeletable).length > 0 && devices.filter(isDeletable).every(d => selectedIds.includes(d.id))}
+                      onChange={(e) => {
+                        const deletableIds = devices.filter(isDeletable).map(d => d.id);
+                        if (e.target.checked) {
+                          setSelectedIds(prev => [...new Set([...prev, ...deletableIds])]);
+                        } else {
+                          setSelectedIds(prev => prev.filter(id => !deletableIds.includes(id)));
+                        }
+                      }}
+                    />
+                  </th>
                   <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Mã TS</th>
                   <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Thiết Bị</th>
                   <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Thương Hiệu</th>
@@ -610,11 +676,26 @@ const AdminDeviceManager = () => {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {devices.map((item) => (
-                  <tr 
-                    key={item.id} 
+                  <tr
+                    key={item.id}
                     className={`hover:bg-gray-50/50 transition-colors ${item.is_grouped ? 'cursor-pointer' : ''}`}
                     onClick={() => item.is_grouped ? setViewGroup(item) : undefined}
                   >
+                    <td className="px-6 py-4 w-12 text-center" onClick={(e) => e.stopPropagation()}>
+                      <input
+                        type="checkbox"
+                        disabled={!isDeletable(item)}
+                        checked={selectedIds.includes(item.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedIds(prev => [...prev, item.id]);
+                          } else {
+                            setSelectedIds(prev => prev.filter(id => id !== item.id));
+                          }
+                        }}
+                        className={`w-4 h-4 rounded border-gray-300 ${isDeletable(item) ? 'text-hepco-green focus:ring-hepco-green cursor-pointer' : 'text-gray-300 bg-gray-100 cursor-not-allowed'}`}
+                      />
+                    </td>
                     <td className="px-6 py-4 font-mono text-sm text-gray-800 font-bold">
                       {item.is_grouped ? (
                         <div className="flex flex-col">
@@ -642,7 +723,7 @@ const AdminDeviceManager = () => {
                       <p className="font-medium text-gray-700 truncate max-w-[150px]" title={item.brand || ''}>{item.brand || '-'}</p>
                       {item.supplier && <p className="text-xs text-gray-400 mt-1 truncate max-w-[150px]" title={item.supplier.name}>{item.supplier.name}</p>}
                     </td>
-                    <td className="px-6 py-4" onClick={(e) => { if(!item.is_grouped) e.stopPropagation(); }}>
+                    <td className="px-6 py-4" onClick={(e) => { if (!item.is_grouped) e.stopPropagation(); }}>
                       {item.status ? getStatusLabel(item.status) : ''}
                     </td>
                     <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
@@ -673,8 +754,9 @@ const AdminDeviceManager = () => {
                           </button>
                           <button
                             onClick={() => handleDelete(item.id)}
-                            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                            title="Xóa Thiết Bị"
+                            disabled={!isDeletable(item)}
+                            className={`p-2 rounded-lg transition-colors ${isDeletable(item) ? 'text-gray-400 hover:text-red-500 hover:bg-red-50' : 'text-gray-200 cursor-not-allowed'}`}
+                            title={isDeletable(item) ? "Xóa Thiết Bị" : "Không thể xóa"}
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -709,9 +791,19 @@ const AdminDeviceManager = () => {
                   {viewGroup.name} - {viewGroup.category?.name} - {viewGroup.quantity} thiết bị
                 </p>
               </div>
-              <button onClick={() => setViewGroup(null)} className="text-gray-400 hover:text-red-500 transition-colors p-2 rounded-lg hover:bg-red-50">
-                <X className="w-6 h-6" />
-              </button>
+              <div className="flex items-center gap-4">
+                {selectedGroupIds.length > 0 && (
+                  <button
+                    onClick={handleGroupBulkDelete}
+                    className="flex items-center gap-2 px-3 py-1.5 bg-red-500 text-white text-sm font-medium rounded-lg hover:bg-red-600 transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" /> Xóa đã chọn ({selectedGroupIds.length})
+                  </button>
+                )}
+                <button onClick={() => setViewGroup(null)} className="text-gray-400 hover:text-red-500 transition-colors p-2 rounded-lg hover:bg-red-50">
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
             </div>
             <div className="overflow-y-auto p-4 flex-1 bg-white">
               {isLoadingGroupedDevices ? (
@@ -721,6 +813,21 @@ const AdminDeviceManager = () => {
                   <table className="w-full text-left border-collapse min-w-[600px]">
                     <thead>
                       <tr className="bg-gray-50 border-b border-gray-200">
+                        <th className="px-4 py-3 w-10 text-center">
+                          <input
+                            type="checkbox"
+                            className="w-4 h-4 text-hepco-green focus:ring-hepco-green rounded border-gray-300"
+                            checked={groupedDevicesList.length > 0 && groupedDevicesList.filter(isDeletable).length > 0 && groupedDevicesList.filter(isDeletable).every(d => selectedGroupIds.includes(d.id))}
+                            onChange={(e) => {
+                              const deletableIds = groupedDevicesList.filter(isDeletable).map(d => d.id);
+                              if (e.target.checked) {
+                                setSelectedGroupIds(prev => [...new Set([...prev, ...deletableIds])]);
+                              } else {
+                                setSelectedGroupIds(prev => prev.filter(id => !deletableIds.includes(id)));
+                              }
+                            }}
+                          />
+                        </th>
                         <th className="px-4 py-3 text-sm font-bold text-gray-700">Mã TS</th>
                         <th className="px-4 py-3 text-sm font-bold text-gray-700">Tên Thiết Bị</th>
                         <th className="px-4 py-3 text-sm font-bold text-gray-700">Trạng Thái</th>
@@ -730,18 +837,58 @@ const AdminDeviceManager = () => {
                     <tbody className="divide-y divide-gray-100">
                       {groupedDevicesList.map(dev => (
                         <tr key={dev.id} className="hover:bg-gray-50">
+                          <td className="px-4 py-3 w-10 text-center">
+                            <input
+                              type="checkbox"
+                              disabled={!isDeletable(dev)}
+                              checked={selectedGroupIds.includes(dev.id)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedGroupIds(prev => [...prev, dev.id]);
+                                } else {
+                                  setSelectedGroupIds(prev => prev.filter(id => id !== dev.id));
+                                }
+                              }}
+                              className={`w-4 h-4 rounded border-gray-300 ${isDeletable(dev) ? 'text-hepco-green focus:ring-hepco-green cursor-pointer' : 'text-gray-300 bg-gray-100 cursor-not-allowed'}`}
+                            />
+                          </td>
                           <td className="px-4 py-3 font-mono text-sm text-gray-800">{dev.asset_code}</td>
                           <td className="px-4 py-3 text-sm text-gray-800 font-semibold truncate max-w-[200px]" title={dev.name}>{dev.name}</td>
                           <td className="px-4 py-3">{getStatusLabel(dev.status)}</td>
-                          <td className="px-4 py-3 text-right">
-                            <button
-                              onClick={() => { setViewGroup(null); handleEdit(dev); }}
-                              className="text-blue-500 hover:text-blue-700 text-sm font-medium mr-3"
-                            >Sửa</button>
-                            <button
-                              onClick={() => { setViewGroup(null); handleDelete(dev.id); }}
-                              className="text-red-500 hover:text-red-700 text-sm font-medium"
-                            >Xóa</button>
+                          <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
+                            <div className="flex items-center justify-end gap-2">
+                              {!dev.parent_device_id && dev.category?.parent_id === null && categories.some(c => c.parent_id === dev.category?.id) && (
+                                <button
+                                  onClick={() => handleOpenAssemble(dev)}
+                                  className="p-2 text-hepco-green hover:bg-green-50 rounded-lg transition-colors"
+                                  title="Lắp ráp linh kiện"
+                                >
+                                  <Package className="w-4 h-4" />
+                                </button>
+                              )}
+                              <button
+                                onClick={() => { setCloneDevice(dev); setCloneQuantity(1); }}
+                                className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
+                                title="Nhân bản Thiết Bị"
+                              >
+                                <Copy className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => { setViewGroup(null); handleEdit(dev); }}
+                                className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
+                                title="Sửa Thiết Bị"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </button>
+                              <button
+                                disabled={!isDeletable(dev)}
+                                onClick={() => { handleDelete(dev.id); }}
+                                className={`p-2 rounded-lg transition-colors ${isDeletable(dev) ? 'text-gray-400 hover:text-red-500 hover:bg-red-50' : 'text-gray-200 cursor-not-allowed'}`}
+                                title={!isDeletable(dev) ? "Không thể xóa" : "Xóa Thiết Bị"}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -790,121 +937,13 @@ const AdminDeviceManager = () => {
         </div>
       )}
 
-      {isAssembleModalOpen && assembleDevice && (() => {
-        const existingCategories = assembleDevice.child_devices?.map(c => c.category?.code) || [];
-        const checkCanAssemble = (compCode) => {
-          if (!compCode) return true;
-          if (!PC_COMPONENTS.includes(compCode)) return false;
-
-          const singleLimitCodes = [DEVICE_CATEGORY_CODES.CPU, DEVICE_CATEGORY_CODES.MAINBOARD, DEVICE_CATEGORY_CODES.PSU, DEVICE_CATEGORY_CODES.CASE, DEVICE_CATEGORY_CODES.COOLER];
-          return !(singleLimitCodes.includes(compCode) && existingCategories.includes(compCode));
-        };
-
-        return (
-          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col relative">
-              <div className="flex justify-between items-center p-6 border-b">
-                <div>
-                  <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                    <Package className="w-6 h-6 text-hepco-green" /> Lắp ráp cấu hình
-                  </h2>
-                  <p className="text-sm text-gray-500 mt-1">Cấu hình linh kiện cho: <span className="font-semibold text-gray-800">{assembleDevice.name}</span></p>
-                </div>
-                <button onClick={() => { setIsAssembleModalOpen(false); setAssembleDevice(null); }} className="text-gray-400 hover:text-red-500 transition-colors p-2 rounded-lg hover:bg-red-50">
-                  <X className="w-6 h-6" />
-                </button>
-              </div>
-
-              <div className="flex-1 overflow-y-auto p-6 flex flex-col lg:flex-row gap-6 bg-gray-50/50">
-                {/* Linh kiện đang lắp */}
-                <div className="flex-1 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-                  <h3 className="font-semibold text-gray-800 mb-4 pb-2 border-b">Linh kiện đang lắp trong máy ({assembleDevice.child_devices?.length || 0})</h3>
-                  <div className="space-y-3">
-                    {assembleDevice.child_devices?.length > 0 ? assembleDevice.child_devices.map(comp => (
-                      <div key={comp.id} className="flex justify-between items-center p-3 bg-purple-50 border border-purple-100 rounded-lg">
-                        <div>
-                          <p className="text-sm font-semibold text-gray-800">{comp.name}</p>
-                        </div>
-                        <button
-                          onClick={async () => {
-                            await updateDeviceMutation.mutateAsync({ id: comp.id, parent_device_id: null, status: DEVICE_STATUS.IN_STOCK });
-                            toast.success('Đã tháo linh kiện');
-                            setAssembleDevice(prev => ({ ...prev, child_devices: prev.child_devices.filter(c => c.id !== comp.id) }));
-                            queryClient.invalidateQueries({ queryKey: ['devices'] });
-                          }}
-                          className="text-xs font-semibold text-red-600 bg-red-100 hover:bg-red-200 px-3 py-1.5 rounded transition-colors"
-                        >
-                          Tháo ra
-                        </button>
-                      </div>
-                    )) : (
-                      <p className="text-sm text-gray-500 italic text-center py-4">Máy này chưa được lắp linh kiện nào.</p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Linh kiện trong kho */}
-                <div className="flex-1 bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col">
-                  <h3 className="font-semibold text-gray-800 mb-4 pb-2 border-b">Kho linh kiện sẵn có ({availableComponents.length})</h3>
-                  <div className="flex flex-col sm:flex-row gap-2 mb-4">
-                    <div className="relative flex-1">
-                      <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
-                      <input
-                        type="text"
-                        placeholder="Tìm linh kiện, S/N..."
-                        className="w-full pl-8 pr-3 py-1.5 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:outline-none focus:bg-white focus:ring-2 focus:ring-hepco-green"
-                        value={assembleSearch}
-                        onChange={(e) => setAssembleSearch(e.target.value)}
-                      />
-                    </div>
-                    <select
-                      className="w-full sm:w-auto py-1.5 px-3 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:outline-none focus:bg-white focus:ring-2 focus:ring-hepco-green"
-                      value={assembleCategory}
-                      onChange={(e) => setAssembleCategory(e.target.value)}
-                    >
-                      <option value="">Tất cả danh mục</option>
-                      {categories.filter(c => c.is_component).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                    </select>
-                  </div>
-                  <div className="space-y-3 overflow-y-auto flex-1 max-h-[400px] pr-1">
-                    {(() => {
-                      if (availableComponents.length === 0) return <p className="text-sm text-gray-500 italic text-center py-4">Không tìm thấy linh kiện phù hợp.</p>;
-
-                      return availableComponents.map(comp => {
-                        const canAdd = checkCanAssemble(comp.category?.code);
-                      return (
-                        <div key={comp.id} className="flex justify-between items-center p-3 bg-gray-50 border border-gray-200 rounded-lg">
-                          <div>
-                            <p className="text-sm font-semibold text-gray-800">{comp.name}</p>
-                          </div>
-                          <button
-                            disabled={!canAdd}
-                            onClick={async () => {
-                              await updateDeviceMutation.mutateAsync({ id: comp.id, parent_device_id: assembleDevice.id, status: assembleDevice.status });
-                              toast.success('Đã lắp linh kiện vào máy');
-                              setAssembleDevice(prev => ({ ...prev, child_devices: [...(prev.child_devices || []), comp] }));
-                              queryClient.invalidateQueries({ queryKey: ['devices'] });
-                            }}
-                            className={`text-xs font-semibold px-3 py-1.5 rounded transition-colors ${canAdd ? 'text-hepco-green bg-green-100 hover:bg-green-200' : 'text-gray-400 bg-gray-200 cursor-not-allowed'}`}
-                          >
-                            {canAdd ? 'Lắp vào' : 'Đã có'}
-                          </button>
-                        </div>
-                      )
-                    })})()}
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-4 border-t bg-white flex justify-end">
-                <button onClick={() => { setIsAssembleModalOpen(false); setAssembleDevice(null); }} className="py-2 px-6 bg-gray-100 text-gray-700 font-semibold rounded-lg hover:bg-gray-200 transition-colors">
-                  Hoàn tất
-                </button>
-              </div>
-            </div>
-          </div>
-        );
-      })()}
+      <AssembleDeviceModal
+        isOpen={isAssembleModalOpen}
+        onClose={() => { setIsAssembleModalOpen(false); setAssembleDevice(null); }}
+        assembleDevice={assembleDevice}
+        setAssembleDevice={setAssembleDevice}
+        categories={categories}
+      />
     </div>
   );
 };
