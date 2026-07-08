@@ -234,7 +234,7 @@ const AdminAssignmentManager = () => {
                   >
                     <option value="">-- Chọn nhân viên --</option>
                     {employees.map(e => (
-                      <option key={e.id} value={e.id}>{e.full_name} ({e.employee_code}) - {e.department?.name || 'Không có PB'}</option>
+                      <option key={e.id} value={e.id}>{e.full_name} ({e.employee_code}) - {e.position ? `${e.position} ` : ''}{e.department?.name || 'Không có PB'}</option>
                     ))}
                   </select>
                 </div>

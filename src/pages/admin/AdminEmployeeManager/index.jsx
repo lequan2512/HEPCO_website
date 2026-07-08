@@ -54,7 +54,7 @@ const AdminEmployeeManager = () => {
   };
 
   const formik = useFormik({
-    initialValues: { employee_code: '', full_name: '', department_id: '', email: '', phone: '', status: EMPLOYEE_STATUS.ACTIVE },
+    initialValues: { employee_code: '', full_name: '', department_id: '', position: '', email: '', phone: '', status: EMPLOYEE_STATUS.ACTIVE },
     validationSchema: Yup.object({
       employee_code: Yup.string().required('Vui lòng nhập mã nhân viên'),
       full_name: Yup.string().required('Vui lòng nhập họ tên'),
@@ -85,6 +85,7 @@ const AdminEmployeeManager = () => {
       employee_code: item.employee_code,
       full_name: item.full_name,
       department_id: item.department_id || '',
+      position: item.position || '',
       email: item.email || '',
       phone: item.phone || '',
       status: item.status
@@ -176,6 +177,10 @@ const AdminEmployeeManager = () => {
                   {formik.touched.full_name && formik.errors.full_name && <div className="text-red-500 text-xs mt-1">{formik.errors.full_name}</div>}
                 </div>
                 <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Chức vụ</label>
+                  <input type="text" name="position" placeholder="VD: Trưởng phòng, Nhân viên..." className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-hepco-green/50" value={formik.values.position} onChange={formik.handleChange} />
+                </div>
+                <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                   <input type="email" name="email" className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-hepco-green/50" value={formik.values.email} onChange={formik.handleChange} />
                   {formik.touched.email && formik.errors.email && <div className="text-red-500 text-xs mt-1">{formik.errors.email}</div>}
@@ -227,7 +232,7 @@ const AdminEmployeeManager = () => {
                     <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Mã NV</th>
                     <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Họ Tên</th>
                     <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Liên Hệ</th>
-                    <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Phòng Ban</th>
+                    <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Chức vụ / Phòng Ban</th>
                     <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase text-right">Thao tác</th>
                   </tr>
                 </thead>
@@ -244,7 +249,10 @@ const AdminEmployeeManager = () => {
                         )}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-500">{e.email}<br/>{e.phone}</td>
-                      <td className="px-6 py-4 text-sm text-gray-500">{e.department?.name || 'Chưa xếp'}</td>
+                      <td className="px-6 py-4 text-sm text-gray-500">
+                        {e.position && <div className="font-medium text-gray-700">{e.position}</div>}
+                        <div>{e.department?.name || 'Chưa xếp'}</div>
+                      </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <button onClick={() => handleEdit(e)} className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"><Edit2 className="w-4 h-4" /></button>

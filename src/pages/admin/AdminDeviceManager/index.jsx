@@ -31,11 +31,13 @@ const AdminDeviceManager = () => {
   const [debouncedFilters, setDebouncedFilters] = useState(filters);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [hideAssembled, setHideAssembled] = useState(true);
+  const [isGrouped, setIsGrouped] = useState(false);
   const [isAssembleModalOpen, setIsAssembleModalOpen] = useState(false);
   const [assembleDevice, setAssembleDevice] = useState(null);
   const [assembleSearch, setAssembleSearch] = useState('');
   const [debouncedAssembleSearch, setDebouncedAssembleSearch] = useState('');
   const [assembleCategory, setAssembleCategory] = useState('');
+  const [viewGroup, setViewGroup] = useState(null);
   const [confirmConfig, setConfirmConfig] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
   const queryClient = useQueryClient();
 
@@ -54,9 +56,22 @@ const AdminDeviceManager = () => {
     return () => clearTimeout(timer);
   }, [assembleSearch]);
 
-  const { data: devicesRes, isLoading: isLoadingDevices } = useGetDevices({ ...debouncedFilters, hide_assembled: hideAssembled, page, limit: 20 });
+  const { data: devicesRes, isLoading: isLoadingDevices } = useGetDevices({ ...debouncedFilters, hide_assembled: hideAssembled, group_by: isGrouped, page, limit: 20 });
   const devices = devicesRes?.data || [];
   const meta = devicesRes?.meta;
+
+  const { data: groupedDevicesRes, isLoading: isLoadingGroupedDevices } = useGetDevices(
+    { 
+      exact_name: viewGroup?.name,
+      exact_model: viewGroup?.model || 'null',
+      exact_spec_detail: viewGroup?.spec_detail || 'null',
+      category_id: viewGroup?.category_id,
+      brand: viewGroup?.brand || '',
+      limit: 1000 
+    },
+    { enabled: !!viewGroup }
+  );
+  const groupedDevicesList = groupedDevicesRes?.data || [];
   const { data: componentsRes } = useGetDevices({ status: DEVICE_STATUS.IN_STOCK, hide_assembled: true, is_component: true, search: debouncedAssembleSearch, category_id: assembleCategory, limit: 1000 });
   const components = componentsRes?.data || [];
   const { data: categories = [], isLoading: isLoadingCategories } = useGetCategories();
@@ -399,7 +414,16 @@ const AdminDeviceManager = () => {
       </div>
 
       {/* Hide Assembled Toggle */}
-      <div className="flex justify-end mb-4">
+      <div className="flex justify-end mb-4 gap-4">
+        <label className="flex items-center gap-2 cursor-pointer text-sm font-medium text-gray-700 bg-white px-3 py-1.5 rounded-lg border border-gray-200 shadow-sm hover:bg-gray-50 transition-colors">
+          <input
+            type="checkbox"
+            checked={isGrouped}
+            onChange={(e) => { setIsGrouped(e.target.checked); setPage(1); }}
+            className="w-4 h-4 text-hepco-green focus:ring-hepco-green rounded"
+          />
+          Gom nhóm thiết bị giống nhau
+        </label>
         <label className="flex items-center gap-2 cursor-pointer text-sm font-medium text-gray-700 bg-white px-3 py-1.5 rounded-lg border border-gray-200 shadow-sm hover:bg-gray-50 transition-colors">
           <input
             type="checkbox"
@@ -586,12 +610,25 @@ const AdminDeviceManager = () => {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {devices.map((item) => (
-                  <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
+                  <tr 
+                    key={item.id} 
+                    className={`hover:bg-gray-50/50 transition-colors ${item.is_grouped ? 'cursor-pointer' : ''}`}
+                    onClick={() => item.is_grouped ? setViewGroup(item) : undefined}
+                  >
                     <td className="px-6 py-4 font-mono text-sm text-gray-800 font-bold">
-                      {item.asset_code}
+                      {item.is_grouped ? (
+                        <div className="flex flex-col">
+                          <span className="text-gray-500 italic font-normal">Nhiều mã TS</span>
+                          <span className="text-hepco-green bg-green-50 px-2 py-0.5 rounded text-xs mt-1 w-fit border border-green-100">
+                            Số lượng: {item.quantity}
+                          </span>
+                        </div>
+                      ) : (
+                        item.asset_code
+                      )}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-800">
-                      <p className="font-semibold">{item.name}</p>
+                      <p className="font-semibold truncate max-w-[200px] sm:max-w-[300px]" title={item.name}>{item.name}</p>
                       <div className="flex flex-wrap gap-1 mt-1">
                         {item.category && <span className="bg-blue-100 text-blue-700 text-[10px] px-2 py-0.5 rounded font-medium">{item.category.name}</span>}
                         {item.parent_device_id && (
@@ -602,45 +639,49 @@ const AdminDeviceManager = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500">
-                      <p className="font-medium text-gray-700">{item.brand || '-'}</p>
-                      {item.supplier && <p className="text-xs text-gray-400 mt-1">{item.supplier.name}</p>}
+                      <p className="font-medium text-gray-700 truncate max-w-[150px]" title={item.brand || ''}>{item.brand || '-'}</p>
+                      {item.supplier && <p className="text-xs text-gray-400 mt-1 truncate max-w-[150px]" title={item.supplier.name}>{item.supplier.name}</p>}
                     </td>
-                    <td className="px-6 py-4">
-                      {getStatusLabel(item.status)}
+                    <td className="px-6 py-4" onClick={(e) => { if(!item.is_grouped) e.stopPropagation(); }}>
+                      {item.status ? getStatusLabel(item.status) : ''}
                     </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        {!item.parent_device_id && item.category?.parent_id === null && categories.some(c => c.parent_id === item.category?.id) && (
+                    <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
+                      {!item.is_grouped ? (
+                        <div className="flex items-center justify-end gap-2">
+                          {!item.parent_device_id && item.category?.parent_id === null && categories.some(c => c.parent_id === item.category?.id) && (
+                            <button
+                              onClick={() => handleOpenAssemble(item)}
+                              className="p-2 text-hepco-green hover:bg-green-50 rounded-lg transition-colors"
+                              title="Lắp ráp linh kiện"
+                            >
+                              <Package className="w-4 h-4" />
+                            </button>
+                          )}
                           <button
-                            onClick={() => handleOpenAssemble(item)}
-                            className="p-2 text-hepco-green hover:bg-green-50 rounded-lg transition-colors"
-                            title="Lắp ráp linh kiện"
+                            onClick={() => { setCloneDevice(item); setCloneQuantity(1); }}
+                            className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
+                            title="Nhân bản Thiết Bị"
                           >
-                            <Package className="w-4 h-4" />
+                            <Copy className="w-4 h-4" />
                           </button>
-                        )}
-                        <button
-                          onClick={() => { setCloneDevice(item); setCloneQuantity(1); }}
-                          className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
-                          title="Nhân bản Thiết Bị"
-                        >
-                          <Copy className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleEdit(item)}
-                          className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
-                          title="Sửa Thiết Bị"
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(item.id)}
-                          className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                          title="Xóa Thiết Bị"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
+                          <button
+                            onClick={() => handleEdit(item)}
+                            className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
+                            title="Sửa Thiết Bị"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(item.id)}
+                            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                            title="Xóa Thiết Bị"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-gray-400 italic">Chế độ xem nhóm</span>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -656,6 +697,64 @@ const AdminDeviceManager = () => {
           </div>
         )}
       </div>
+
+      {/* Grouped Devices Modal */}
+      {viewGroup && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col relative">
+            <div className="p-4 border-b flex justify-between items-center bg-gray-50">
+              <div>
+                <h3 className="font-bold text-lg text-gray-800">Chi tiết nhóm thiết bị</h3>
+                <p className="text-sm text-gray-500 mt-1">
+                  {viewGroup.name} - {viewGroup.category?.name} - {viewGroup.quantity} thiết bị
+                </p>
+              </div>
+              <button onClick={() => setViewGroup(null)} className="text-gray-400 hover:text-red-500 transition-colors p-2 rounded-lg hover:bg-red-50">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="overflow-y-auto p-4 flex-1 bg-white">
+              {isLoadingGroupedDevices ? (
+                <div className="py-12"><Loading /></div>
+              ) : groupedDevicesList.length > 0 ? (
+                <div className="border border-gray-200 rounded-lg overflow-x-auto">
+                  <table className="w-full text-left border-collapse min-w-[600px]">
+                    <thead>
+                      <tr className="bg-gray-50 border-b border-gray-200">
+                        <th className="px-4 py-3 text-sm font-bold text-gray-700">Mã TS</th>
+                        <th className="px-4 py-3 text-sm font-bold text-gray-700">Tên Thiết Bị</th>
+                        <th className="px-4 py-3 text-sm font-bold text-gray-700">Trạng Thái</th>
+                        <th className="px-4 py-3 text-sm font-bold text-gray-700 text-right">Thao Tác</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {groupedDevicesList.map(dev => (
+                        <tr key={dev.id} className="hover:bg-gray-50">
+                          <td className="px-4 py-3 font-mono text-sm text-gray-800">{dev.asset_code}</td>
+                          <td className="px-4 py-3 text-sm text-gray-800 font-semibold truncate max-w-[200px]" title={dev.name}>{dev.name}</td>
+                          <td className="px-4 py-3">{getStatusLabel(dev.status)}</td>
+                          <td className="px-4 py-3 text-right">
+                            <button
+                              onClick={() => { setViewGroup(null); handleEdit(dev); }}
+                              className="text-blue-500 hover:text-blue-700 text-sm font-medium mr-3"
+                            >Sửa</button>
+                            <button
+                              onClick={() => { setViewGroup(null); handleDelete(dev.id); }}
+                              className="text-red-500 hover:text-red-700 text-sm font-medium"
+                            >Xóa</button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <p className="text-center text-gray-500 italic py-8">Không tìm thấy thiết bị nào.</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       <ConfirmModal
         isOpen={confirmConfig.isOpen}

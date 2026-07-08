@@ -1,13 +1,14 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
 import axiosInstance from '../utils/axios';
 
-export const useGetDevices = (params) => {
+export const useGetDevices = (params, options = {}) => {
   return useQuery({
     queryKey: ['devices', params],
     queryFn: async () => {
       const response = await axiosInstance.get('/api/devices', { params });
       return response.data;
     },
+    ...options
   });
 };
 
