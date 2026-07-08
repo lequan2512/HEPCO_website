@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { ClipboardList, Plus, RotateCcw, X, Search, Package } from 'lucide-react';
+import { ClipboardList, Plus, RotateCcw, X, Search, Package, Download } from 'lucide-react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import toast from 'react-hot-toast';
@@ -13,6 +13,9 @@ import { useGetDepartments } from '../../../apis/department';
 import ConfirmModal from '../../../components/ConfirmModal';
 import Pagination from '../../../components/Pagination';
 import { PC_COMPONENTS, DEVICE_CATEGORY_CODES, DEVICE_STATUS, ASSIGNMENT_STATUS } from '../../../constants/device';
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
+import axiosInstance from '../../../utils/axios';
 
 const AdminAssignmentManager = () => {
   const [page, setPage] = useState(1);
@@ -124,6 +127,117 @@ const AdminAssignmentManager = () => {
     returnFormik.setValues({ returned_date: new Date().toISOString().split('T')[0], note: 'Đã thu hồi', return_status: DEVICE_STATUS.IN_STOCK });
   };
 
+  const handleExportExcel = async () => {
+    try {
+      const response = await axiosInstance.get('/api/assignments', {
+        params: { ...debouncedFilters, limit: 10000, status: ASSIGNMENT_STATUS.ACTIVE }
+      });
+      const allAssignments = response.data.data || [];
+
+      // Only show devices whose category has child categories
+      const validAssignments = allAssignments.filter(item => {
+        if (!item.device || !item.device.category) return false;
+        return categories.some(c => c.parent_id === item.device.category.id);
+      });
+
+      // Group by department
+      const grouped = {};
+      validAssignments.forEach(item => {
+        const deptName = item.employee?.department?.name || 'Khác';
+        if (!grouped[deptName]) grouped[deptName] = [];
+        grouped[deptName].push(item);
+      });
+
+      const getComponent = (device, code) => {
+        if (!device?.child_devices) return '-';
+        const comps = device.child_devices.filter(c => c.category?.code === code);
+        return comps.length > 0 ? comps.map(c => c.name).join('\n') : '-';
+      };
+
+      const workbook = new ExcelJS.Workbook();
+      const sheet = workbook.addWorksheet('Cấp Phát Thiết Bị');
+
+      sheet.columns = [
+        { header: 'Mã NV', key: 'employee_code', width: 15 },
+        { header: 'Nhân Viên', key: 'employee', width: 25 },
+        { header: 'Chức Vụ', key: 'position', width: 20 },
+        { header: 'Mainboard', key: 'mainboard', width: 25 },
+        { header: 'CPU', key: 'cpu', width: 25 },
+        { header: 'RAM', key: 'ram', width: 25 },
+        { header: 'Ổ Cứng', key: 'drive', width: 25 },
+        { header: 'VGA', key: 'vga', width: 25 },
+        { header: 'Nguồn', key: 'psu', width: 20 },
+        { header: 'Vỏ Case', key: 'case', width: 20 },
+        { header: 'Tản Nhiệt', key: 'cooler', width: 20 },
+        { header: 'Màn Hình', key: 'monitor', width: 25 },
+        { header: 'Bàn Phím', key: 'keyboard', width: 20 },
+        { header: 'Chuột', key: 'mouse', width: 20 },
+        { header: 'Ngày Cấp', key: 'assigned_date', width: 15 },
+      ];
+
+      // Style header
+      sheet.getRow(1).eachCell((cell) => {
+        cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1F497D' } }; // Formal dark blue
+        cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        cell.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
+      });
+
+      let currentRow = 2;
+      Object.keys(grouped).sort().forEach((dept) => {
+        // Department Header Row
+        const deptRow = sheet.addRow({ employee_code: `Phòng Ban: ${dept}` });
+        sheet.mergeCells(currentRow, 1, currentRow, 15);
+        deptRow.getCell(1).font = { bold: true, size: 12, color: { argb: 'FF000000' } };
+        deptRow.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD9E1F2' } }; // Light blueish gray
+        deptRow.getCell(1).alignment = { vertical: 'middle', horizontal: 'left' };
+        
+        for (let c = 1; c <= 15; c++) {
+          deptRow.getCell(c).border = { top: {style:'thin', color: {argb:'FFB4C6E7'}}, left: {style:'thin', color: {argb:'FFB4C6E7'}}, bottom: {style:'thin', color: {argb:'FFB4C6E7'}}, right: {style:'thin', color: {argb:'FFB4C6E7'}} };
+        }
+        currentRow++;
+
+        const items = grouped[dept];
+        items.forEach((item, i) => {
+          const isAlternate = i % 2 !== 0;
+          const color = isAlternate ? 'FFF2F2F2' : 'FFFFFFFF'; // Alternate rows within department
+          
+          const row = sheet.addRow({
+            employee_code: item.employee?.employee_code || '-',
+            employee: item.employee?.full_name || item.employee?.name || '-',
+            position: item.employee?.position || '-',
+            mainboard: getComponent(item.device, DEVICE_CATEGORY_CODES.MAINBOARD),
+            cpu: getComponent(item.device, DEVICE_CATEGORY_CODES.CPU),
+            ram: getComponent(item.device, DEVICE_CATEGORY_CODES.RAM),
+            drive: getComponent(item.device, DEVICE_CATEGORY_CODES.DRIVE),
+            vga: getComponent(item.device, DEVICE_CATEGORY_CODES.VGA),
+            psu: getComponent(item.device, DEVICE_CATEGORY_CODES.PSU),
+            case: getComponent(item.device, DEVICE_CATEGORY_CODES.CASE),
+            cooler: getComponent(item.device, DEVICE_CATEGORY_CODES.COOLER),
+            monitor: getComponent(item.device, DEVICE_CATEGORY_CODES.MONITOR),
+            keyboard: getComponent(item.device, DEVICE_CATEGORY_CODES.KEYBOARD),
+            mouse: getComponent(item.device, DEVICE_CATEGORY_CODES.MOUSE),
+            assigned_date: item.assigned_date ? new Date(item.assigned_date).toLocaleDateString('vi-VN') : '-'
+          });
+
+          row.eachCell((cell) => {
+            cell.alignment = { vertical: 'middle', wrapText: true };
+            cell.border = { top: {style:'thin', color: {argb:'FFBFBFBF'}}, left: {style:'thin', color: {argb:'FFBFBFBF'}}, bottom: {style:'thin', color: {argb:'FFBFBFBF'}}, right: {style:'thin', color: {argb:'FFBFBFBF'}} };
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: color } };
+          });
+          currentRow++;
+        });
+      });
+
+      const buffer = await workbook.xlsx.writeBuffer();
+      saveAs(new Blob([buffer]), `ThongKe_ThietBi_${new Date().toISOString().split('T')[0]}.xlsx`);
+      toast.success('Xuất file Excel thành công');
+    } catch (error) {
+      console.error(error);
+      toast.error('Có lỗi xảy ra khi xuất Excel');
+    }
+  };
+
   if (isLoading) return <Loading />;
 
   const filteredAssignments = assignments;
@@ -132,7 +246,10 @@ const AdminAssignmentManager = () => {
     <div className="w-full relative">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b pb-4 gap-4">
         <h1 className="text-2xl font-bold flex items-center gap-2"><ClipboardList className="w-6 h-6 text-hepco-green" /> Cấp Phát Thiết Bị</h1>
-        <button onClick={() => setIsFormOpen(true)} className="flex items-center whitespace-nowrap gap-2 px-4 py-2 bg-hepco-green text-white font-semibold rounded-lg hover:bg-green-700 transition-colors shadow-sm w-full sm:w-auto justify-center"><Plus className="w-5 h-5" /> <span>Cấp Phát Mới</span></button>
+        <div className="flex gap-2 w-full sm:w-auto">
+          <button onClick={handleExportExcel} className="flex items-center whitespace-nowrap gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors shadow-sm w-full sm:w-auto justify-center"><Download className="w-5 h-5 text-gray-500" /> <span>Xuất Excel</span></button>
+          <button onClick={() => setIsFormOpen(true)} className="flex items-center whitespace-nowrap gap-2 px-4 py-2 bg-hepco-green text-white font-semibold rounded-lg hover:bg-green-700 transition-colors shadow-sm w-full sm:w-auto justify-center"><Plus className="w-5 h-5" /> <span>Cấp Phát Mới</span></button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
