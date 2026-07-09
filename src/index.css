@@ -12,6 +12,14 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+@layer base {
+  button:not(:disabled),
+  input[type="button"]:not(:disabled),
+  input[type="submit"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
 @layer utilities {
   .clip-diagonal {
     clip-path: polygon(10% 0, 100% 0, 100% 100%, 0% 100%);
