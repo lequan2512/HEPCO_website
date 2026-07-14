@@ -85,11 +85,24 @@ const NewsPartnersAwards = () => {
           </div>
           <div className="flex flex-wrap justify-center items-center gap-12 opacity-70">
             {/* Logos Placeholders */}
-            <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center font-bold text-gray-400 shadow-md hover:shadow-lg hover:-translate-y-1 transition-all border border-gray-100 grayscale hover:grayscale-0">Logo 1</div>
-            <div className="w-32 h-16 bg-white flex items-center justify-center font-bold text-gray-400 shadow-md hover:shadow-lg hover:-translate-y-1 transition-all rounded-lg border border-gray-100 grayscale hover:grayscale-0">Logo 2</div>
-            <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center font-bold text-gray-400 shadow-md hover:shadow-lg hover:-translate-y-1 transition-all border border-gray-100 grayscale hover:grayscale-0">Logo 3</div>
-            <div className="w-40 h-12 bg-white flex items-center justify-center font-bold text-gray-400 shadow-md hover:shadow-lg hover:-translate-y-1 transition-all rounded-lg border border-gray-100 grayscale hover:grayscale-0">Logo 4</div>
-            <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center font-bold text-gray-400 shadow-md hover:shadow-lg hover:-translate-y-1 transition-all border border-gray-100 grayscale hover:grayscale-0">Logo 5</div>
+            <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-md hover:shadow-lg hover:-translate-y-1 transition-all border border-gray-100 grayscale hover:grayscale-0 overflow-hidden">
+              <img src="/images/partner/benh-vien.jpg" alt="Bệnh Viện" className="w-full h-full object-contain p-2" />
+            </div>
+            <div className="w-32 h-16 bg-white flex items-center justify-center shadow-md hover:shadow-lg hover:-translate-y-1 transition-all rounded-lg border border-gray-100 grayscale hover:grayscale-0 overflow-hidden">
+              <img src="/images/partner/logomgreen.png" alt="mGreen" className="w-full h-full object-contain p-2" />
+            </div>
+            <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-md hover:shadow-lg hover:-translate-y-1 transition-all border border-gray-100 grayscale hover:grayscale-0 overflow-hidden">
+              <img src="/images/partner/scavi.jpg" alt="Scavi" className="w-full h-full object-contain p-2" />
+            </div>
+            <div className="w-40 h-16 bg-white flex items-center justify-center shadow-md hover:shadow-lg hover:-translate-y-1 transition-all rounded-lg border border-gray-100 grayscale hover:grayscale-0 overflow-hidden">
+              <img src="/images/partner/toyota.png" alt="Toyota" className="w-full h-full object-contain p-2" />
+            </div>
+            <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-md hover:shadow-lg hover:-translate-y-1 transition-all border border-gray-100 grayscale hover:grayscale-0 overflow-hidden">
+              <img src="/images/partner/usaid.jpg" alt="USAID" className="w-full h-full object-contain p-2" />
+            </div>
+            <div className="w-32 h-16 bg-white flex items-center justify-center shadow-md hover:shadow-lg hover:-translate-y-1 transition-all rounded-lg border border-gray-100 grayscale hover:grayscale-0 overflow-hidden">
+              <img src="/images/partner/wwf.webp" alt="WWF" className="w-full h-full object-contain p-2" />
+            </div>
           </div>
         </div>
 
@@ -102,10 +115,21 @@ const NewsPartnersAwards = () => {
             </h2>
           </div>
           <div className="flex justify-start md:justify-center gap-6 overflow-x-auto pb-8 snap-x snap-mandatory px-2">
-             <div className="w-64 h-80 bg-white border-2 border-yellow-400 rounded-xl shadow-md hover:shadow-2xl hover:-translate-y-2 flex-shrink-0 flex items-center justify-center snap-center transition-all duration-300">Bằng khen 1</div>
-             <div className="w-64 h-80 bg-white border-2 border-yellow-400 rounded-xl shadow-md hover:shadow-2xl hover:-translate-y-2 flex-shrink-0 flex items-center justify-center snap-center transition-all duration-300">Bằng khen 2</div>
-             <div className="w-64 h-80 bg-white border-2 border-yellow-400 rounded-xl shadow-md hover:shadow-2xl hover:-translate-y-2 flex-shrink-0 flex items-center justify-center snap-center transition-all duration-300">Bằng khen 3</div>
-             <div className="w-64 h-80 bg-white border-2 border-yellow-400 rounded-xl shadow-md hover:shadow-2xl hover:-translate-y-2 flex-shrink-0 flex items-center justify-center snap-center transition-all duration-300">Bằng khen 4</div>
+             <div className="w-96 h-64 bg-white border-2 border-yellow-400 rounded-xl shadow-md hover:shadow-2xl hover:-translate-y-2 flex-shrink-0 flex items-center justify-center snap-center transition-all duration-300 overflow-hidden">
+               <img src="/images/merit/bang-khen1.jpg" alt="Bằng khen 1" className="w-full h-full object-contain p-2" />
+             </div>
+             <div className="w-96 h-64 bg-white border-2 border-yellow-400 rounded-xl shadow-md hover:shadow-2xl hover:-translate-y-2 flex-shrink-0 flex items-center justify-center snap-center transition-all duration-300 overflow-hidden">
+               <img src="/images/merit/bang-khen2.jpg" alt="Bằng khen 2" className="w-full h-full object-contain p-2" />
+             </div>
+             <div className="w-96 h-64 bg-white border-2 border-yellow-400 rounded-xl shadow-md hover:shadow-2xl hover:-translate-y-2 flex-shrink-0 flex items-center justify-center snap-center transition-all duration-300 overflow-hidden">
+               <img src="/images/merit/bang-khen3.jpg" alt="Bằng khen 3" className="w-full h-full object-contain p-2" />
+             </div>
+             <div className="w-96 h-64 bg-white border-2 border-yellow-400 rounded-xl shadow-md hover:shadow-2xl hover:-translate-y-2 flex-shrink-0 flex items-center justify-center snap-center transition-all duration-300 overflow-hidden">
+               <img src="/images/merit/bang-khen4.jpg" alt="Bằng khen 4" className="w-full h-full object-contain p-2" />
+             </div>
+             <div className="w-96 h-64 bg-white border-2 border-yellow-400 rounded-xl shadow-md hover:shadow-2xl hover:-translate-y-2 flex-shrink-0 flex items-center justify-center snap-center transition-all duration-300 overflow-hidden">
+               <img src="/images/merit/bang-khen5.jpg" alt="Bằng khen 5" className="w-full h-full object-contain p-2" />
+             </div>
           </div>
         </div>
       </div>
