@@ -516,10 +516,6 @@ const AdminAssignmentManager = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Người bàn giao</label>
                   <input name="assigned_by" className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/50" value={editFormik.values.assigned_by} onChange={editFormik.handleChange} />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Ngày thu hồi (nếu có)</label>
-                  <input type="date" name="returned_date" className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/50" value={editFormik.values.returned_date} onChange={editFormik.handleChange} />
-                </div>
                 <div className="col-span-1 md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Ghi chú</label>
                   <input name="note" className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/50" value={editFormik.values.note} onChange={editFormik.handleChange} />
