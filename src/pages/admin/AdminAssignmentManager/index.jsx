@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { ClipboardList, Plus, RotateCcw, X, Search, Package, Download, Loader2 } from 'lucide-react';
+import { ClipboardList, Plus, RotateCcw, X, Search, Package, Download, Loader2, Edit2, Trash2, MoreVertical } from 'lucide-react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import toast from 'react-hot-toast';
 import { getErrorMessage } from '../../../utils/errorMapper';
 import Loading from '../../../components/Loading';
-import { useGetAssignments, useAddAssignment, useReturnAssignment } from '../../../apis/assignment';
+import { useGetAssignments, useAddAssignment, useReturnAssignment, useUpdateAssignment, useDeleteAssignment } from '../../../apis/assignment';
 import { useGetCategories } from '../../../apis/device';
 import { useGetDepartments } from '../../../apis/department';
 import ConfirmModal from '../../../components/ConfirmModal';
@@ -25,11 +25,20 @@ const AdminAssignmentManager = () => {
   const [assembleDevice, setAssembleDevice] = useState(null);
   const [returnItem, setReturnItem] = useState(null);
   const [viewAssignmentDetail, setViewAssignmentDetail] = useState(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editItem, setEditItem] = useState(null);
   const [confirmConfig, setConfirmConfig] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
   const queryClient = useQueryClient();
   const [filters, setFilters] = useState({ search: '', department_id: '', category_id: '', start_date: '', end_date: '', status: '' });
   const [debouncedFilters, setDebouncedFilters] = useState(filters);
   const [isExporting, setIsExporting] = useState(false);
+  const [openDropdownId, setOpenDropdownId] = useState(null);
+
+  useEffect(() => {
+    const handleClickOutside = () => setOpenDropdownId(null);
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -80,6 +89,8 @@ const AdminAssignmentManager = () => {
 
   const addAssignment = useAddAssignment();
   const returnAssignment = useReturnAssignment();
+  const updateAssignment = useUpdateAssignment();
+  const deleteAssignment = useDeleteAssignment();
 
   const calculateTimeAssigned = (assignedDate) => {
     const start = new Date(assignedDate);
@@ -140,6 +151,60 @@ const AdminAssignmentManager = () => {
     setReturnItem(item);
     returnFormik.resetForm();
     returnFormik.setValues({ returned_date: new Date().toISOString().split('T')[0], note: 'Đã thu hồi', return_status: DEVICE_STATUS.IN_STOCK });
+  };
+
+  const editFormik = useFormik({
+    initialValues: { assigned_date: '', returned_date: '', assigned_by: '', note: '' },
+    validationSchema: Yup.object({
+      assigned_date: Yup.date().required('Bắt buộc')
+    }),
+    onSubmit: async (values, { setSubmitting }) => {
+      if (!editItem) return;
+      try {
+        await updateAssignment.mutateAsync({
+          id: editItem.id,
+          data: {
+            ...values,
+            returned_date: values.returned_date || null
+          }
+        });
+        toast.success('Cập nhật thành công');
+        queryClient.invalidateQueries({ queryKey: ['assignments'] });
+        setIsEditModalOpen(false);
+      } catch (error) { handleError(error); }
+      finally { setSubmitting(false); }
+    }
+  });
+
+  const handleEdit = (item) => {
+    setEditItem(item);
+    editFormik.setValues({
+      assigned_date: item.assigned_date ? new Date(item.assigned_date).toISOString().split('T')[0] : '',
+      returned_date: item.returned_date ? new Date(item.returned_date).toISOString().split('T')[0] : '',
+      assigned_by: item.assigned_by || '',
+      note: item.note || ''
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleDelete = (item) => {
+    setConfirmConfig({
+      isOpen: true,
+      title: 'Xóa Cấp Phát',
+      message: 'Bạn có chắc chắn muốn xóa bản cấp phát này?',
+      onConfirm: async () => {
+        try {
+          await deleteAssignment.mutateAsync(item.id);
+          toast.success('Xóa cấp phát thành công');
+          queryClient.invalidateQueries({ queryKey: ['assignments'] });
+          queryClient.invalidateQueries({ queryKey: ['devices'] });
+        } catch (error) {
+          handleError(error);
+        } finally {
+          setConfirmConfig(prev => ({ ...prev, isOpen: false }));
+        }
+      }
+    });
   };
 
   const handleExportExcel = async () => {
@@ -227,7 +292,7 @@ const AdminAssignmentManager = () => {
         const deptRow = sheet.addRow({ employee_code: dept });
         sheet.mergeCells(deptRow.number, 1, deptRow.number, 11);
         deptRow.height = 30; // Chiếm 1 dòng rõ ràng
-        
+
         const deptCell = deptRow.getCell(1);
         deptCell.font = { name: 'Times New Roman', bold: true, italic: true, size: 11, color: { argb: 'FF000000' } };
         deptCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } };
@@ -255,7 +320,7 @@ const AdminAssignmentManager = () => {
             mouse: getComponent(item.device, DEVICE_CATEGORY_CODES.MOUSE),
             assigned_date: item.assigned_date ? new Date(item.assigned_date).toLocaleDateString('vi-VN') : '-'
           });
-          
+
           // Set a minimum reasonable height for data rows with wrapped text
           row.height = 40;
 
@@ -365,6 +430,8 @@ const AdminAssignmentManager = () => {
         </select>
       </div>
 
+      {(addAssignment.isPending || returnAssignment.isPending || updateAssignment.isPending || deleteAssignment.isPending) && <Loading fullScreen message="Đang xử lý..." />}
+
       {isFormOpen && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto relative">
@@ -430,6 +497,43 @@ const AdminAssignmentManager = () => {
         </div>
       )}
 
+      {isEditModalOpen && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto relative">
+            <form onSubmit={editFormik.handleSubmit} className="p-6">
+              <div className="flex justify-between items-center mb-6 border-b pb-4 sticky top-0 bg-white z-10">
+                <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                  <Edit2 className="w-5 h-5 text-blue-500" /> Cập Nhật Cấp Phát
+                </h2>
+                <button type="button" onClick={() => setIsEditModalOpen(false)} className="text-gray-400 hover:text-red-500 p-2"><X className="w-6 h-6" /></button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Ngày bàn giao <span className="text-red-500">*</span></label>
+                  <input type="date" name="assigned_date" className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/50" value={editFormik.values.assigned_date} onChange={editFormik.handleChange} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Người bàn giao</label>
+                  <input name="assigned_by" className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/50" value={editFormik.values.assigned_by} onChange={editFormik.handleChange} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Ngày thu hồi (nếu có)</label>
+                  <input type="date" name="returned_date" className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/50" value={editFormik.values.returned_date} onChange={editFormik.handleChange} />
+                </div>
+                <div className="col-span-1 md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Ghi chú</label>
+                  <input name="note" className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/50" value={editFormik.values.note} onChange={editFormik.handleChange} />
+                </div>
+              </div>
+              <div className="mt-8 pt-4 border-t flex justify-end gap-3 sticky bottom-0 bg-white">
+                <button type="button" onClick={() => setIsEditModalOpen(false)} className="py-2.5 px-5 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors">Hủy Bỏ</button>
+                <button type="submit" disabled={editFormik.isSubmitting} className="py-2.5 px-6 font-bold rounded-lg transition-colors shadow-sm disabled:opacity-50 text-white bg-blue-600 hover:bg-blue-700">Lưu Thay Đổi</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         {filteredAssignments.length > 0 ? (
           <div className="overflow-x-auto">
@@ -460,16 +564,36 @@ const AdminAssignmentManager = () => {
                         <span className="inline-flex items-center text-blue-700 bg-blue-100 px-2.5 py-1 rounded-md text-xs font-medium whitespace-nowrap">Đang sử dụng</span>
                       }
                     </td>
-                    <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
-                      {!a.returned_date && (
-                        <div className="flex items-center justify-end gap-2">
-                          {a.device?.category?.parent_id === null && (
-                            <button onClick={() => { setAssembleDevice(a.device); setIsAssembleModalOpen(true); }} className="px-3 py-1.5 bg-gray-100 text-gray-700 font-medium rounded text-sm hover:bg-gray-200 transition-colors flex items-center gap-1.5 shadow-sm" title="Cấu hình thiết bị">
-                              <Package className="w-3.5 h-3.5" /> Cấu hình
-                            </button>
+                    <td className="px-6 py-4 text-right relative" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setOpenDropdownId(openDropdownId === a.id ? null : a.id);
+                        }}
+                        className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors text-gray-500"
+                      >
+                        <MoreVertical className="w-5 h-5" />
+                      </button>
+
+                      {openDropdownId === a.id && (
+                        <div className="absolute right-8 top-10 bg-white border border-gray-100 shadow-xl rounded-xl w-40 z-10 flex flex-col overflow-hidden py-1">
+                          <button onClick={(e) => { e.stopPropagation(); setOpenDropdownId(null); handleEdit(a); }} className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+                            <Edit2 className="w-4 h-4 text-blue-500" /> Sửa thông tin
+                          </button>
+                          {!a.returned_date && (
+                            <>
+                              {a.device?.category?.parent_id === null && (
+                                <button onClick={(e) => { e.stopPropagation(); setOpenDropdownId(null); setAssembleDevice(a.device); setIsAssembleModalOpen(true); }} className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+                                  <Package className="w-4 h-4 text-gray-500" /> Cấu hình
+                                </button>
+                              )}
+                              <button onClick={(e) => { e.stopPropagation(); setOpenDropdownId(null); handleReturn(a); }} className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+                                <RotateCcw className="w-4 h-4 text-yellow-500" /> Thu hồi
+                              </button>
+                            </>
                           )}
-                          <button onClick={() => handleReturn(a)} className="bg-yellow-500 text-white px-3 py-1.5 rounded text-sm font-medium flex items-center gap-1.5 hover:bg-yellow-600 transition-colors shadow-sm">
-                            <RotateCcw className="w-3.5 h-3.5" /> Thu hồi
+                          <button onClick={(e) => { e.stopPropagation(); setOpenDropdownId(null); handleDelete(a); }} className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 border-t border-gray-50">
+                            <Trash2 className="w-4 h-4" /> Xóa
                           </button>
                         </div>
                       )}
@@ -495,7 +619,7 @@ const AdminAssignmentManager = () => {
         title={confirmConfig.title}
         message={confirmConfig.message}
         onConfirm={confirmConfig.onConfirm}
-        onCancel={() => setConfirmConfig(prev => ({ ...prev, isOpen: false }))}
+        onClose={() => setConfirmConfig(prev => ({ ...prev, isOpen: false }))}
       />
 
       {viewAssignmentDetail && (
@@ -527,7 +651,7 @@ const AdminAssignmentManager = () => {
                     <tr className="bg-blue-50/40">
                       <td className="px-4 py-3 font-mono text-sm text-blue-800 font-semibold">{viewAssignmentDetail.device?.asset_code}</td>
                       <td className="px-4 py-3 text-sm text-blue-900 font-bold">
-                        {viewAssignmentDetail.device?.name} 
+                        {viewAssignmentDetail.device?.name}
                         <span className="ml-2 text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded uppercase font-bold">Thiết bị chính</span>
                       </td>
                       <td className="px-4 py-3 text-sm text-blue-800 font-semibold">{viewAssignmentDetail.device?.category?.name}</td>

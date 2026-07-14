@@ -28,3 +28,21 @@ export const useReturnAssignment = () => {
     },
   });
 };
+
+export const useUpdateAssignment = () => {
+  return useMutation({
+    mutationFn: async ({ id, data }) => {
+      const response = await axiosInstance.put(`/api/assignments/${id}`, data);
+      return response.data;
+    },
+  });
+};
+
+export const useDeleteAssignment = () => {
+  return useMutation({
+    mutationFn: async (id) => {
+      const response = await axiosInstance.delete(`/api/assignments/${id}`);
+      return response.data;
+    },
+  });
+};
