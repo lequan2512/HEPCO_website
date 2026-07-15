@@ -11,4 +11,5 @@ export const ROUTES = {
   ADMIN_SHAREHOLDERS: '/admin-dashboard/shareholders',
   ADMIN_IP: '/admin-dashboard/ip-whitelist',
   ADMIN_DEPARTMENTS: '/admin-dashboard/departments',
+  ADMIN_FUEL: '/admin-dashboard/fuel-comparison',
 };

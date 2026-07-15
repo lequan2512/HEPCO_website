@@ -18,6 +18,7 @@ import AdminEmployeeManager from './pages/admin/AdminEmployeeManager';
 import AdminSupplierManager from './pages/admin/AdminSupplierManager';
 import AdminAssignmentManager from './pages/admin/AdminAssignmentManager';
 import AdminDepartmentManager from './pages/admin/AdminDepartmentManager';
+import AdminFuelComparison from './pages/admin/AdminFuelComparison';
 import { ROUTES } from './constants/routes';
 import { Toaster } from 'react-hot-toast';
 
@@ -55,6 +56,7 @@ const AppRoutes = () => {
           <Route path="departments" element={<AdminDepartmentManager />} />
           <Route path="suppliers" element={<AdminSupplierManager />} />
           <Route path="assignments" element={<AdminAssignmentManager />} />
+          <Route path="fuel-comparison" element={<AdminFuelComparison />} />
         </Route>
       </Routes>
     );

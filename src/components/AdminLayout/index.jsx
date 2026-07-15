@@ -179,6 +179,23 @@ const AdminLayout = () => {
             <Building2 className="w-5 h-5" />
             <span>Phòng Ban</span>
           </Link>
+          
+          {/* Nhóm 4: Tiện ích */}
+          <div className="text-xs uppercase font-bold text-green-300 tracking-wider mb-2 mt-8 px-4 border-t border-green-800 pt-6">
+            Tiện ích
+          </div>
+          <Link 
+            to={ROUTES.ADMIN_FUEL} 
+            onClick={() => setIsSidebarOpen(false)}
+            className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+              location.pathname.includes('fuel-comparison')
+                ? 'bg-green-800 text-white font-semibold' 
+                : 'text-green-100 hover:bg-green-700 hover:text-white'
+            }`}
+          >
+            <FileText className="w-5 h-5" />
+            <span>Đối Chiếu Xăng Dầu</span>
+          </Link>
         </nav>
         <div className="p-4 border-t border-green-800">
           <button 
