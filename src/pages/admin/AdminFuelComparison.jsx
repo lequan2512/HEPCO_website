@@ -94,7 +94,6 @@ const AdminFuelComparison = () => {
     setError(null);
 
     try {
-      // Đọc file API
       const apiDataBuf = await apiFile.arrayBuffer();
       const wbApi = xlsx.read(apiDataBuf, { type: 'array' });
       const sheetApi = wbApi.Sheets[wbApi.SheetNames[0]];
@@ -125,11 +124,16 @@ const AdminFuelComparison = () => {
         apiStats[bsx] = (apiStats[bsx] || 0) + phanMemFuel;
       }
 
-      // Đọc file CQ
       const cqDataBuf = await cqFile.arrayBuffer();
       const wbCq = xlsx.read(cqDataBuf, { type: 'array' });
-      const sheetCq = wbCq.Sheets[sheetName];
-      if (!sheetCq) throw new Error(`Không tìm thấy sheet "${sheetName}" trong file Cơ quan.`);
+      
+      let targetSheetName = sheetName.trim();
+      if (!targetSheetName) {
+        targetSheetName = wbCq.SheetNames[0];
+      }
+      
+      const sheetCq = wbCq.Sheets[targetSheetName];
+      if (!sheetCq) throw new Error(`Không tìm thấy sheet "${targetSheetName}" trong file Cơ quan.`);
       
       const dataCq = xlsx.utils.sheet_to_json(sheetCq, { header: 1 });
       const headerRowCq = dataCq.findIndex(row => row.includes('BSX') || row.includes('Biển số xe'));
@@ -161,7 +165,6 @@ const AdminFuelComparison = () => {
         }
       }
 
-      // Tổng hợp
       const allBsx = new Set([...Object.keys(apiStats), ...Object.keys(cqStats)]);
       const newResults = [];
       let stt = 1;
