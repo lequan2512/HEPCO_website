@@ -1,12 +1,25 @@
-import { X, FileText, Calendar, Building2, User, Paperclip, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
+import { useState } from 'react';
+import { X, FileText, Calendar, Building2, User, Paperclip, CheckCircle2, Clock, ExternalLink, Download } from 'lucide-react';
 import { DISPATCH_TYPE_LABELS, DISPATCH_STATUS_LABELS, URGENCY_LEVEL_LABELS } from '../../../../constants/baseOffice';
+import { formatDate } from '../../../../utils/formatDate';
+import FilePreviewModal from './FilePreviewModal';
 
 const DispatchDetailModal = ({ isOpen, onClose, dispatch }) => {
+  const [isFilePreviewOpen, setIsFilePreviewOpen] = useState(false);
+
   if (!isOpen || !dispatch) return null;
 
   const typeConfig = DISPATCH_TYPE_LABELS[dispatch.type] || { label: dispatch.type, bg: 'bg-gray-100', text: 'text-gray-700' };
   const statusConfig = DISPATCH_STATUS_LABELS[dispatch.status] || { label: dispatch.status, bg: 'bg-gray-100', text: 'text-gray-700' };
   const urgencyConfig = URGENCY_LEVEL_LABELS[dispatch.urgency] || { label: dispatch.urgency || 'Thường', badge: 'bg-gray-100 text-gray-700' };
+
+  const handleOpenFile = () => {
+    if (dispatch.file_url) {
+      window.open(dispatch.file_url, '_blank', 'noopener,noreferrer');
+      return;
+    }
+    setIsFilePreviewOpen(true);
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs">
@@ -62,15 +75,24 @@ const DispatchDetailModal = ({ isOpen, onClose, dispatch }) => {
                 <Calendar className="w-4 h-4 text-gray-400 shrink-0" />
                 <span className="text-xs text-gray-500 font-medium">Ngày phát hành:</span>
                 <span className="font-semibold text-gray-900">
-                  {dispatch.created_at ? new Date(dispatch.created_at).toLocaleDateString('vi-VN') : '---'}
+                  {formatDate(dispatch.created_at)}
                 </span>
               </div>
               <div className="flex items-center gap-2 text-gray-700">
                 <Paperclip className="w-4 h-4 text-gray-400 shrink-0" />
                 <span className="text-xs text-gray-500 font-medium">Tệp đính kèm:</span>
-                <span className="font-semibold text-hepco-green underline cursor-pointer hover:opacity-80">
-                  {dispatch.file_name || 'Không có tệp'}
-                </span>
+                {dispatch.file_name ? (
+                  <button
+                    type="button"
+                    onClick={handleOpenFile}
+                    className="inline-flex items-center gap-1 font-semibold text-hepco-green underline cursor-pointer hover:text-hepco-green/80 transition-colors"
+                  >
+                    <span>{dispatch.file_name}</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </button>
+                ) : (
+                  <span className="text-gray-400">Không có tệp</span>
+                )}
               </div>
             </div>
           </div>
@@ -93,7 +115,7 @@ const DispatchDetailModal = ({ isOpen, onClose, dispatch }) => {
                 </div>
                 <div>
                   <p className="text-xs font-bold text-gray-900">Tiếp nhận công văn</p>
-                  <p className="text-xs text-gray-500">Đã lưu vào kho công văn Base Office - {new Date(dispatch.created_at || Date.now()).toLocaleDateString('vi-VN')}</p>
+                  <p className="text-xs text-gray-500">Đã lưu vào kho công văn Base Office - {formatDate(dispatch.created_at)}</p>
                 </div>
               </div>
 
@@ -122,6 +144,13 @@ const DispatchDetailModal = ({ isOpen, onClose, dispatch }) => {
           </button>
         </div>
       </div>
+
+      {/* File / PDF Preview Modal */}
+      <FilePreviewModal
+        isOpen={isFilePreviewOpen}
+        onClose={() => setIsFilePreviewOpen(false)}
+        dispatch={dispatch}
+      />
     </div>
   );
 };

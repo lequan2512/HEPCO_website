@@ -34,6 +34,7 @@ import {
   URGENCY_LEVEL_LABELS,
   REQUEST_STATUS_LABELS
 } from '../../../constants/baseOffice';
+import { formatDate } from '../../../utils/formatDate';
 import CreateDispatchModal from './components/CreateDispatchModal';
 import DispatchDetailModal from './components/DispatchDetailModal';
 
@@ -59,19 +60,19 @@ const AdminBaseOffice = () => {
     data: dispatchesRes = {},
     isLoading: isLoadingDispatches,
     refetch: refetchDispatches
-  } = useGetDispatches({ ...debouncedFilters, page, limit: 10 });
+  } = useGetDispatches({ ...debouncedFilters, page, limit: 10 }, { enabled: activeTab === 'dispatches' });
 
   const {
     data: requestsRes = {},
     isLoading: isLoadingRequests,
     refetch: refetchRequests
-  } = useGetRequests({ page, limit: 10 });
+  } = useGetRequests({ search: debouncedFilters.search, page, limit: 10 }, { enabled: activeTab === 'requests' });
 
   const {
     data: tasksRes = {},
     isLoading: isLoadingTasks,
     refetch: refetchTasks
-  } = useGetTasks({ page, limit: 10 });
+  } = useGetTasks({ search: debouncedFilters.search, page, limit: 10 }, { enabled: activeTab === 'tasks' });
 
   const {
     data: healthRes = {},
@@ -143,7 +144,7 @@ const AdminBaseOffice = () => {
             }`}
         >
           <FileText className="w-4 h-4" />
-          Công Văn (Base Office)
+          Công Văn
         </button>
 
         <button
@@ -153,8 +154,8 @@ const AdminBaseOffice = () => {
             : 'border-transparent text-gray-500 hover:text-gray-700'
             }`}
         >
-          <Layers className="w-4 h-4" />
-          Trình Ký & Đề Xuất (Base Request)
+          <Layers cla ssName="w-4 h-4" />
+          Trình Ký & Đề Xuất
         </button>
 
         <button
@@ -165,7 +166,7 @@ const AdminBaseOffice = () => {
             }`}
         >
           <CheckSquare className="w-4 h-4" />
-          Công Việc Liên Quan (Base Wework)
+          Công Việc Liên Quan
         </button>
       </div>
 
@@ -240,8 +241,8 @@ const AdminBaseOffice = () => {
                     const urgencyLabel = URGENCY_LEVEL_LABELS[item.urgency] || { label: item.urgency || 'Thường', badge: 'bg-gray-100 text-gray-700' };
 
                     return (
-                      <tr 
-                        key={item.id} 
+                      <tr
+                        key={item.id}
                         onClick={() => setSelectedDispatch(item)}
                         className="hover:bg-gray-50 cursor-pointer transition-colors group"
                       >
@@ -249,7 +250,7 @@ const AdminBaseOffice = () => {
                         <td className="p-3.5 min-w-[220px]">
                           <p className="font-semibold text-gray-900 line-clamp-2 group-hover:text-hepco-green transition-colors">{item.title}</p>
                           <span className="text-[10px] text-gray-400 mt-0.5 block whitespace-nowrap">
-                            {item.created_at ? new Date(item.created_at).toLocaleDateString('vi-VN') : ''}
+                            {formatDate(item.created_at)}
                           </span>
                         </td>
                         <td className="p-3.5 whitespace-nowrap">
