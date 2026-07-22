@@ -19,6 +19,7 @@ import AdminSupplierManager from './pages/admin/AdminSupplierManager';
 import AdminAssignmentManager from './pages/admin/AdminAssignmentManager';
 import AdminDepartmentManager from './pages/admin/AdminDepartmentManager';
 import AdminFuelComparison from './pages/admin/AdminFuelComparison';
+import AdminBaseOffice from './pages/admin/AdminBaseOffice';
 import { ROUTES } from './constants/routes';
 import { Toaster } from 'react-hot-toast';
 
@@ -57,6 +58,7 @@ const AppRoutes = () => {
           <Route path="suppliers" element={<AdminSupplierManager />} />
           <Route path="assignments" element={<AdminAssignmentManager />} />
           <Route path="fuel-comparison" element={<AdminFuelComparison />} />
+          <Route path="base-office" element={<AdminBaseOffice />} />
         </Route>
       </Routes>
     );

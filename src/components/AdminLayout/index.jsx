@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Outlet, useNavigate, Link, useLocation } from 'react-router-dom';
-import { FileText, Shield, LogOut, Menu, X, Laptop, Users, Building2, ClipboardList } from 'lucide-react';
+import { FileText, Shield, LogOut, Menu, X, Laptop, Users, Building2, ClipboardList, Briefcase } from 'lucide-react';
 import useAuthStore from '../../store/useAuthStore';
 import { ROUTES } from '../../constants/routes';
 import logo from '../../assets/images/logo.png';
@@ -195,6 +195,23 @@ const AdminLayout = () => {
           >
             <FileText className="w-5 h-5" />
             <span>Đối Chiếu Xăng Dầu</span>
+          </Link>
+
+          {/* Nhóm 5: Hệ thống Base.vn */}
+          <div className="text-xs uppercase font-bold text-green-300 tracking-wider mb-2 mt-8 px-4 border-t border-green-800 pt-6">
+            Hệ thống Base.vn
+          </div>
+          <Link 
+            to={ROUTES.ADMIN_BASE_OFFICE} 
+            onClick={() => setIsSidebarOpen(false)}
+            className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+              location.pathname.includes('base-office')
+                ? 'bg-green-800 text-white font-semibold' 
+                : 'text-green-100 hover:bg-green-700 hover:text-white'
+            }`}
+          >
+            <Briefcase className="w-5 h-5" />
+            <span>Quản Lý Base Office</span>
           </Link>
         </nav>
         <div className="p-4 border-t border-green-800">

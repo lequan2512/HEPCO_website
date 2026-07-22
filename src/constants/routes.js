@@ -12,4 +12,5 @@ export const ROUTES = {
   ADMIN_IP: '/admin-dashboard/ip-whitelist',
   ADMIN_DEPARTMENTS: '/admin-dashboard/departments',
   ADMIN_FUEL: '/admin-dashboard/fuel-comparison',
+  ADMIN_BASE_OFFICE: '/admin-dashboard/base-office',
 };
