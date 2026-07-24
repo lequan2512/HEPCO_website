@@ -20,7 +20,11 @@ import AdminAssignmentManager from './pages/admin/AdminAssignmentManager';
 import AdminDepartmentManager from './pages/admin/AdminDepartmentManager';
 import AdminFuelComparison from './pages/admin/AdminFuelComparison';
 import AdminBaseOffice from './pages/admin/AdminBaseOffice';
+import AdminPosManager from './pages/admin/AdminPosManager';
+import AdminPosEmployeeManager from './pages/admin/AdminPosEmployeeManager';
+import AdminPosPaperManager from './pages/admin/AdminPosPaperManager';
 import { ROUTES } from './constants/routes';
+
 import { Toaster } from 'react-hot-toast';
 
 const queryClient = new QueryClient({
@@ -59,6 +63,9 @@ const AppRoutes = () => {
           <Route path="assignments" element={<AdminAssignmentManager />} />
           <Route path="fuel-comparison" element={<AdminFuelComparison />} />
           <Route path="base-office" element={<AdminBaseOffice />} />
+          <Route path="pos" element={<AdminPosManager />} />
+          <Route path="pos-employees" element={<AdminPosEmployeeManager />} />
+          <Route path="pos-paper" element={<AdminPosPaperManager />} />
         </Route>
       </Routes>
     );

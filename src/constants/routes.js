@@ -13,4 +13,9 @@ export const ROUTES = {
   ADMIN_DEPARTMENTS: '/admin-dashboard/departments',
   ADMIN_FUEL: '/admin-dashboard/fuel-comparison',
   ADMIN_BASE_OFFICE: '/admin-dashboard/base-office',
+  ADMIN_POS: '/admin-dashboard/pos',
+  ADMIN_POS_EMPLOYEES: '/admin-dashboard/pos-employees',
+  ADMIN_POS_PAPER: '/admin-dashboard/pos-paper',
 };
+
+

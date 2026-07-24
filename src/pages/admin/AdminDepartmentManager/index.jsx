@@ -15,6 +15,7 @@ const AdminDepartmentManager = () => {
   const [page, setPage] = useState(1);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
   const [confirmConfig, setConfirmConfig] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
   const queryClient = useQueryClient();
 
@@ -28,7 +29,7 @@ const AdminDepartmentManager = () => {
     return () => clearTimeout(handler);
   }, [searchQuery]);
 
-  const { data: departmentsRes, isLoading } = useGetDepartments({ search: debouncedSearch, page, limit: 20 });
+  const { data: departmentsRes, isLoading } = useGetDepartments({ search: debouncedSearch, type: typeFilter || undefined, page, limit: 20 });
   const departments = departmentsRes?.data || [];
   const meta = departmentsRes?.meta;
   const addMutation = useAddDepartment();
@@ -49,18 +50,23 @@ const AdminDepartmentManager = () => {
   };
 
   const formik = useFormik({
-    initialValues: { code: '', name: '', description: '' },
+    initialValues: { code: '', name: '', type: 'van_phong', parent_id: '', description: '' },
     validationSchema: Yup.object({
       code: Yup.string().required('Vui lòng nhập mã phòng ban'),
       name: Yup.string().required('Vui lòng nhập tên phòng ban'),
+      type: Yup.string().required('Vui lòng chọn loại phòng ban'),
     }),
     onSubmit: async (values, { setSubmitting }) => {
       try {
+        const payload = {
+          ...values,
+          parent_id: values.parent_id ? Number(values.parent_id) : null
+        };
         if (editingId) {
-          await updateMutation.mutateAsync({ id: editingId, ...values });
+          await updateMutation.mutateAsync({ id: editingId, ...payload });
           handleSuccess('Cập nhật phòng ban thành công');
         } else {
-          await addMutation.mutateAsync(values);
+          await addMutation.mutateAsync(payload);
           handleSuccess('Thêm phòng ban thành công');
         }
       } catch (error) {
@@ -76,6 +82,8 @@ const AdminDepartmentManager = () => {
     formik.setValues({
       code: item.code || '',
       name: item.name,
+      type: item.type || 'van_phong',
+      parent_id: item.parent_id ? String(item.parent_id) : '',
       description: item.description || ''
     });
     setIsFormOpen(true);
@@ -105,10 +113,26 @@ const AdminDepartmentManager = () => {
   return (
     <div className="w-full relative">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b pb-4 gap-4">
-        <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-          <Building2 className="w-7 h-7 text-hepco-green" /> Quản lý Phòng Ban
-        </h1>
-        <div className="flex items-center w-full sm:w-auto gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+            <Building2 className="w-7 h-7 text-hepco-green" /> Quản lý Phòng Ban & Xí Nghiệp
+          </h1>
+          <p className="text-xs text-gray-500 mt-1">
+            Cấu trúc sơ đồ cây đơn vị cấp 1 & các Khu vực trực thuộc (Quảng Điền, Hương Thủy, Phong Điền, Hương Trà, Lăng Cô...)
+          </p>
+        </div>
+
+        <div className="flex items-center w-full sm:w-auto gap-3">
+          <select
+            value={typeFilter}
+            onChange={(e) => { setTypeFilter(e.target.value); setPage(1); }}
+            className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:outline-none focus:bg-white text-gray-700"
+          >
+            <option value="">Tất cả Loại</option>
+            <option value="van_phong">Văn Phòng</option>
+            <option value="xi_nghiep">Xí Nghiệp</option>
+          </select>
+
           <div className="relative w-full sm:w-64">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
@@ -119,7 +143,7 @@ const AdminDepartmentManager = () => {
               className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:outline-none focus:bg-white focus:ring-2 focus:ring-hepco-green focus:border-transparent transition-all"
             />
             {searchQuery && (
-              <button 
+              <button
                 onClick={() => setSearchQuery('')}
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5 rounded-full hover:bg-gray-200 transition-colors"
               >
@@ -127,8 +151,8 @@ const AdminDepartmentManager = () => {
               </button>
             )}
           </div>
-          <button 
-            onClick={() => { setIsFormOpen(true); setEditingId(null); formik.resetForm(); }} 
+          <button
+            onClick={() => { setIsFormOpen(true); setEditingId(null); formik.resetForm(); }}
             className="flex items-center whitespace-nowrap gap-2 px-4 py-2 bg-hepco-green text-white font-semibold rounded-lg hover:bg-green-700 transition-colors shadow-sm w-full sm:w-auto justify-center"
           >
             <Plus className="w-5 h-5" /> <span>Thêm Phòng Ban</span>
@@ -143,7 +167,8 @@ const AdminDepartmentManager = () => {
               <thead className="bg-gray-50">
                 <tr className="border-b border-gray-100">
                   <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Mã PB</th>
-                  <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Tên Phòng Ban</th>
+                  <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Tên Phòng Ban / Xí Nghiệp / Khu Vực</th>
+                  <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Phân Loại Cấp Phát</th>
                   <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Mô tả</th>
                   <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase text-right">Thao tác</th>
                 </tr>
@@ -152,18 +177,42 @@ const AdminDepartmentManager = () => {
                 {filteredDepartments.map((item) => (
                   <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="px-6 py-4 text-sm font-mono text-gray-800 font-bold">{item.code || '-'}</td>
-                    <td className="px-6 py-4 text-sm font-medium text-gray-800">{item.name}</td>
-                    <td className="px-6 py-4 text-sm text-gray-500 truncate max-w-[300px]">{item.description || '-'}</td>
+                    <td className="px-6 py-4 text-sm">
+                      {item.parent ? (
+                        <div className="pl-3 border-l-2 border-purple-400">
+                          <div className="font-semibold text-gray-900">{item.name}</div>
+                          <div className="text-xs text-purple-700 font-medium mt-0.5">
+                            ↳ Trực thuộc: <span className="font-bold">{item.parent.name}</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="font-bold text-gray-900 flex items-center gap-1.5">
+                          {item.name}
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-sm">
+                      {item.type === 'xi_nghiep' ? (
+                        <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-800 border border-purple-200">
+                          🏢 Xí Nghiệp
+                        </span>
+                      ) : (
+                        <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200">
+                          💻 Văn Phòng
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-500 truncate max-w-[250px]">{item.description || '-'}</td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <button 
+                        <button
                           onClick={() => handleEdit(item)}
                           className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
                           title="Sửa"
                         >
                           <Edit2 className="w-4 h-4" />
                         </button>
-                        <button 
+                        <button
                           onClick={() => handleDelete(item.id)}
                           className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                           title="Xóa"
@@ -189,7 +238,7 @@ const AdminDepartmentManager = () => {
         )}
       </div>
 
-      <ConfirmModal 
+      <ConfirmModal
         isOpen={confirmConfig.isOpen}
         title={confirmConfig.title}
         message={confirmConfig.message}
@@ -210,12 +259,12 @@ const AdminDepartmentManager = () => {
                   <X className="w-5 h-5" />
                 </button>
               </div>
-              
+
               <div className="p-6 space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Mã Phòng Ban <span className="text-red-500">*</span></label>
-                  <input 
-                    type="text" 
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Mã Phòng Ban / Đơn Vị <span className="text-red-500">*</span></label>
+                  <input
+                    type="text"
                     name="code"
                     placeholder="Nhập mã phòng ban..."
                     className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-hepco-green/50"
@@ -227,10 +276,11 @@ const AdminDepartmentManager = () => {
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Tên Phòng Ban <span className="text-red-500">*</span></label>
-                  <input 
-                    type="text" 
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Tên Phòng Ban / Xí Nghiệp / Khu Vực <span className="text-red-500">*</span></label>
+                  <input
+                    type="text"
                     name="name"
+                    placeholder="Nhập tên phòng ban hoặc khu vực..."
                     className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-hepco-green/50"
                     value={formik.values.name}
                     onChange={formik.handleChange}
@@ -239,17 +289,46 @@ const AdminDepartmentManager = () => {
                     <div className="text-red-500 text-xs mt-1">{formik.errors.name}</div>
                   )}
                 </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Đơn Vị Trực Thuộc (Phòng Ban / Xí Nghiệp Cha)</label>
+                  <select
+                    name="parent_id"
+                    className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-hepco-green/50 bg-white text-gray-800 font-medium"
+                    value={formik.values.parent_id}
+                    onChange={formik.handleChange}
+                  >
+                    <option value="">-- Đơn Vị Cấp 1 (Độc Lập / Cấp Trên) --</option>
+                    {departments.filter(d => d.id !== editingId).map(d => (
+                      <option key={d.id} value={d.id}>{d.name} ({d.code || 'Mã PB'})</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Phân Loại Đơn Vị <span className="text-red-500">*</span></label>
+                  <select
+                    name="type"
+                    className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-hepco-green/50 bg-white"
+                    value={formik.values.type}
+                    onChange={formik.handleChange}
+                  >
+                    <option value="van_phong">Văn Phòng</option>
+                    <option value="xi_nghiep">Xí Nghiệp</option>
+                  </select>
+                </div>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Mô tả</label>
-                  <textarea 
+                  <textarea
                     name="description"
-                    className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-hepco-green/50 min-h-[100px]"
+                    className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-hepco-green/50 min-h-[80px]"
                     value={formik.values.description}
                     onChange={formik.handleChange}
                   />
                 </div>
               </div>
-              
+
               <div className="p-4 border-t bg-gray-50 flex justify-end gap-3">
                 <button type="button" onClick={() => setIsFormOpen(false)} className="py-2.5 px-5 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-100">
                   Hủy Bỏ

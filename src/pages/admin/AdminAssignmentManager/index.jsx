@@ -76,7 +76,7 @@ const AdminAssignmentManager = () => {
   const loadEmployees = async (inputValue) => {
     try {
       const res = await axiosInstance.get('/api/employees', {
-        params: { search: inputValue, limit: 20 }
+        params: { search: inputValue, limit: 25, dept_type: 'van_phong' }
       });
       return (res.data.data || []).map(e => ({
         value: e.id,
@@ -86,6 +86,7 @@ const AdminAssignmentManager = () => {
       return [];
     }
   };
+
 
   const addAssignment = useAddAssignment();
   const returnAssignment = useReturnAssignment();
