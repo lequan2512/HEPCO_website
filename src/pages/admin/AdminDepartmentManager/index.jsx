@@ -117,9 +117,6 @@ const AdminDepartmentManager = () => {
           <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
             <Building2 className="w-7 h-7 text-hepco-green" /> Quản lý Phòng Ban & Xí Nghiệp
           </h1>
-          <p className="text-xs text-gray-500 mt-1">
-            Cấu trúc sơ đồ cây đơn vị cấp 1 & các Khu vực trực thuộc (Quảng Điền, Hương Thủy, Phong Điền, Hương Trà, Lăng Cô...)
-          </p>
         </div>
 
         <div className="flex items-center w-full sm:w-auto gap-3">

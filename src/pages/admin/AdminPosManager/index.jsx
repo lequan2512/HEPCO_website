@@ -507,9 +507,6 @@ const AdminPosManager = () => {
             <CreditCard className="w-8 h-8 text-hepco-green" />
             Quản Lý Thiết Bị POS
           </h1>
-          <p className="text-gray-500 text-sm mt-1">
-            Quản lý cấp phát, cho mượn kho dự phòng và theo dõi thiết bị POS
-          </p>
         </div>
         <div className="flex items-center gap-3">
           <button

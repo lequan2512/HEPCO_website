@@ -82,24 +82,32 @@ const AdminDeviceManager = () => {
 
   useEffect(() => {
     if (!isLoadingCategories && !isDefaultSet) {
-      if (categories.length > 0) {
-        const pcCategory = categories.find(c => c.code === DEVICE_CATEGORY_CODES.PC);
-        if (pcCategory) {
-          setFilters(prev => ({ ...prev, category_id: pcCategory.id }));
-          setDebouncedFilters(prev => ({ ...prev, category_id: pcCategory.id }));
+      Promise.resolve().then(() => {
+        if (categories.length > 0) {
+          const pcCategory = categories.find(c => c.code === DEVICE_CATEGORY_CODES.PC);
+          if (pcCategory) {
+            setFilters(prev => ({ ...prev, category_id: pcCategory.id }));
+            setDebouncedFilters(prev => ({ ...prev, category_id: pcCategory.id }));
+          }
         }
-      }
-      setIsDefaultSet(true);
+        setIsDefaultSet(true);
+      });
     }
   }, [categories, isLoadingCategories, isDefaultSet]);
 
+
   useEffect(() => {
-    setSelectedIds([]); // Clear selection when page or filters change
+    Promise.resolve().then(() => {
+      setSelectedIds([]); // Clear selection when page or filters change
+    });
   }, [page, debouncedFilters, isGrouped]);
 
   useEffect(() => {
-    setSelectedGroupIds([]);
+    Promise.resolve().then(() => {
+      setSelectedGroupIds([]);
+    });
   }, [viewGroup]);
+
 
   const handleAddSuccess = () => {
     toast.success('Thêm thiết bị thành công');
@@ -305,7 +313,6 @@ const AdminDeviceManager = () => {
           <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
             <Laptop className="w-6 h-6 text-hepco-green" /> Quản Lý Thiết Bị
           </h1>
-          <p className="text-gray-500 text-sm mt-2 hidden sm:block">Quản lý phần cứng, cấp phát và bảo trì trong công ty.</p>
         </div>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center w-full sm:w-auto gap-3 sm:gap-4">
           <div className="relative w-full sm:w-64">

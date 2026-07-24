@@ -145,10 +145,8 @@ const AdminEmployeeManager = () => {
           <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
             <Users className="w-7 h-7 text-hepco-green" /> Quản Lý Nhân Viên Văn Phòng
           </h1>
-          <p className="text-xs text-gray-500 mt-1">
-            Danh sách cán bộ, nhân viên thuộc khối các Phòng ban Văn phòng (Cấp phát thiết bị PC)
-          </p>
         </div>
+
 
         <button
           onClick={() => { setIsFormOpen(true); setEditingId(null); formik.resetForm(); }}

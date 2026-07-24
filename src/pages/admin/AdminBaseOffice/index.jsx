@@ -3,19 +3,10 @@ import {
   FileText,
   Plus,
   Search,
-  Filter,
   RefreshCw,
-  Eye,
-  CheckCircle,
-  Clock,
-  AlertCircle,
   Building2,
-  ShieldCheck,
   Layers,
   CheckSquare,
-  ChevronRight,
-  ExternalLink,
-  Loader2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Loading from '../../../components/Loading';
@@ -74,11 +65,9 @@ const AdminBaseOffice = () => {
     refetch: refetchTasks
   } = useGetTasks({ search: debouncedFilters.search, page, limit: 10 }, { enabled: activeTab === 'tasks' });
 
-  const {
-    data: healthRes = {},
-    isLoading: isLoadingHealth,
-    refetch: refetchHealth
-  } = useGetBaseHealth();
+  const { refetch: refetchHealth } = useGetBaseHealth();
+
+
 
   const dispatches = dispatchesRes?.data || [];
   const dispatchesMeta = dispatchesRes?.meta;
@@ -88,8 +77,6 @@ const AdminBaseOffice = () => {
 
   const tasks = tasksRes?.data || [];
   const tasksMeta = tasksRes?.meta;
-
-  const healthData = healthRes?.data || {};
 
   const handleRefresh = () => {
     if (activeTab === 'dispatches') refetchDispatches();
@@ -109,7 +96,6 @@ const AdminBaseOffice = () => {
           </div>
           <div>
             <h1 className="text-xl font-bold text-gray-900">Quản Lý Base.vn Office</h1>
-            <p className="text-xs text-gray-500 mt-0.5">Tích hợp Quản lý Công văn, Trình ký Đề xuất & Công việc từ hệ sinh thái Base.vn</p>
           </div>
         </div>
 

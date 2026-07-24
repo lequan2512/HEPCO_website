@@ -270,9 +270,10 @@ const AdminAssignmentManager = () => {
       sheet.mergeCells('D2:J2');
       sheet.mergeCells('K2:K3');
 
-      // Style row 1
+      // Style row 1 (Title)
       const titleCell = sheet.getRow(1).getCell(1);
-      titleCell.font = { name: 'Times New Roman', size: 16, bold: true, color: { argb: 'FF1F497D' } };
+      titleCell.font = { name: 'Times New Roman', size: 14, bold: true, color: { argb: 'FFFFFFFF' } };
+      titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF15803D' } }; // Hepco Green
       titleCell.alignment = { vertical: 'middle', horizontal: 'center' };
       sheet.getRow(1).height = 35;
 
@@ -281,8 +282,8 @@ const AdminAssignmentManager = () => {
         sheet.getRow(i).height = 25;
         for (let c = 1; c <= 11; c++) {
           const cell = sheet.getRow(i).getCell(c);
-          cell.font = { name: 'Times New Roman', bold: true, size: 12, color: { argb: 'FFFFFFFF' } };
-          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1F497D' } }; // Popular dark blue UI
+          cell.font = { name: 'Times New Roman', bold: true, size: 10, color: { argb: 'FFFFFFFF' } };
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF166534' } }; // Hepco Deep Green
           cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
           cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
         }
@@ -290,23 +291,24 @@ const AdminAssignmentManager = () => {
 
       Object.keys(grouped).sort().forEach((dept) => {
         // Department Header Row
-        const deptRow = sheet.addRow({ employee_code: dept });
+        const deptRow = sheet.addRow({ employee_code: `PHÒNG BAN: ${dept.toUpperCase()}` });
         sheet.mergeCells(deptRow.number, 1, deptRow.number, 11);
-        deptRow.height = 30; // Chiếm 1 dòng rõ ràng
+        deptRow.height = 24;
 
         const deptCell = deptRow.getCell(1);
-        deptCell.font = { name: 'Times New Roman', bold: true, italic: true, size: 11, color: { argb: 'FF000000' } };
-        deptCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } };
+        deptCell.font = { name: 'Times New Roman', bold: true, size: 11, color: { argb: 'FF0F172A' } };
+        deptCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE2E8F0' } }; // Slate Gray Accent
         deptCell.alignment = { vertical: 'middle', horizontal: 'left', wrapText: false };
 
         for (let c = 1; c <= 11; c++) {
-          deptRow.getCell(c).border = { top: { style: 'thin', color: { argb: 'FF000000' } }, left: { style: 'thin', color: { argb: 'FF000000' } }, bottom: { style: 'thin', color: { argb: 'FF000000' } }, right: { style: 'thin', color: { argb: 'FF000000' } } };
+          deptRow.getCell(c).border = { top: { style: 'thin', color: { argb: 'FFE2E8F0' } }, left: { style: 'thin', color: { argb: 'FFE2E8F0' } }, bottom: { style: 'thin', color: { argb: 'FFE2E8F0' } }, right: { style: 'thin', color: { argb: 'FFE2E8F0' } } };
         }
 
         const items = grouped[dept];
         items.forEach((item, i) => {
           const isAlternate = i % 2 !== 0;
-          const color = isAlternate ? 'FFF2F2F2' : 'FFFFFFFF'; // Alternate rows within department
+          const color = isAlternate ? 'FFF8FAFC' : 'FFFFFFFF'; // Alternate rows within department
+
 
           const row = sheet.addRow({
             employee_code: item.employee?.employee_code || '-',
@@ -327,17 +329,24 @@ const AdminAssignmentManager = () => {
 
           for (let c = 1; c <= 11; c++) {
             const cell = row.getCell(c);
-            cell.font = { name: 'Times New Roman', size: 11, color: { argb: 'FF000000' } };
-            if (c >= 4) {
+            cell.font = { name: 'Times New Roman', size: 10, color: { argb: 'FF1F2937' } };
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: color } };
+            cell.border = {
+              top: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+              left: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+              bottom: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+              right: { style: 'thin', color: { argb: 'FFE2E8F0' } }
+            };
+
+            if (c === 1 || c >= 4) {
               cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
             } else {
-              cell.alignment = { vertical: 'middle', wrapText: true };
+              cell.alignment = { vertical: 'middle', horizontal: 'left', wrapText: true };
             }
-            cell.border = { top: { style: 'thin', color: { argb: 'FF000000' } }, left: { style: 'thin', color: { argb: 'FF000000' } }, bottom: { style: 'thin', color: { argb: 'FF000000' } }, right: { style: 'thin', color: { argb: 'FF000000' } } };
-            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: color } };
           }
         });
       });
+
 
       const buffer = await workbook.xlsx.writeBuffer();
       saveAs(new Blob([buffer]), `ThongKe_ThietBi_${new Date().toISOString().split('T')[0]}.xlsx`);
@@ -359,10 +368,15 @@ const AdminAssignmentManager = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b pb-4 gap-4">
         <h1 className="text-2xl font-bold flex items-center gap-2"><ClipboardList className="w-6 h-6 text-hepco-green" /> Cấp Phát Thiết Bị</h1>
         <div className="flex gap-2 w-full sm:w-auto">
-          <button onClick={handleExportExcel} disabled={isExporting} className="flex items-center whitespace-nowrap gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors shadow-sm w-full sm:w-auto justify-center cursor-pointer disabled:cursor-not-allowed disabled:opacity-75">
-            {isExporting ? <Loader2 className="w-5 h-5 animate-spin text-gray-500" /> : <Download className="w-5 h-5 text-gray-500" />}
+          <button
+            onClick={handleExportExcel}
+            disabled={isExporting}
+            className="flex items-center gap-2 px-4 py-2.5 bg-[#1D6F42] text-white hover:bg-[#155231] rounded-lg text-sm font-medium transition-colors shadow-sm disabled:opacity-50"
+          >
+            {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
             <span>{isExporting ? 'Đang xuất...' : 'Xuất Excel'}</span>
           </button>
+
           <button onClick={() => setIsFormOpen(true)} className="flex items-center whitespace-nowrap gap-2 px-4 py-2 bg-hepco-green text-white font-semibold rounded-lg hover:bg-green-700 transition-colors shadow-sm w-full sm:w-auto justify-center cursor-pointer disabled:cursor-not-allowed"><Plus className="w-5 h-5" /> <span>Cấp Phát Mới</span></button>
         </div>
       </div>
