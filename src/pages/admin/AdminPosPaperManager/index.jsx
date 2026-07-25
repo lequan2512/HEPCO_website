@@ -181,7 +181,7 @@ const AdminPosPaperManager = () => {
             <Printer className="w-7 h-7 text-hepco-green" /> Quản Lý Kho Giấy In POS
           </h1>
           <p className="text-xs text-gray-500 mt-1">
-            Quản lý tồn kho cuộn giấy in nhiệt (K57 / K80) và cấp phát giấy in cho nhân viên thu phí
+            Quản lý tồn kho cuộn giấy in nhiệt (K57/K80) và cấp phát giấy in cho nhân viên thu phí
           </p>
         </div>
 

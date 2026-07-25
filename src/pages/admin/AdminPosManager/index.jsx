@@ -9,7 +9,7 @@ import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import axiosInstance from '../../../utils/axios';
 import Select from 'react-select';
-
+import { POS_STATUS, POS_STATUS_OPTIONS, POS_STATUS_LABELS } from '../../../constants/pos';
 
 
 import toast from 'react-hot-toast';
@@ -24,13 +24,6 @@ import {
 import { useGetEmployees } from '../../../apis/employee';
 import { useGetDepartments } from '../../../apis/department';
 
-const STATUS_LABELS = {
-  in_stock: { label: 'Kho / Dự phòng', bg: 'bg-blue-100 text-blue-800 border-blue-200' },
-  in_use: { label: 'Đang cấp phát', bg: 'bg-green-100 text-green-800 border-green-200' },
-  borrowed: { label: 'Đang mượn', bg: 'bg-amber-100 text-amber-800 border-amber-200' },
-  broken: { label: 'Đang hỏng', bg: 'bg-red-100 text-red-800 border-red-200' },
-  retired: { label: 'Thanh lý', bg: 'bg-gray-100 text-gray-800 border-gray-200' }
-};
 
 const ENTERPRISE_LABELS = {
   BSH: { label: 'Bắc Sông Hương (BSH)', badge: 'bg-emerald-600 text-white' },
@@ -76,7 +69,7 @@ const AdminPosManager = () => {
     telecom_plan: 'Gói ezCom90',
     enterprise: 'BSH',
     region: '',
-    status: 'in_stock',
+    status: POS_STATUS.IN_STOCK,
     notes: ''
   });
 
@@ -92,7 +85,7 @@ const AdminPosManager = () => {
     borrower_name: '',
     employee_id: '',
     expected_return_date: '',
-    purpose: 'Mượn kho dự phòng / Tăng cường đợt thu',
+    purpose: 'Mượn kho dự phòng/Tăng cường đợt thu',
     note: ''
   });
 
@@ -109,7 +102,7 @@ const AdminPosManager = () => {
   // Queries & Mutations
   const { data: posRes, isLoading } = useGetPosDevices({
     search: debouncedSearch,
-    status: activeTab === 'assigned' ? 'in_use' : activeTab === 'borrowed' ? 'in_stock,borrowed' : (status || undefined),
+    status: activeTab === 'assigned' ? POS_STATUS.IN_USE : activeTab === 'borrowed' ? `${POS_STATUS.IN_STOCK},${POS_STATUS.BORROWED}` : (status || undefined),
     department_id: departmentId || undefined,
     page,
     limit: 20
@@ -149,7 +142,7 @@ const AdminPosManager = () => {
       telecom_plan: 'Gói ezCom90',
       enterprise: 'BSH',
       region: '',
-      status: 'in_stock',
+      status: POS_STATUS.IN_STOCK,
       notes: ''
     });
     setIsFormOpen(true);
@@ -165,7 +158,7 @@ const AdminPosManager = () => {
       telecom_plan: device.telecom_plan || 'Gói ezCom90',
       enterprise: device.enterprise || 'BSH',
       region: device.region || '',
-      status: device.status || 'in_stock',
+      status: device.status || POS_STATUS.IN_STOCK,
       notes: device.notes || ''
     });
     setIsFormOpen(true);
@@ -270,7 +263,7 @@ const AdminPosManager = () => {
       borrower_name: '',
       employee_id: '',
       expected_return_date: '',
-      purpose: 'Mượn kho dự phòng / Tăng cường đợt thu',
+      purpose: 'Mượn kho dự phòng/Tăng cường đợt thu',
       note: ''
     });
     setIsBorrowModalOpen(true);
@@ -326,7 +319,7 @@ const AdminPosManager = () => {
         return;
       }
 
-      // Hàm tìm tên phòng ban cha động từ CSDL theo mã xí nghiệp / mã phòng ban
+      // Hàm tìm tên phòng ban cha động từ CSDL theo mã xí nghiệp/mã phòng ban
       const findParentDeptName = (entCode) => {
         if (!entCode) return 'Kho Dự Phòng Chung';
         const match = departments.find(d => (!d.parent_id || !d.parent) && (d.code === entCode || (d.code && d.code.includes(entCode))));
@@ -411,7 +404,7 @@ const AdminPosManager = () => {
           // Dòng Tiêu Đề Cột cho Khu Vực
           const headerRow = sheet.addRow([
             'STT',
-            'Họ và Tên Nhân Viên / Người Mượn',
+            'Họ và Tên Nhân Viên/Người Mượn',
             'Địa Bàn Phụ Trách',
             'Serial POS',
             'IMEI POS',
@@ -430,13 +423,13 @@ const AdminPosManager = () => {
             cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
           }
 
-          // Dòng dữ liệu Nhân viên / POS trong Khu vực
+          // Dòng dữ liệu Nhân viên/POS trong Khu vực
           devList.forEach((dev, idx) => {
             const activeAss = dev.assignments?.[0];
             const activeBor = dev.borrowings?.[0];
             const userStr = dev.status === 'in_use'
               ? (activeAss?.employee_name || 'Đã cấp phát')
-              : (dev.status === 'borrowed' ? (activeBor?.borrower_name || 'Đang mượn') : 'Kho / Sẵn sàng');
+              : (dev.status === 'borrowed' ? (activeBor?.borrower_name || 'Đang mượn') : 'Kho/Sẵn sàng');
 
             const statusLabel = STATUS_LABELS[dev.status]?.label || dev.status;
 
@@ -505,7 +498,7 @@ const AdminPosManager = () => {
         <div>
           <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-3">
             <CreditCard className="w-8 h-8 text-hepco-green" />
-            Quản Lý Thiết Bị POS
+            Quản Lý Máy POS
           </h1>
         </div>
         <div className="flex items-center gap-3">
@@ -580,7 +573,7 @@ const AdminPosManager = () => {
               onChange={(e) => { setDepartmentId(e.target.value); setPage(1); }}
               className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-hepco-green bg-white text-gray-700 max-w-[260px]"
             >
-              <option value="">Tất cả Phòng Ban / Xí Nghiệp / Khu Vực</option>
+              <option value="">Tất cả Xí Nghiệp/Khu Vực</option>
               {departments.map(d => (
                 <option key={d.id} value={d.id}>
                   {d.parent ? `↳ ${d.name}` : `🏢 ${d.name}`}
@@ -596,11 +589,9 @@ const AdminPosManager = () => {
                 className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-hepco-green bg-white text-gray-700"
               >
                 <option value="">Tất cả Trạng thái</option>
-                <option value="in_stock">Kho / Dự phòng</option>
-                <option value="in_use">Đang cấp phát</option>
-                <option value="borrowed">Đang mượn</option>
-                <option value="broken">Đang hỏng</option>
-                <option value="retired">Thanh lý</option>
+                {POS_STATUS_OPTIONS.map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
               </select>
             )}
 
@@ -631,11 +622,11 @@ const AdminPosManager = () => {
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-100 text-gray-600 text-xs font-semibold uppercase tracking-wider">
                   <th className="py-3.5 px-4">Xí Nghiệp & Khu Vực</th>
-                  <th className="py-3.5 px-4">Serial / IMEI POS</th>
+                  <th className="py-3.5 px-4">Serial/IMEI POS</th>
                   <th className="py-3.5 px-4">Thông Tin SIM</th>
                   <th className="py-3.5 px-4">Địa Bàn Phụ Trách</th>
                   <th className="py-3.5 px-4">Trạng Thái</th>
-                  <th className="py-3.5 px-4">Người Sử Dụng / Mượn</th>
+                  <th className="py-3.5 px-4">Người Sử Dụng/Mượn</th>
                   <th className="py-3.5 px-4 text-right">Thao Tác</th>
                 </tr>
               </thead>
@@ -643,7 +634,7 @@ const AdminPosManager = () => {
                 {posDevices.map((device) => {
                   const activeAss = device.assignments?.[0];
                   const activeBor = device.borrowings?.[0];
-                  const stLabel = STATUS_LABELS[device.status] || { label: device.status, bg: 'bg-gray-100' };
+                  const stLabel = POS_STATUS_LABELS[device.status] || { label: device.status, bg: 'bg-gray-100' };
                   const entLabel = ENTERPRISE_LABELS[device.enterprise] || { label: device.enterprise, badge: 'bg-gray-600 text-white' };
 
                   return (
@@ -677,7 +668,7 @@ const AdminPosManager = () => {
                       </td>
 
 
-                      {/* Serial / IMEI */}
+                      {/* Serial/IMEI */}
                       <td className="py-3.5 px-4">
                         <div className="font-semibold text-gray-900 flex items-center gap-1.5">
                           {device.serial_number}
@@ -719,7 +710,7 @@ const AdminPosManager = () => {
                         </span>
                       </td>
 
-                      {/* User / Borrower */}
+                      {/* User/Borrower */}
                       <td className="py-3.5 px-4">
                         {device.status === 'in_use' && activeAss ? (
                           <div>
@@ -762,7 +753,7 @@ const AdminPosManager = () => {
 
                         {openDropdownId === device.id && (
                           <div className="absolute right-4 top-10 bg-white border border-gray-100 shadow-xl rounded-xl w-48 z-20 flex flex-col overflow-hidden py-1 text-left">
-                            {device.status === 'in_stock' && (
+                            {device.status === POS_STATUS.IN_STOCK && (
                               <button
                                 onClick={(e) => { e.stopPropagation(); setOpenDropdownId(null); handleOpenAssignModal(device); }}
                                 className="w-full px-4 py-2.5 text-xs font-medium text-green-700 hover:bg-green-50 flex items-center gap-2"
@@ -772,7 +763,7 @@ const AdminPosManager = () => {
                               </button>
                             )}
 
-                            {device.status === 'in_use' && (
+                            {device.status === POS_STATUS.IN_USE && (
                               <button
                                 onClick={(e) => { e.stopPropagation(); setOpenDropdownId(null); handleUnassign(device); }}
                                 className="w-full px-4 py-2.5 text-xs font-medium text-amber-700 hover:bg-amber-50 flex items-center gap-2"
@@ -782,7 +773,7 @@ const AdminPosManager = () => {
                               </button>
                             )}
 
-                            {device.status === 'in_stock' && (
+                            {device.status === POS_STATUS.IN_STOCK && (
                               <button
                                 onClick={(e) => { e.stopPropagation(); setOpenDropdownId(null); handleOpenBorrowModal(device); }}
                                 className="w-full px-4 py-2.5 text-xs font-medium text-blue-700 hover:bg-blue-50 flex items-center gap-2"
@@ -792,7 +783,7 @@ const AdminPosManager = () => {
                               </button>
                             )}
 
-                            {device.status === 'borrowed' && (
+                            {device.status === POS_STATUS.BORROWED && (
                               <button
                                 onClick={(e) => { e.stopPropagation(); setOpenDropdownId(null); handleReturnBorrow(device); }}
                                 className="w-full px-4 py-2.5 text-xs font-medium text-purple-700 hover:bg-purple-50 flex items-center gap-2"
@@ -848,7 +839,7 @@ const AdminPosManager = () => {
             <div className="p-5 bg-hepco-green text-white flex items-center justify-between">
               <h3 className="font-bold text-lg flex items-center gap-2">
                 <CreditCard className="w-5 h-5" />
-                {editingDevice ? 'Chỉnh Sửa Thiết Bị POS' : 'Thêm Máy POS Mới'}
+                {editingDevice ? 'Chỉnh Sửa Máy POS' : 'Thêm Máy POS Mới'}
               </h3>
               <button onClick={() => setIsFormOpen(false)} className="text-white/80 hover:text-white">
                 <X className="w-6 h-6" />
@@ -949,11 +940,9 @@ const AdminPosManager = () => {
                     onChange={(e) => setFormValues({ ...formValues, status: e.target.value })}
                     className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-hepco-green"
                   >
-                    <option value="in_stock">Kho / Dự phòng</option>
-                    <option value="in_use">Đang cấp phát</option>
-                    <option value="borrowed">Đang mượn</option>
-                    <option value="broken">Hỏng / Sửa chữa</option>
-                    <option value="retired">Thanh lý</option>
+                    {POS_STATUS_OPTIONS.map(opt => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -1102,7 +1091,7 @@ const AdminPosManager = () => {
 
             <form onSubmit={handleBorrowSubmit} className="p-6 space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">Người / Khu Vực Mượn *</label>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">Người/Khu Vực Mượn *</label>
                 <input
                   type="text"
                   required
@@ -1124,10 +1113,10 @@ const AdminPosManager = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">Mục Đích / Lý Do Mượn</label>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">Mục Đích/Lý Do Mượn</label>
                 <input
                   type="text"
-                  placeholder="VD: Máy chính hỏng / Tăng cường đợt thu tháng"
+                  placeholder="VD: Máy chính hỏng/Tăng cường đợt thu tháng"
                   value={borrowValues.purpose}
                   onChange={(e) => setBorrowValues({ ...borrowValues, purpose: e.target.value })}
                   className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-amber-600"

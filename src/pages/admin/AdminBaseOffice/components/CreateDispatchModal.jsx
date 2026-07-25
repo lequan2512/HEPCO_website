@@ -50,7 +50,7 @@ const CreateDispatchModal = ({ isOpen, onClose, onSuccess }) => {
               <Send className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-gray-900">Tạo Công Văn / Trình Ký Mới</h3>
+              <h3 className="text-lg font-bold text-gray-900">Tạo Công Văn/Trình Ký Mới</h3>
               <p className="text-xs text-gray-500">Đồng bộ trực tiếp lên hệ sinh thái Base.vn Office</p>
             </div>
           </div>
@@ -98,7 +98,7 @@ const CreateDispatchModal = ({ isOpen, onClose, onSuccess }) => {
 
           {/* Tiêu đề */}
           <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1">Tiêu Đề / Tên Văn Bản *</label>
+            <label className="block text-xs font-semibold text-gray-700 mb-1">Tiêu Đề/Tên Văn Bản *</label>
             <input
               type="text"
               name="title"
@@ -106,9 +106,8 @@ const CreateDispatchModal = ({ isOpen, onClose, onSuccess }) => {
               value={formik.values.title}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-hidden focus:ring-2 focus:ring-hepco-green/20 ${
-                formik.touched.title && formik.errors.title ? 'border-red-500' : 'border-gray-300 focus:border-hepco-green'
-              }`}
+              className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-hidden focus:ring-2 focus:ring-hepco-green/20 ${formik.touched.title && formik.errors.title ? 'border-red-500' : 'border-gray-300 focus:border-hepco-green'
+                }`}
             />
             {formik.touched.title && formik.errors.title && (
               <span className="text-xs text-red-500 mt-1 block">{formik.errors.title}</span>
@@ -118,17 +117,16 @@ const CreateDispatchModal = ({ isOpen, onClose, onSuccess }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Nơi/Người gửi */}
             <div>
-              <label className="block text-xs font-semibold text-gray-700 mb-1">Nơi Gửi / Cơ Quan Gửi *</label>
+              <label className="block text-xs font-semibold text-gray-700 mb-1">Nơi Gửi/Cơ Quan Gửi *</label>
               <input
                 type="text"
                 name="sender"
-                placeholder="VD: Sở TN&MT / Phòng Kế Hoạch..."
+                placeholder="VD: Sở TN&MT/Phòng Kế Hoạch..."
                 value={formik.values.sender}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-hidden ${
-                  formik.touched.sender && formik.errors.sender ? 'border-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-hidden ${formik.touched.sender && formik.errors.sender ? 'border-red-500' : 'border-gray-300'
+                  }`}
               />
               {formik.touched.sender && formik.errors.sender && (
                 <span className="text-xs text-red-500 mt-1 block">{formik.errors.sender}</span>
@@ -137,7 +135,7 @@ const CreateDispatchModal = ({ isOpen, onClose, onSuccess }) => {
 
             {/* Nơi nhận */}
             <div>
-              <label className="block text-xs font-semibold text-gray-700 mb-1">Nơi Nhận / Xử Lý *</label>
+              <label className="block text-xs font-semibold text-gray-700 mb-1">Nơi Nhận/Xử Lý *</label>
               <input
                 type="text"
                 name="receiver"
@@ -145,9 +143,8 @@ const CreateDispatchModal = ({ isOpen, onClose, onSuccess }) => {
                 value={formik.values.receiver}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-hidden ${
-                  formik.touched.receiver && formik.errors.receiver ? 'border-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-hidden ${formik.touched.receiver && formik.errors.receiver ? 'border-red-500' : 'border-gray-300'
+                  }`}
               />
             </div>
           </div>
@@ -182,9 +179,8 @@ const CreateDispatchModal = ({ isOpen, onClose, onSuccess }) => {
             </div>
           </div>
 
-          {/* Trích yếu / Mô tả */}
           <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1">Nội dung tóm tắt / Ghi chú</label>
+            <label className="block text-xs font-semibold text-gray-700 mb-1">Nội dung tóm tắt/Ghi chú</label>
             <textarea
               rows={3}
               name="description"

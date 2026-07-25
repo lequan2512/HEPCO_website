@@ -215,7 +215,7 @@ const AdminBaseOffice = () => {
                     <th className="p-3.5 whitespace-nowrap">Mã CV</th>
                     <th className="p-3.5 min-w-[220px]">Tiêu đề công văn</th>
                     <th className="p-3.5 whitespace-nowrap">Loại văn bản</th>
-                    <th className="p-3.5 min-w-[200px]">Đơn vị gửi / nhận</th>
+                    <th className="p-3.5 min-w-[200px]">Đơn vị gửi/nhận</th>
                     <th className="p-3.5 whitespace-nowrap">Độ khẩn</th>
                     <th className="p-3.5 whitespace-nowrap">Trạng thái</th>
                   </tr>
@@ -289,7 +289,7 @@ const AdminBaseOffice = () => {
                     <th className="p-3.5 min-w-[220px]">Tiêu đề tờ trình</th>
                     <th className="p-3.5 whitespace-nowrap">Danh mục</th>
                     <th className="p-3.5 whitespace-nowrap">Người trình ký</th>
-                    <th className="p-3.5 whitespace-nowrap">Kinh phí / Số tiền</th>
+                    <th className="p-3.5 whitespace-nowrap">Kinh phí/Số tiền</th>
                     <th className="p-3.5 whitespace-nowrap">Trạng thái phê duyệt</th>
                   </tr>
                 </thead>
@@ -336,7 +336,7 @@ const AdminBaseOffice = () => {
                   <tr>
                     <th className="p-3.5 min-w-[200px]">Tên công việc</th>
                     <th className="p-3.5 whitespace-nowrap">Dự án liên quan</th>
-                    <th className="p-3.5 whitespace-nowrap">Người giao / Nhận</th>
+                    <th className="p-3.5 whitespace-nowrap">Người giao/Nhận</th>
                     <th className="p-3.5 whitespace-nowrap">Hạn hoàn thành</th>
                     <th className="p-3.5 whitespace-nowrap">Trạng thái</th>
                   </tr>

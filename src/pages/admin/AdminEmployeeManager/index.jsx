@@ -10,7 +10,7 @@ import { useGetEmployees, useAddEmployee, useUpdateEmployee, useDeleteEmployee }
 import { useGetDepartments } from '../../../apis/department';
 import ConfirmModal from '../../../components/ConfirmModal';
 import Pagination from '../../../components/Pagination';
-import { EMPLOYEE_STATUS } from '../../../constants/employee';
+import { EMPLOYEE_STATUS, EMPLOYEE_STATUS_LABELS, EMPLOYEE_STATUS_OPTIONS } from '../../../constants/employee';
 
 const AdminEmployeeManager = () => {
   const [editingId, setEditingId] = useState(null);
@@ -58,7 +58,7 @@ const AdminEmployeeManager = () => {
 
   // Compute stats for top widgets
   const totalOfficeEmployees = meta?.total || employees.length;
-  const activeOfficeEmployees = employees.filter(e => e.status !== 'inactive').length;
+  const activeOfficeEmployees = employees.filter(e => e.status !== EMPLOYEE_STATUS.INACTIVE).length;
   const totalOfficeDepts = departments.length;
 
   const handleSuccess = (msg) => {
@@ -240,7 +240,7 @@ const AdminEmployeeManager = () => {
                 <tr className="border-b border-gray-100 text-xs font-bold text-gray-700 uppercase tracking-wider">
                   <th className="px-6 py-4">Mã NV</th>
                   <th className="px-6 py-4">Họ & Tên</th>
-                  <th className="px-6 py-4">Phòng Ban Văn Phòng</th>
+                  <th className="px-6 py-4">Phòng Ban</th>
                   <th className="px-6 py-4">Chức Vụ</th>
                   <th className="px-6 py-4">Liên Hệ</th>
                   <th className="px-6 py-4 text-right">Thao Tác</th>
@@ -252,16 +252,15 @@ const AdminEmployeeManager = () => {
                     <td className="px-6 py-4 font-mono font-bold text-gray-900">{e.employee_code}</td>
                     <td className="px-6 py-4 font-semibold text-gray-800">
                       {e.full_name}
-                      {e.status === 'inactive' && (
-                        <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
-                          Đã nghỉ việc
+                      {e.status === EMPLOYEE_STATUS.INACTIVE && (
+                        <span className={`ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${EMPLOYEE_STATUS_LABELS[EMPLOYEE_STATUS.INACTIVE].bg}`}>
+                          {EMPLOYEE_STATUS_LABELS[EMPLOYEE_STATUS.INACTIVE].label}
                         </span>
                       )}
                     </td>
                     <td className="px-6 py-4">
                       {e.department?.name ? (
                         <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-800 px-3 py-1 rounded-full text-xs font-semibold border border-blue-100">
-                          <Building2 className="w-3.5 h-3.5" />
                           {e.department.name}
                         </span>
                       ) : (
@@ -379,7 +378,7 @@ const AdminEmployeeManager = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Phòng Ban Văn Phòng <span className="text-red-500">*</span></label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Phòng Ban <span className="text-red-500">*</span></label>
                   <select
                     name="department_id"
                     className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-hepco-green/50 bg-white"
@@ -397,8 +396,9 @@ const AdminEmployeeManager = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
                   <select name="status" className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-hepco-green/50 bg-white" value={formik.values.status} onChange={formik.handleChange}>
-                    <option value={EMPLOYEE_STATUS.ACTIVE}>Hoạt động</option>
-                    <option value={EMPLOYEE_STATUS.INACTIVE}>Đã nghỉ việc</option>
+                    {EMPLOYEE_STATUS_OPTIONS.map(opt => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
                   </select>
                 </div>
               </div>

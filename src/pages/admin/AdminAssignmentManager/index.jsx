@@ -11,7 +11,7 @@ import { useGetCategories } from '../../../apis/device';
 import { useGetDepartments } from '../../../apis/department';
 import ConfirmModal from '../../../components/ConfirmModal';
 import Pagination from '../../../components/Pagination';
-import { DEVICE_CATEGORY_CODES, DEVICE_STATUS, ASSIGNMENT_STATUS } from '../../../constants/device';
+import { DEVICE_CATEGORY_CODES, DEVICE_STATUS, ASSIGNMENT_STATUS, ASSIGNMENT_STATUS_LABELS, ASSIGNMENT_STATUS_OPTIONS } from '../../../constants/device';
 import AssembleDeviceModal from '../../../components/AssembleDeviceModal';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
@@ -440,8 +440,9 @@ const AdminAssignmentManager = () => {
           onChange={(e) => setFilters(f => ({ ...f, status: e.target.value }))}
         >
           <option value="">Tất cả trạng thái</option>
-          <option value={ASSIGNMENT_STATUS.IN_USE}>Đang sử dụng</option>
-          <option value={ASSIGNMENT_STATUS.RETURNED}>Đã trả</option>
+          {ASSIGNMENT_STATUS_OPTIONS.map(opt => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          ))}
         </select>
       </div>
 
@@ -571,8 +572,8 @@ const AdminAssignmentManager = () => {
                     <td className="px-6 py-4 text-sm text-gray-800">{a.employee?.position || '-'}</td>
                     <td className="px-6 py-4">
                       {a.returned_date ?
-                        <span className="inline-flex items-center text-gray-600 bg-gray-100 px-2.5 py-1 rounded-md text-xs font-medium whitespace-nowrap">Đã trả</span> :
-                        <span className="inline-flex items-center text-blue-700 bg-blue-100 px-2.5 py-1 rounded-md text-xs font-medium whitespace-nowrap">Đang sử dụng</span>
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium whitespace-nowrap ${ASSIGNMENT_STATUS_LABELS[ASSIGNMENT_STATUS.RETURNED].bg}`}>{ASSIGNMENT_STATUS_LABELS[ASSIGNMENT_STATUS.RETURNED].label}</span> :
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium whitespace-nowrap ${ASSIGNMENT_STATUS_LABELS[ASSIGNMENT_STATUS.IN_USE].bg}`}>{ASSIGNMENT_STATUS_LABELS[ASSIGNMENT_STATUS.IN_USE].label}</span>
                       }
                     </td>
                     <td className="px-6 py-4 text-right relative" onClick={(e) => e.stopPropagation()}>

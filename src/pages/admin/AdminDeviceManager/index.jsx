@@ -10,7 +10,7 @@ import { useGetDevices, useAddDevice, useUpdateDevice, useDeleteDevice, useGetCa
 import { useGetSuppliers } from '../../../apis/supplier';
 import ConfirmModal from '../../../components/ConfirmModal';
 import Pagination from '../../../components/Pagination';
-import { DEVICE_CATEGORY_CODES, DEVICE_STATUS } from '../../../constants/device';
+import { DEVICE_CATEGORY_CODES, DEVICE_STATUS, DEVICE_STATUS_LABELS, DEVICE_STATUS_OPTIONS } from '../../../constants/device';
 import AssembleDeviceModal from '../../../components/AssembleDeviceModal';
 
 const AdminDeviceManager = () => {
@@ -247,14 +247,8 @@ const AdminDeviceManager = () => {
   };
 
   const getStatusLabel = (status) => {
-    const statusMap = {
-      [DEVICE_STATUS.IN_STOCK]: { label: 'Tồn kho', color: 'bg-green-100 text-green-700' },
-      [DEVICE_STATUS.IN_USE]: { label: 'Đang sử dụng', color: 'bg-blue-100 text-blue-700' },
-      [DEVICE_STATUS.BROKEN]: { label: 'Hỏng', color: 'bg-red-100 text-red-700' },
-      [DEVICE_STATUS.RETIRED]: { label: 'Đã thanh lý', color: 'bg-gray-100 text-gray-700' },
-    };
-    const s = statusMap[status] || { label: status, color: 'bg-gray-100 text-gray-700' };
-    return <span className={`px-2 py-1 rounded text-xs font-semibold ${s.color}`}>{s.label}</span>;
+    const s = DEVICE_STATUS_LABELS[status] || { label: status, bg: 'bg-gray-100 text-gray-700' };
+    return <span className={`px-2 py-1 rounded text-xs font-semibold ${s.bg}`}>{s.label}</span>;
   };
 
   const stats = {
@@ -386,9 +380,9 @@ const AdminDeviceManager = () => {
               className="w-full p-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
               <option value="">Tất cả trạng thái</option>
-              <option value={DEVICE_STATUS.IN_STOCK}>Tồn kho</option>
-              <option value={DEVICE_STATUS.IN_USE}>Đang sử dụng</option>
-              <option value={DEVICE_STATUS.BROKEN}>Hỏng</option>
+              {DEVICE_STATUS_OPTIONS.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
             </select>
           </div>
           <div>
@@ -465,7 +459,7 @@ const AdminDeviceManager = () => {
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
           <div className="p-3 bg-red-50 text-red-600 rounded-lg"><Wrench className="w-6 h-6" /></div>
           <div>
-            <p className="text-sm text-gray-500 font-medium">Đang Hỏng / Bảo Trì<br />{suffix}</p>
+            <p className="text-sm text-gray-500 font-medium">Đang Hỏng/Bảo Trì<br />{suffix}</p>
             <p className="text-2xl font-bold text-gray-800">{stats.broken}</p>
           </div>
         </div>

@@ -88,7 +88,7 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
       title: Yup.string().required('Vui lòng nhập tiêu đề bài viết'),
       thumbnail: Yup.string().required('Vui lòng tải lên thumbnail'),
       content: Yup.string().test(
-        'is-empty', 
+        'is-empty',
         'Vui lòng nhập nội dung bài viết',
         (value) => value && value.replace(/<[^>]+>/g, '').trim().length > 0
       ),
@@ -146,7 +146,7 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
           }
 
           await deleteNewsMutation.mutateAsync(article.id);
-          
+
           if (article.thumbnail && article.thumbnail.startsWith('/images/news/')) {
             await deleteImageMutation.mutateAsync(article.thumbnail);
           }
@@ -173,7 +173,7 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
           <h1 className="text-2xl font-bold text-gray-800">
             {editingId ? `Sửa Bài Viết ${titleText}` : `Thêm Mới ${titleText}`}
           </h1>
-          <button 
+          <button
             onClick={handleCloseForm}
             className="text-gray-400 hover:text-red-500 transition-colors p-2 rounded hover:bg-red-50"
           >
@@ -184,12 +184,11 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
         <form onSubmit={formik.handleSubmit} className="space-y-6 bg-white p-6 rounded-lg shadow-sm border border-gray-100">
           <div>
             <label className="block text-lg font-medium text-gray-700 mb-2">Tiêu đề bài viết</label>
-            <input 
-              type="text" 
+            <input
+              type="text"
               name="title"
-              className={`w-full p-3 border rounded outline-none focus:ring-hepco-green focus:border-hepco-green ${
-                formik.touched.title && formik.errors.title ? 'border-red-500' : 'border-gray-300'
-              }`}
+              className={`w-full p-3 border rounded outline-none focus:ring-hepco-green focus:border-hepco-green ${formik.touched.title && formik.errors.title ? 'border-red-500' : 'border-gray-300'
+                }`}
               placeholder="Nhập tiêu đề..."
               value={formik.values.title}
               onChange={formik.handleChange}
@@ -201,84 +200,83 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
           </div>
 
 
-            <div>
-              <label className="block text-lg font-medium text-gray-700 mb-2">Ảnh đại diện (Thumbnail)</label>
-              <input 
-                type="file" 
-                accept="image/*"
-                className={`w-full p-2 border rounded outline-none focus:ring-hepco-green focus:border-hepco-green ${
-                  formik.submitCount > 0 && formik.errors.thumbnail ? 'border-red-500' : 'border-gray-300'
+          <div>
+            <label className="block text-lg font-medium text-gray-700 mb-2">Ảnh đại diện (Thumbnail)</label>
+            <input
+              type="file"
+              accept="image/*"
+              className={`w-full p-2 border rounded outline-none focus:ring-hepco-green focus:border-hepco-green ${formik.submitCount > 0 && formik.errors.thumbnail ? 'border-red-500' : 'border-gray-300'
                 }`}
-                onChange={async (e) => {
-                  const file = e.target.files[0];
-                  if (file) {
-                    const formData = new FormData();
-                    formData.append('image', file);
-                    try {
-                      toast.loading('Đang tải ảnh lên...', { id: 'upload' });
-                      const res = await uploadImageMutation.mutateAsync(formData);
-                      if (res.success) {
-                        const oldThumb = formik.values.thumbnail;
-                        
-                        if (oldThumb && oldThumb.startsWith('/images/news/')) {
-                          await deleteImageMutation.mutateAsync(oldThumb);
-                        }
+              onChange={async (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                  const formData = new FormData();
+                  formData.append('image', file);
+                  try {
+                    toast.loading('Đang tải ảnh lên...', { id: 'upload' });
+                    const res = await uploadImageMutation.mutateAsync(formData);
+                    if (res.success) {
+                      const oldThumb = formik.values.thumbnail;
 
-                        formik.setFieldValue('thumbnail', res.url);
-                        toast.success('Tải ảnh thành công!', { id: 'upload' });
+                      if (oldThumb && oldThumb.startsWith('/images/news/')) {
+                        await deleteImageMutation.mutateAsync(oldThumb);
                       }
-                    } catch (error) {
-                      console.error('Lỗi tải ảnh:', error.response?.data || error);
-                      toast.error('Lỗi tải ảnh lên', { id: 'upload' });
-                    }
-                  }
-                }}
-              />
-              {formik.submitCount > 0 && formik.errors.thumbnail ? (
-                <div className="text-red-500 text-sm mt-1">{formik.errors.thumbnail}</div>
-              ) : null}
-              {formik.values.thumbnail && (
-                 <div className="mt-2 relative inline-block">
-                   <img src={formik.values.thumbnail.startsWith('http') ? formik.values.thumbnail : `${API_BASE_URL}${formik.values.thumbnail}`} alt="Thumbnail" className="h-32 object-cover rounded shadow" />
-                   <button
-                     type="button"
-                     onClick={() => {
-                       setConfirmConfig({
-                         isOpen: true,
-                         title: 'Xóa ảnh',
-                         message: 'Bạn có chắc chắn muốn xóa ảnh này?',
-                         onConfirm: async () => {
-                           try {
-                             toast.loading('Đang xóa ảnh...', { id: 'delete_upload' });
-                             
-                             const currThumb = formik.values.thumbnail;
-                             
-                             if (currThumb && currThumb.startsWith('/images/news/')) {
-                               await deleteImageMutation.mutateAsync(currThumb);
-                             }
 
-                             formik.setFieldValue('thumbnail', '');
-                             toast.success('Xóa ảnh thành công!', { id: 'delete_upload' });
-                           } catch (error) {
-                             console.error('Lỗi xóa ảnh:', error);
-                             toast.error('Lỗi xóa ảnh', { id: 'delete_upload' });
-                           }
-                         }
-                       });
-                     }}
-                     className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 shadow transition-colors"
-                     title="Xóa ảnh"
-                   >
-                     <X className="w-4 h-4" />
-                   </button>
-                 </div>
-              )}
-            </div>
+                      formik.setFieldValue('thumbnail', res.url);
+                      toast.success('Tải ảnh thành công!', { id: 'upload' });
+                    }
+                  } catch (error) {
+                    console.error('Lỗi tải ảnh:', error.response?.data || error);
+                    toast.error('Lỗi tải ảnh lên', { id: 'upload' });
+                  }
+                }
+              }}
+            />
+            {formik.submitCount > 0 && formik.errors.thumbnail ? (
+              <div className="text-red-500 text-sm mt-1">{formik.errors.thumbnail}</div>
+            ) : null}
+            {formik.values.thumbnail && (
+              <div className="mt-2 relative inline-block">
+                <img src={formik.values.thumbnail.startsWith('http') ? formik.values.thumbnail : `${API_BASE_URL}${formik.values.thumbnail}`} alt="Thumbnail" className="h-32 object-cover rounded shadow" />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setConfirmConfig({
+                      isOpen: true,
+                      title: 'Xóa ảnh',
+                      message: 'Bạn có chắc chắn muốn xóa ảnh này?',
+                      onConfirm: async () => {
+                        try {
+                          toast.loading('Đang xóa ảnh...', { id: 'delete_upload' });
+
+                          const currThumb = formik.values.thumbnail;
+
+                          if (currThumb && currThumb.startsWith('/images/news/')) {
+                            await deleteImageMutation.mutateAsync(currThumb);
+                          }
+
+                          formik.setFieldValue('thumbnail', '');
+                          toast.success('Xóa ảnh thành công!', { id: 'delete_upload' });
+                        } catch (error) {
+                          console.error('Lỗi xóa ảnh:', error);
+                          toast.error('Lỗi xóa ảnh', { id: 'delete_upload' });
+                        }
+                      }
+                    });
+                  }}
+                  className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 shadow transition-colors"
+                  title="Xóa ảnh"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+          </div>
 
           <div>
             <label className="block text-lg font-medium text-gray-700 mb-2">Nội dung</label>
             <div className={`bg-white ${formik.touched.content && formik.errors.content ? 'border border-red-500 rounded' : ''}`}>
-              <RichTextEditor 
+              <RichTextEditor
                 value={formik.values.content}
                 onChange={(content) => {
                   formik.setFieldValue('content', content);
@@ -295,14 +293,14 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
           </div>
 
           <div className="flex justify-end pt-4 gap-4">
-            <button 
+            <button
               type="button"
               onClick={handleCloseForm}
               className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold rounded shadow transition-colors"
             >
               Hủy Bỏ
             </button>
-            <button 
+            <button
               type="submit"
               className="px-8 py-3 bg-hepco-green hover:bg-green-700 text-white font-semibold rounded shadow transition-colors"
             >
@@ -311,7 +309,7 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
           </div>
         </form>
 
-        <ConfirmModal 
+        <ConfirmModal
           isOpen={confirmConfig.isOpen}
           title={confirmConfig.title}
           message={confirmConfig.message}
@@ -325,7 +323,7 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
   return (
     <div className="w-full relative">
       {deleteNewsMutation.isPending && <Loading fullScreen message="Đang xóa..." />}
-      
+
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b pb-4 gap-4">
         <h1 className="text-2xl font-bold text-gray-800">{titleText}</h1>
         <div className="flex items-center w-full sm:w-auto gap-4">
@@ -339,7 +337,7 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
               className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:outline-none focus:bg-white focus:ring-2 focus:ring-hepco-green focus:border-transparent transition-all"
             />
             {searchQuery && (
-              <button 
+              <button
                 onClick={() => setSearchQuery('')}
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5 rounded-full hover:bg-gray-200 transition-colors"
               >
@@ -348,7 +346,7 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
             )}
           </div>
           {!editOnly && (
-            <button 
+            <button
               onClick={() => {
                 setEditingId(null);
                 formik.resetForm();
@@ -384,19 +382,19 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
                   <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="px-6 py-4 text-sm text-gray-500 font-medium">#{item.id}</td>
 
-                      <td className="px-6 py-4">
-                        {item.thumbnail ? (
-                          <img 
-                            src={item.thumbnail.startsWith('http') ? item.thumbnail : `${API_BASE_URL}${item.thumbnail}`} 
-                            alt="Thumb" 
-                            className="w-16 h-12 object-cover rounded-md shadow-sm border border-gray-200"
-                          />
-                        ) : (
-                          <div className="w-16 h-12 bg-gray-100 rounded-md flex items-center justify-center text-gray-400 border border-gray-200">
-                            <ImageIcon className="w-5 h-5" />
-                          </div>
-                        )}
-                      </td>
+                    <td className="px-6 py-4">
+                      {item.thumbnail ? (
+                        <img
+                          src={item.thumbnail.startsWith('http') ? item.thumbnail : `${API_BASE_URL}${item.thumbnail}`}
+                          alt="Thumb"
+                          className="w-16 h-12 object-cover rounded-md shadow-sm border border-gray-200"
+                        />
+                      ) : (
+                        <div className="w-16 h-12 bg-gray-100 rounded-md flex items-center justify-center text-gray-400 border border-gray-200">
+                          <ImageIcon className="w-5 h-5" />
+                        </div>
+                      )}
+                    </td>
                     <td className="px-6 py-4">
                       <div className="text-sm text-gray-800 font-medium line-clamp-2 leading-tight max-w-[200px] sm:max-w-xs md:max-w-md" title={item.title}>
                         {item.title}
@@ -407,7 +405,7 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <button 
+                        <button
                           onClick={() => handleEdit(item)}
                           className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
                           title="Sửa bài viết"
@@ -415,7 +413,7 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
                           <Edit2 className="w-4 h-4" />
                         </button>
                         {!editOnly && (
-                          <button 
+                          <button
                             onClick={() => handleDelete(item)}
                             className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                             title="Xóa bài viết"
@@ -444,7 +442,7 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
         )}
       </div>
 
-      <ConfirmModal 
+      <ConfirmModal
         isOpen={confirmConfig.isOpen}
         title={confirmConfig.title}
         message={confirmConfig.message}

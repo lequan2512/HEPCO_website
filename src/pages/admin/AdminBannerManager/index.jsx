@@ -62,21 +62,21 @@ const AdminBannerManager = () => {
   return (
     <div className="w-full relative">
       {(uploadBannerMutation.isPending || deleteBannerMutation.isPending) && <Loading fullScreen message="Đang xử lý..." />}
-      
+
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b pb-4 gap-4">
         <h1 className="text-2xl font-bold text-gray-800">Hình Ảnh (Slider Trang Chủ)</h1>
-        <button 
+        <button
           onClick={() => fileInputRef.current?.click()}
           className="flex items-center gap-2 px-4 py-2 bg-hepco-green text-white font-semibold rounded-lg hover:bg-green-700 transition-colors shadow-sm w-full sm:w-auto justify-center"
         >
           <Plus className="w-5 h-5" />
           <span>Thêm Hình Ảnh</span>
         </button>
-        <input 
-          type="file" 
-          ref={fileInputRef} 
-          className="hidden" 
-          accept="image/*" 
+        <input
+          type="file"
+          ref={fileInputRef}
+          className="hidden"
+          accept="image/*"
           onChange={handleUpload}
         />
       </div>
@@ -88,13 +88,13 @@ const AdminBannerManager = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {banners.map((url, index) => (
               <div key={index} className="relative group rounded-lg overflow-hidden border border-gray-200 shadow-sm">
-                <img 
-                  src={url.startsWith('http') ? url : `${API_BASE_URL}${url}`} 
-                  alt={`Hình Ảnh ${index}`} 
+                <img
+                  src={url.startsWith('http') ? url : `${API_BASE_URL}${url}`}
+                  alt={`Hình Ảnh ${index}`}
                   className="w-full h-48 object-cover"
                 />
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <button 
+                  <button
                     onClick={() => handleDelete(url)}
                     className="p-3 bg-red-500 text-white rounded-full hover:bg-red-600 shadow-lg transform hover:scale-110 transition-all"
                     title="Xóa Hình Ảnh"
@@ -116,7 +116,7 @@ const AdminBannerManager = () => {
         )}
       </div>
 
-      <ConfirmModal 
+      <ConfirmModal
         isOpen={confirmConfig.isOpen}
         title={confirmConfig.title}
         message={confirmConfig.message}

@@ -21,7 +21,7 @@ export const DISPATCH_STATUS_LABELS = {
   [DISPATCH_STATUS.PENDING]: { label: 'Chờ phân công', bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
   [DISPATCH_STATUS.PROCESSING]: { label: 'Đang xử lý', bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
   [DISPATCH_STATUS.COMPLETED]: { label: 'Đã hoàn thành', bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
-  [DISPATCH_STATUS.REJECTED]: { label: 'Từ chối / Hủy', bg: 'bg-rose-50', text: 'text-rose-700', border: 'border-rose-200' }
+  [DISPATCH_STATUS.REJECTED]: { label: 'Từ chối/Hủy', bg: 'bg-rose-50', text: 'text-rose-700', border: 'border-rose-200' }
 };
 
 export const REQUEST_STATUS = {

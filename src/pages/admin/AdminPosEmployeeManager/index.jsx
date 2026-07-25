@@ -242,7 +242,7 @@ const AdminPosEmployeeManager = () => {
                 <tr className="border-b border-gray-100 text-xs font-bold text-gray-700 uppercase tracking-wider">
                   <th className="px-6 py-4">Mã NV</th>
                   <th className="px-6 py-4">Họ & Tên</th>
-                  <th className="px-6 py-4">Xí Nghiệp Trực Thuộc</th>
+                  <th className="px-6 py-4">Xí Nghiệp</th>
                   <th className="px-6 py-4">Chức Vụ</th>
                   <th className="px-6 py-4">Liên Hệ</th>
                   <th className="px-6 py-4 text-right">Thao Tác</th>
@@ -257,7 +257,6 @@ const AdminPosEmployeeManager = () => {
                     </td>
                     <td className="px-6 py-4">
                       <span className="inline-flex items-center gap-1 bg-purple-50 text-purple-800 px-3 py-1 rounded-full text-xs font-semibold border border-purple-100">
-                        <Building2 className="w-3.5 h-3.5" />
                         {emp.department?.name || 'Xí nghiệp chưa gán'}
                       </span>
                     </td>
@@ -370,7 +369,7 @@ const AdminPosEmployeeManager = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Xí Nghiệp Trực Thuộc <span className="text-red-500">*</span></label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Xí Nghiệp <span className="text-red-500">*</span></label>
                   <select
                     name="department_id"
                     className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-hepco-green/50 bg-white"

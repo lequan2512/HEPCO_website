@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import { getErrorMessage } from '../../../utils/errorMapper';
 import Loading from '../../../components/Loading';
 import { useGetDepartments, useAddDepartment, useUpdateDepartment, useDeleteDepartment } from '../../../apis/department';
+import { DEPARTMENT_TYPE, DEPARTMENT_TYPE_LABELS, DEPARTMENT_TYPE_OPTIONS } from '../../../constants/department';
 import ConfirmModal from '../../../components/ConfirmModal';
 import Pagination from '../../../components/Pagination';
 
@@ -50,7 +51,7 @@ const AdminDepartmentManager = () => {
   };
 
   const formik = useFormik({
-    initialValues: { code: '', name: '', type: 'van_phong', parent_id: '', description: '' },
+    initialValues: { code: '', name: '', type: DEPARTMENT_TYPE.VAN_PHONG, parent_id: '', description: '' },
     validationSchema: Yup.object({
       code: Yup.string().required('Vui lòng nhập mã phòng ban'),
       name: Yup.string().required('Vui lòng nhập tên phòng ban'),
@@ -82,7 +83,7 @@ const AdminDepartmentManager = () => {
     formik.setValues({
       code: item.code || '',
       name: item.name,
-      type: item.type || 'van_phong',
+      type: item.type || DEPARTMENT_TYPE.VAN_PHONG,
       parent_id: item.parent_id ? String(item.parent_id) : '',
       description: item.description || ''
     });
@@ -126,8 +127,9 @@ const AdminDepartmentManager = () => {
             className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:outline-none focus:bg-white text-gray-700"
           >
             <option value="">Tất cả Loại</option>
-            <option value="van_phong">Văn Phòng</option>
-            <option value="xi_nghiep">Xí Nghiệp</option>
+            {DEPARTMENT_TYPE_OPTIONS.map(opt => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
           </select>
 
           <div className="relative w-full sm:w-64">
@@ -164,8 +166,8 @@ const AdminDepartmentManager = () => {
               <thead className="bg-gray-50">
                 <tr className="border-b border-gray-100">
                   <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Mã PB</th>
-                  <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Tên Phòng Ban / Xí Nghiệp / Khu Vực</th>
-                  <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Phân Loại Cấp Phát</th>
+                  <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Tên Phòng Ban</th>
+                  <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Đơn vị</th>
                   <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Mô tả</th>
                   <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase text-right">Thao tác</th>
                 </tr>
@@ -189,15 +191,9 @@ const AdminDepartmentManager = () => {
                       )}
                     </td>
                     <td className="px-6 py-4 text-sm">
-                      {item.type === 'xi_nghiep' ? (
-                        <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-800 border border-purple-200">
-                          🏢 Xí Nghiệp
-                        </span>
-                      ) : (
-                        <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200">
-                          💻 Văn Phòng
-                        </span>
-                      )}
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${DEPARTMENT_TYPE_LABELS[item.type || DEPARTMENT_TYPE.VAN_PHONG]?.bg}`}>
+                        {DEPARTMENT_TYPE_LABELS[item.type || DEPARTMENT_TYPE.VAN_PHONG]?.label}
+                      </span>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500 truncate max-w-[250px]">{item.description || '-'}</td>
                     <td className="px-6 py-4 text-right">
@@ -259,7 +255,7 @@ const AdminDepartmentManager = () => {
 
               <div className="p-6 space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Mã Phòng Ban / Đơn Vị <span className="text-red-500">*</span></label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Mã Phòng Ban<span className="text-red-500">*</span></label>
                   <input
                     type="text"
                     name="code"
@@ -273,7 +269,7 @@ const AdminDepartmentManager = () => {
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Tên Phòng Ban / Xí Nghiệp / Khu Vực <span className="text-red-500">*</span></label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Tên Phòng Ban <span className="text-red-500">*</span></label>
                   <input
                     type="text"
                     name="name"
@@ -288,14 +284,14 @@ const AdminDepartmentManager = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Đơn Vị Trực Thuộc (Phòng Ban / Xí Nghiệp Cha)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Đơn Vị Trực Thuộc </label>
                   <select
                     name="parent_id"
                     className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-hepco-green/50 bg-white text-gray-800 font-medium"
                     value={formik.values.parent_id}
                     onChange={formik.handleChange}
                   >
-                    <option value="">-- Đơn Vị Cấp 1 (Độc Lập / Cấp Trên) --</option>
+                    <option value="">-- Đơn Vị Cấp 1 (Độc Lập/Cấp Trên) --</option>
                     {departments.filter(d => d.id !== editingId).map(d => (
                       <option key={d.id} value={d.id}>{d.name} ({d.code || 'Mã PB'})</option>
                     ))}
@@ -310,8 +306,9 @@ const AdminDepartmentManager = () => {
                     value={formik.values.type}
                     onChange={formik.handleChange}
                   >
-                    <option value="van_phong">Văn Phòng</option>
-                    <option value="xi_nghiep">Xí Nghiệp</option>
+                    {DEPARTMENT_TYPE_OPTIONS.map(opt => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
                   </select>
                 </div>
 

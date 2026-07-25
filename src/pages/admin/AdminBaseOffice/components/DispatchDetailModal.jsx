@@ -120,9 +120,8 @@ const DispatchDetailModal = ({ isOpen, onClose, dispatch }) => {
               </div>
 
               <div className="relative flex items-start gap-3">
-                <div className={`absolute -left-6 top-1 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${
-                  dispatch.status === 'completed' ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white'
-                }`}>
+                <div className={`absolute -left-6 top-1 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${dispatch.status === 'completed' ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white'
+                  }`}>
                   {dispatch.status === 'completed' ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Clock className="w-3.5 h-3.5" />}
                 </div>
                 <div>
@@ -145,7 +144,6 @@ const DispatchDetailModal = ({ isOpen, onClose, dispatch }) => {
         </div>
       </div>
 
-      {/* File / PDF Preview Modal */}
       <FilePreviewModal
         isOpen={isFilePreviewOpen}
         onClose={() => setIsFilePreviewOpen(false)}
