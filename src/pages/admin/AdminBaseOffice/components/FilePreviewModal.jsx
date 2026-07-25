@@ -1,4 +1,4 @@
-import { X, Download, Printer, ExternalLink, FileText, CheckCircle2, ShieldCheck } from 'lucide-react';
+import { X, Download, Printer, FileText, ShieldCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { formatDate } from '../../../../utils/formatDate';
 

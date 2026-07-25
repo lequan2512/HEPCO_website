@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, FileText, Calendar, Building2, User, Paperclip, CheckCircle2, Clock, ExternalLink, Download } from 'lucide-react';
+import { X, FileText, Calendar, Building2, User, Paperclip, CheckCircle2, Clock, ExternalLink } from 'lucide-react';
 import { DISPATCH_TYPE_LABELS, DISPATCH_STATUS_LABELS, URGENCY_LEVEL_LABELS } from '../../../../constants/baseOffice';
 import { formatDate } from '../../../../utils/formatDate';
 import FilePreviewModal from './FilePreviewModal';

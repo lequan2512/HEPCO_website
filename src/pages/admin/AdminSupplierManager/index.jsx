@@ -59,17 +59,15 @@ const AdminSupplierManager = () => {
   const handleDelete = (id) => {
     setConfirmConfig({
       isOpen: true, title: 'Xóa', message: 'Bạn có chắc muốn xóa?',
-      onConfirm: async () => { 
+      onConfirm: async () => {
         try {
-          await deleteSupplier.mutateAsync(id); 
-          toast.success('Đã xóa'); 
-          queryClient.invalidateQueries({ queryKey: ['suppliers'] }); 
+          await deleteSupplier.mutateAsync(id);
+          toast.success('Đã xóa');
+          queryClient.invalidateQueries({ queryKey: ['suppliers'] });
         } catch (error) { handleError(error); }
       }
     });
   };
-
-  if (isLoading) return <Loading />;
 
   const filteredSuppliers = suppliers;
 
@@ -88,7 +86,7 @@ const AdminSupplierManager = () => {
               className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:outline-none focus:bg-white focus:ring-2 focus:ring-hepco-green focus:border-transparent transition-all"
             />
             {searchQuery && (
-              <button 
+              <button
                 onClick={() => setSearchQuery('')}
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5 rounded-full hover:bg-gray-200 transition-colors"
               >
@@ -96,7 +94,7 @@ const AdminSupplierManager = () => {
               </button>
             )}
           </div>
-          <button onClick={() => { setIsFormOpen(true); setEditingId(null); formik.resetForm(); }} className="flex items-center whitespace-nowrap gap-2 px-4 py-2 bg-hepco-green text-white font-semibold rounded-lg hover:bg-green-700 transition-colors shadow-sm w-full sm:w-auto justify-center"><Plus className="w-5 h-5"/> <span>Thêm NCC</span></button>
+          <button onClick={() => { setIsFormOpen(true); setEditingId(null); formik.resetForm(); }} className="flex items-center whitespace-nowrap gap-2 px-4 py-2 bg-hepco-green text-white font-semibold rounded-lg hover:bg-green-700 transition-colors shadow-sm w-full sm:w-auto justify-center"><Plus className="w-5 h-5" /> <span>Thêm NCC</span></button>
         </div>
       </div>
 
@@ -142,8 +140,10 @@ const AdminSupplierManager = () => {
         </div>
       )}
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        {filteredSuppliers.length > 0 ? (
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden min-h-[300px] flex flex-col justify-center">
+        {isLoading ? (
+          <Loading />
+        ) : filteredSuppliers.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse min-w-[600px]">
               <thead className="bg-gray-50">
@@ -160,12 +160,12 @@ const AdminSupplierManager = () => {
                   <tr key={s.id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="px-6 py-4 text-sm font-mono text-gray-500 font-medium">#{s.id}</td>
                     <td className="px-6 py-4 text-sm font-medium text-gray-800">{s.name}</td>
-                    <td className="px-6 py-4 text-sm text-gray-500">{s.contact_person}<br/>{s.phone}</td>
-                    <td className="px-6 py-4 text-sm text-gray-500">{s.email}<br/>{s.address}</td>
+                    <td className="px-6 py-4 text-sm text-gray-500">{s.contact_person}<br />{s.phone}</td>
+                    <td className="px-6 py-4 text-sm text-gray-500">{s.email}<br />{s.address}</td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <button onClick={() => handleEdit(s)} className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"><Edit2 className="w-4 h-4"/></button>
-                        <button onClick={() => handleDelete(s.id)} className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"><Trash2 className="w-4 h-4"/></button>
+                        <button onClick={() => handleEdit(s)} className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"><Edit2 className="w-4 h-4" /></button>
+                        <button onClick={() => handleDelete(s.id)} className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"><Trash2 className="w-4 h-4" /></button>
                       </div>
                     </td>
                   </tr>

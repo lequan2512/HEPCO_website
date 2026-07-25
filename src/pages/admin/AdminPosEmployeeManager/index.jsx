@@ -137,8 +137,6 @@ const AdminPosEmployeeManager = () => {
     });
   };
 
-  if (isLoading) return <Loading />;
-
   return (
     <div className="w-full relative space-y-6">
       {/* Top Header */}
@@ -234,8 +232,10 @@ const AdminPosEmployeeManager = () => {
       </div>
 
       {/* Main Table Card */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        {employees.length > 0 ? (
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden min-h-[300px] flex flex-col justify-center">
+        {isLoading ? (
+          <Loading />
+        ) : employees.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse min-w-[800px]">
               <thead className="bg-gray-50">

@@ -431,7 +431,7 @@ const AdminPosManager = () => {
               ? (activeAss?.employee_name || 'Đã cấp phát')
               : (dev.status === 'borrowed' ? (activeBor?.borrower_name || 'Đang mượn') : 'Kho/Sẵn sàng');
 
-            const statusLabel = STATUS_LABELS[dev.status]?.label || dev.status;
+            const statusLabel = POS_STATUS_LABELS[dev.status]?.label || dev.status;
 
             const dataRow = sheet.addRow([
               idx + 1,

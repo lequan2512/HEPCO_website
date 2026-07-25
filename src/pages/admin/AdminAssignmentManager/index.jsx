@@ -359,8 +359,6 @@ const AdminAssignmentManager = () => {
     }
   };
 
-  if (isLoading) return <Loading />;
-
   const filteredAssignments = assignments;
 
   return (
@@ -546,8 +544,10 @@ const AdminAssignmentManager = () => {
         </div>
       )}
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        {filteredAssignments.length > 0 ? (
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden min-h-[300px] flex flex-col justify-center">
+        {isLoading ? (
+          <Loading />
+        ) : filteredAssignments.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse min-w-[700px]">
               <thead className="bg-gray-50">

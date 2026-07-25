@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Users, Plus, Trash2, Edit2, X, Search, Building2, Phone, Mail, MoreVertical, RefreshCw, UserCheck, ShieldCheck } from 'lucide-react';
+import { Users, Plus, Trash2, Edit2, X, Search, Building2, Phone, Mail, MoreVertical, RefreshCw, ShieldCheck } from 'lucide-react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import toast from 'react-hot-toast';
@@ -135,8 +135,6 @@ const AdminEmployeeManager = () => {
     });
   };
 
-  if (isLoadingEmp || isLoadingDept) return <Loading />;
-
   return (
     <div className="w-full relative space-y-6">
       {/* Top Header */}
@@ -232,8 +230,10 @@ const AdminEmployeeManager = () => {
       </div>
 
       {/* Main Table Card */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        {employees.length > 0 ? (
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden min-h-[300px] flex flex-col justify-center">
+        {(isLoadingEmp || isLoadingDept) ? (
+          <Loading />
+        ) : employees.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse min-w-[800px]">
               <thead className="bg-gray-50">
