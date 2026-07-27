@@ -69,7 +69,7 @@ const AdminPosEmployeeManager = () => {
   };
 
   const handleError = (error) => {
-    toast.error(error?.response?.data?.message || 'Có lỗi xảy ra khi lưu thông tin nhân viên thu phí');
+    toast.error(error?.response?.data?.message || 'Có lỗi xảy ra khi lưu thông tin nhân viên xí nghiệp');
   };
 
   const formik = useFormik({
@@ -77,7 +77,7 @@ const AdminPosEmployeeManager = () => {
       employee_code: '',
       full_name: '',
       department_id: '',
-      position: 'Nhân viên thu phí',
+      position: 'Nhân viên xí nghiệp',
       email: '',
       phone: ''
     },
@@ -94,10 +94,10 @@ const AdminPosEmployeeManager = () => {
         };
         if (editingId) {
           await updateMutation.mutateAsync({ id: editingId, ...payload });
-          handleSuccess('Cập nhật thông tin NV Thu phí thành công');
+          handleSuccess('Cập nhật thông tin NV thành công');
         } else {
           await addMutation.mutateAsync(payload);
-          handleSuccess('Thêm nhân viên thu phí mới thành công');
+          handleSuccess('Thêm nhân viên xí nghiệp mới thành công');
         }
       } catch (error) {
         handleError(error);
@@ -113,7 +113,7 @@ const AdminPosEmployeeManager = () => {
       employee_code: item.employee_code || '',
       full_name: item.full_name || '',
       department_id: item.department_id ? String(item.department_id) : '',
-      position: item.position || 'Nhân viên thu phí',
+      position: item.position || 'Nhân viên xí nghiệp',
       email: item.email || '',
       phone: item.phone || ''
     });
@@ -123,12 +123,12 @@ const AdminPosEmployeeManager = () => {
   const handleDelete = (id) => {
     setConfirmConfig({
       isOpen: true,
-      title: 'Xóa Nhân Viên Thu Phí',
-      message: 'Bạn có chắc chắn muốn xóa nhân viên thu phí này khỏi hệ thống?',
+      title: 'Xóa Nhân Viên',
+      message: 'Bạn có chắc chắn muốn xóa nhân viên này khỏi hệ thống?',
       onConfirm: async () => {
         try {
           await deleteMutation.mutateAsync(id);
-          toast.success('Đã xóa nhân viên thu phí');
+          toast.success('Đã xóa nhân viên');
           queryClient.invalidateQueries({ queryKey: ['employees'] });
         } catch (error) {
           handleError(error);
@@ -143,7 +143,7 @@ const AdminPosEmployeeManager = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-4 gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-            <UserCheck className="w-7 h-7 text-hepco-green" /> Quản Lý Nhân Viên Thu Phí
+            <UserCheck className="w-7 h-7 text-hepco-green" /> Quản Lý Nhân Viên Xí Nghiệp
           </h1>
         </div>
 
@@ -152,7 +152,7 @@ const AdminPosEmployeeManager = () => {
           onClick={() => { setIsFormOpen(true); setEditingId(null); formik.resetForm(); }}
           className="flex items-center gap-2 px-4 py-2.5 bg-hepco-green text-white font-semibold rounded-lg hover:bg-green-700 transition-colors shadow-sm"
         >
-          <Plus className="w-5 h-5" /> <span>Thêm NV Thu Phí</span>
+          <Plus className="w-5 h-5" /> <span>Thêm NV Xí Nghiệp</span>
         </button>
       </div>
 
@@ -164,7 +164,7 @@ const AdminPosEmployeeManager = () => {
           </div>
           <div>
             <div className="text-2xl font-bold text-gray-900">{totalEmployees}</div>
-            <div className="text-xs text-gray-500 font-medium">Tổng NV Thu Phí</div>
+            <div className="text-xs text-gray-500 font-medium">Tổng NV Xí Nghiệp</div>
           </div>
         </div>
 
@@ -260,7 +260,7 @@ const AdminPosEmployeeManager = () => {
                         {emp.department?.name || 'Xí nghiệp chưa gán'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-gray-600 font-medium">{emp.position || 'Nhân viên thu phí'}</td>
+                    <td className="px-6 py-4 text-gray-600 font-medium">{emp.position || 'Nhân viên xí nghiệp'}</td>
                     <td className="px-6 py-4 text-gray-500">
                       {emp.phone && <div className="flex items-center gap-1.5 font-medium text-gray-800"><Phone className="w-3.5 h-3.5 text-green-600" /> {emp.phone}</div>}
                       {emp.email && <div className="flex items-center gap-1.5 text-xs text-gray-400 mt-0.5"><Mail className="w-3 h-3" /> {emp.email}</div>}
@@ -308,8 +308,8 @@ const AdminPosEmployeeManager = () => {
         ) : (
           <div className="p-12 text-center flex flex-col items-center">
             <UserCheck className="w-12 h-12 text-gray-300 mb-3" />
-            <h3 className="text-lg font-bold text-gray-800">Chưa có dữ liệu nhân viên thu phí</h3>
-            <p className="text-gray-500 text-sm mt-1">Chưa có nhân viên thu phí thuộc các Xí Nghiệp địa bàn.</p>
+            <h3 className="text-lg font-bold text-gray-800">Chưa có dữ liệu nhân viên xí nghiệp</h3>
+            <p className="text-gray-500 text-sm mt-1">Chưa có nhân viên xí nghiệp thuộc các Xí Nghiệp địa bàn.</p>
           </div>
         )}
       </div>
@@ -330,7 +330,7 @@ const AdminPosEmployeeManager = () => {
               <div className="flex justify-between items-center p-6 border-b">
                 <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
                   <UserCheck className="w-5 h-5 text-hepco-green" />
-                  {editingId ? 'Cập Nhật NV Thu Phí' : 'Thêm Nhân Viên Thu Phí'}
+                  {editingId ? 'Cập Nhật NV Xí Nghiệp' : 'Thêm Nhân Viên Xí Nghiệp'}
                 </h2>
                 <button type="button" onClick={() => setIsFormOpen(false)} className="text-gray-400 hover:text-red-500 p-2">
                   <X className="w-5 h-5" />

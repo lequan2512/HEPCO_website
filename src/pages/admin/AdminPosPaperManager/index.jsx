@@ -113,7 +113,7 @@ const AdminPosPaperManager = () => {
       note: ''
     },
     validationSchema: Yup.object({
-      employee_id: Yup.string().required('Vui lòng chọn nhân viên thu phí'),
+      employee_id: Yup.string().required('Vui lòng chọn nhân viên xí nghiệp'),
       quantity: Yup.number().min(1, 'Số lượng cấp phát tối thiểu là 1 cuộn').required('Vui lòng nhập số lượng cuộn'),
     }),
     onSubmit: async (values, { setSubmitting }) => {
@@ -122,7 +122,7 @@ const AdminPosPaperManager = () => {
         await issueMutation.mutateAsync({
           ...values,
           paper_id: selectedPaper?.id || values.paper_id,
-          employee_name: emp ? emp.full_name : 'Nhân viên thu phí'
+          employee_name: emp ? emp.full_name : 'Nhân viên xí nghiệp'
         });
         toast.success(`Cấp phát thành công ${values.quantity} cuộn giấy in cho ${emp?.full_name || 'Nhân viên'}`);
         setIsIssueModalOpen(false);
@@ -179,7 +179,7 @@ const AdminPosPaperManager = () => {
             <Printer className="w-7 h-7 text-hepco-green" /> Quản Lý Kho Giấy In POS
           </h1>
           <p className="text-xs text-gray-500 mt-1">
-            Quản lý tồn kho cuộn giấy in nhiệt (K57/K80) và cấp phát giấy in cho nhân viên thu phí
+            Quản lý tồn kho cuộn giấy in nhiệt (K57/K80) và cấp phát giấy in cho nhân viên xí nghiệp
           </p>
         </div>
 
@@ -219,7 +219,7 @@ const AdminPosPaperManager = () => {
           </div>
           <div>
             <div className="text-2xl font-bold text-purple-900">{totalIssuedRolls} <span className="text-xs font-normal text-gray-500">cuộn</span></div>
-            <div className="text-xs text-gray-500 font-medium">Đã Cấp Cho NV Thu Phí</div>
+            <div className="text-xs text-gray-500 font-medium">Đã Cấp Cho NV Xí Nghiệp</div>
           </div>
         </div>
       </div>
@@ -516,7 +516,7 @@ const AdminPosPaperManager = () => {
 
               <div className="p-6 space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nhân Viên Thu Phí Nhận Giấy <span className="text-red-500">*</span></label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Nhân Viên Xí Nghiệp Nhận Giấy <span className="text-red-500">*</span></label>
                   <Select
                     options={collectorEmployees.map(e => ({
                       value: e.id,
@@ -529,7 +529,7 @@ const AdminPosPaperManager = () => {
                     onChange={(option) => {
                       issueFormik.setFieldValue('employee_id', option ? option.value : '');
                     }}
-                    placeholder="-- Gõ để tìm kiếm nhân viên thu phí --"
+                    placeholder="-- Gõ để tìm kiếm nhân viên xí nghiệp --"
                     isSearchable
                     isClearable
                     noOptionsMessage={() => "Không tìm thấy nhân viên Xí nghiệp nào"}

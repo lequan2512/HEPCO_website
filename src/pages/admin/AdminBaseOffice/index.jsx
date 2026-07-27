@@ -140,7 +140,7 @@ const AdminBaseOffice = () => {
             : 'border-transparent text-gray-500 hover:text-gray-700'
             }`}
         >
-          <Layers cla ssName="w-4 h-4" />
+          <Layers className="w-4 h-4" />
           Trình Ký & Đề Xuất
         </button>
 
@@ -232,7 +232,9 @@ const AdminBaseOffice = () => {
                         onClick={() => setSelectedDispatch(item)}
                         className="hover:bg-gray-50 cursor-pointer transition-colors group"
                       >
-                        <td className="p-3.5 font-bold text-hepco-green whitespace-nowrap group-hover:underline">{item.code}</td>
+                        <td className="p-3.5 font-bold text-hepco-green whitespace-nowrap group-hover:underline">
+                          {typeof item.code === 'object' ? (item.code.text || item.code.counter || 'CV') : String(item.code || '')}
+                        </td>
                         <td className="p-3.5 min-w-[220px]">
                           <p className="font-semibold text-gray-900 line-clamp-2 group-hover:text-hepco-green transition-colors">{item.title}</p>
                           <span className="text-[10px] text-gray-400 mt-0.5 block whitespace-nowrap">

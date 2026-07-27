@@ -147,9 +147,9 @@ const AdminLayout = () => {
             <span>Cấp Phát PC</span>
           </Link>
 
-          {/* Nhóm 3: Quản lý thu phí */}
+          {/* Nhóm 3: Quản lý xí nghiệp */}
           <div className="text-xs uppercase font-bold text-green-300 tracking-wider mb-2 mt-8 px-4 border-t border-green-800 pt-6">
-            Quản lý thu phí
+            Quản lý xí nghiệp
           </div>
           <Link
             to={ROUTES.ADMIN_POS}
@@ -188,7 +188,7 @@ const AdminLayout = () => {
               }`}
           >
             <UserCheck className="w-5 h-5" />
-            <span>NV Thu Phí</span>
+            <span>NV Xí Nghiệp</span>
           </Link>
           <Link
             to={`${ROUTES.ADMIN_DASHBOARD}/departments`}
