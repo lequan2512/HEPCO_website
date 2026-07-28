@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Users, Plus, Trash2, Edit2, X, Search, Building2, Phone, Mail, MoreVertical, RefreshCw, ShieldCheck } from 'lucide-react';
+import { Users, Plus, Trash2, Edit2, X, Search, Phone, Mail, MoreVertical, RefreshCw } from 'lucide-react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import toast from 'react-hot-toast';
@@ -8,6 +8,7 @@ import { getErrorMessage } from '../../../utils/errorMapper';
 import Loading from '../../../components/Loading';
 import { useGetEmployees, useAddEmployee, useUpdateEmployee, useDeleteEmployee } from '../../../apis/employee';
 import { useGetDepartments } from '../../../apis/department';
+import { DEPARTMENT_TYPE } from '../../../constants/department';
 import ConfirmModal from '../../../components/ConfirmModal';
 import Pagination from '../../../components/Pagination';
 import { EMPLOYEE_STATUS, EMPLOYEE_STATUS_LABELS, EMPLOYEE_STATUS_OPTIONS, EMPLOYEE_TYPE, EMPLOYEE_TYPE_OPTIONS } from '../../../constants/employee';
@@ -17,6 +18,7 @@ const AdminEmployeeManager = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [departmentIdFilter, setDepartmentIdFilter] = useState('');
+  const [sortOption, setSortOption] = useState('created_at_desc');
   const [page, setPage] = useState(1);
   const [openDropdownId, setOpenDropdownId] = useState(null);
   const [confirmConfig, setConfirmConfig] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
@@ -40,8 +42,10 @@ const AdminEmployeeManager = () => {
 
   const { data: employeesRes, isLoading: isLoadingEmp } = useGetEmployees({
     search: debouncedSearch,
-    dept_type: 'van_phong',
+    dept_type: DEPARTMENT_TYPE.OFFICE,
+    employee_type: EMPLOYEE_TYPE.OFFICE_STAFF,
     department_id: departmentIdFilter || undefined,
+    sort: sortOption,
     page,
     limit: 20
   });
@@ -49,17 +53,14 @@ const AdminEmployeeManager = () => {
   const employees = employeesRes?.data || [];
   const meta = employeesRes?.meta;
 
-  const { data: departmentsRes = {}, isLoading: isLoadingDept } = useGetDepartments({ type: 'van_phong', limit: 1000 });
+  const { data: departmentsRes = {}, isLoading: isLoadingDept } = useGetDepartments({ type: DEPARTMENT_TYPE.OFFICE, limit: 1000 });
   const departments = departmentsRes?.data || [];
 
   const addEmployeeMutation = useAddEmployee();
   const updateEmployeeMutation = useUpdateEmployee();
   const deleteEmployeeMutation = useDeleteEmployee();
 
-  // Compute stats for top widgets
-  const totalOfficeEmployees = meta?.total || employees.length;
-  const activeOfficeEmployees = employees.filter(e => e.status !== EMPLOYEE_STATUS.INACTIVE).length;
-  const totalOfficeDepts = departments.length;
+
 
   const handleSuccess = (msg) => {
     toast.success(msg);
@@ -157,39 +158,6 @@ const AdminEmployeeManager = () => {
         </button>
       </div>
 
-      {/* Stats Widgets Bar */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center font-bold">
-            <Users className="w-6 h-6" />
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-gray-900">{totalOfficeEmployees}</div>
-            <div className="text-xs text-gray-500 font-medium">Tổng NV Văn Phòng</div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-green-50 text-green-700 flex items-center justify-center font-bold">
-            <ShieldCheck className="w-6 h-6" />
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-green-800">{activeOfficeEmployees}</div>
-            <div className="text-xs text-gray-500 font-medium">Đang Làm Việc</div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center font-bold">
-            <Building2 className="w-6 h-6" />
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-purple-900">{totalOfficeDepts}</div>
-            <div className="text-xs text-gray-500 font-medium">Phòng Ban Khối Văn Phòng</div>
-          </div>
-        </div>
-      </div>
-
       {/* Filter Bar Card */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto flex-1">
@@ -220,9 +188,22 @@ const AdminEmployeeManager = () => {
             ))}
           </select>
 
-          {(searchQuery || departmentIdFilter) && (
+          <select
+            value={sortOption}
+            onChange={(e) => { setSortOption(e.target.value); setPage(1); }}
+            className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-700 focus:outline-none focus:bg-white font-medium"
+          >
+            <option value="created_at_desc">Mới nhất ➔ Cũ nhất</option>
+            <option value="created_at_asc">Cũ nhất ➔ Mới nhất</option>
+            <option value="code_asc">Mã NV (A ➔ Z)</option>
+            <option value="code_desc">Mã NV (Z ➔ A)</option>
+            <option value="name_asc">Họ tên (A ➔ Z)</option>
+            <option value="name_desc">Họ tên (Z ➔ A)</option>
+          </select>
+
+          {(searchQuery || departmentIdFilter || sortOption !== 'created_at_desc') && (
             <button
-              onClick={() => { setSearchQuery(''); setDepartmentIdFilter(''); setPage(1); }}
+              onClick={() => { setSearchQuery(''); setDepartmentIdFilter(''); setSortOption('created_at_desc'); setPage(1); }}
               className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100"
               title="Xóa bộ lọc"
             >

@@ -24,6 +24,7 @@ import {
 import { useGetEmployees } from '../../../apis/employee';
 import { useGetDepartments } from '../../../apis/department';
 import { EMPLOYEE_TYPE } from '../../../constants/employee';
+import { DEPARTMENT_TYPE } from '../../../constants/department';
 
 
 const ENTERPRISE_LABELS = {
@@ -110,7 +111,7 @@ const AdminPosManager = () => {
   });
 
 
-  const { data: deptsRes } = useGetDepartments({ type: 'xi_nghiep', limit: 1000 });
+  const { data: deptsRes } = useGetDepartments({ type: DEPARTMENT_TYPE.ENTERPRISE, limit: 1000 });
   const departments = deptsRes?.data || [];
 
   const { data: employeesRes } = useGetEmployees({ employee_type: EMPLOYEE_TYPE.FEE_COLLECTOR, limit: 1000 });

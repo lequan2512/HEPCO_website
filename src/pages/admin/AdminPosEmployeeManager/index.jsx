@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { UserCheck, Plus, Trash2, Edit2, X, Search, Building2, Phone, Mail, MoreVertical, RefreshCw, Users, ShieldCheck } from 'lucide-react';
+import { UserCheck, Plus, Trash2, Edit2, X, Search, Building2, Phone, Mail, MoreVertical, RefreshCw } from 'lucide-react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import toast from 'react-hot-toast';
@@ -9,13 +9,17 @@ import ConfirmModal from '../../../components/ConfirmModal';
 import Pagination from '../../../components/Pagination';
 import { useGetEmployees, useAddEmployee, useUpdateEmployee, useDeleteEmployee } from '../../../apis/employee';
 import { useGetDepartments } from '../../../apis/department';
+import { DEPARTMENT_TYPE } from '../../../constants/department';
+import { EMPLOYEE_TYPE } from '../../../constants/employee';
 
 const AdminPosEmployeeManager = () => {
+  const [activeTab, setActiveTab] = useState('management'); // 'management' (Ban BQL Xí nghiệp - NV VP) | 'fee_collector' (NV Thu phí)
   const [editingId, setEditingId] = useState(null);
   const [page, setPage] = useState(1);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [departmentIdFilter, setDepartmentIdFilter] = useState('');
+  const [sortOption, setSortOption] = useState('created_at_desc');
   const [openDropdownId, setOpenDropdownId] = useState(null);
   const [confirmConfig, setConfirmConfig] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
   const queryClient = useQueryClient();
@@ -36,16 +40,20 @@ const AdminPosEmployeeManager = () => {
     return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
-  // Fetch employees filtered specifically for Xí Nghiệp (type = xi_nghiep)
+  const employeeTypeFilter = activeTab === 'management' ? EMPLOYEE_TYPE.OFFICE_STAFF : EMPLOYEE_TYPE.FEE_COLLECTOR;
+
+  // Fetch employees filtered specifically for Xí Nghiệp and current active tab employee_type
   const { data: employeesRes, isLoading } = useGetEmployees({
     search: debouncedSearch,
-    dept_type: 'xi_nghiep',
+    dept_type: DEPARTMENT_TYPE.ENTERPRISE,
+    employee_type: employeeTypeFilter,
     department_id: departmentIdFilter || undefined,
+    sort: sortOption,
     page,
     limit: 20
   });
 
-  const { data: deptsRes } = useGetDepartments({ type: 'xi_nghiep', limit: 100 });
+  const { data: deptsRes } = useGetDepartments({ type: DEPARTMENT_TYPE.ENTERPRISE, limit: 100 });
   const xiNghiepDepartments = deptsRes?.data || [];
 
   const employees = employeesRes?.data || [];
@@ -55,10 +63,7 @@ const AdminPosEmployeeManager = () => {
   const updateMutation = useUpdateEmployee();
   const deleteMutation = useDeleteEmployee();
 
-  // Compute Stats for top widget
-  const totalEmployees = meta?.total || employees.length;
-  const bshEmployeesCount = employees.filter(e => e.department?.name?.includes('Bắc sông Hương')).length;
-  const nshEmployeesCount = employees.filter(e => e.department?.name?.includes('Nam sông Hương')).length;
+
 
   const handleSuccess = (msg) => {
     toast.success(msg);
@@ -77,20 +82,24 @@ const AdminPosEmployeeManager = () => {
       employee_code: '',
       full_name: '',
       department_id: '',
-      position: 'Nhân viên xí nghiệp',
+      employee_type: activeTab === 'management' ? EMPLOYEE_TYPE.OFFICE_STAFF : EMPLOYEE_TYPE.FEE_COLLECTOR,
+      position: activeTab === 'management' ? 'Cán bộ quản lý Xí nghiệp' : 'Nhân viên thu phí',
       email: '',
       phone: ''
     },
+    enableReinitialize: true,
     validationSchema: Yup.object({
       employee_code: Yup.string().required('Vui lòng nhập mã nhân viên'),
       full_name: Yup.string().required('Vui lòng nhập họ và tên'),
       department_id: Yup.string().required('Vui lòng chọn Xí Nghiệp'),
+      employee_type: Yup.number().required('Vui lòng chọn loại nhân viên'),
     }),
     onSubmit: async (values, { setSubmitting }) => {
       try {
         const payload = {
           ...values,
-          department_id: Number(values.department_id)
+          department_id: Number(values.department_id),
+          employee_type: Number(values.employee_type)
         };
         if (editingId) {
           await updateMutation.mutateAsync({ id: editingId, ...payload });
@@ -113,7 +122,8 @@ const AdminPosEmployeeManager = () => {
       employee_code: item.employee_code || '',
       full_name: item.full_name || '',
       department_id: item.department_id ? String(item.department_id) : '',
-      position: item.position || 'Nhân viên xí nghiệp',
+      employee_type: item.employee_type ? Number(item.employee_type) : (activeTab === 'management' ? EMPLOYEE_TYPE.OFFICE_STAFF : EMPLOYEE_TYPE.FEE_COLLECTOR),
+      position: item.position || (activeTab === 'management' ? 'Cán bộ quản lý Xí nghiệp' : 'Nhân viên thu phí'),
       email: item.email || '',
       phone: item.phone || ''
     });
@@ -147,7 +157,6 @@ const AdminPosEmployeeManager = () => {
           </h1>
         </div>
 
-
         <button
           onClick={() => { setIsFormOpen(true); setEditingId(null); formik.resetForm(); }}
           className="flex items-center gap-2 px-4 py-2.5 bg-hepco-green text-white font-semibold rounded-lg hover:bg-green-700 transition-colors shadow-sm"
@@ -156,41 +165,33 @@ const AdminPosEmployeeManager = () => {
         </button>
       </div>
 
-      {/* Stats Widgets Bar */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-green-50 text-green-700 flex items-center justify-center font-bold">
-            <Users className="w-6 h-6" />
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-gray-900">{totalEmployees}</div>
-            <div className="text-xs text-gray-500 font-medium">Tổng NV Xí Nghiệp</div>
-          </div>
-        </div>
+      {/* Sub-Tabs Navigation */}
+      <div className="flex border-b border-gray-200 bg-white px-4 pt-2 rounded-t-xl overflow-x-auto whitespace-nowrap scrollbar-none">
+        <button
+          onClick={() => { setActiveTab('management'); setPage(1); }}
+          className={`flex items-center gap-2 px-5 py-3 text-xs font-bold transition-all border-b-2 shrink-0 ${activeTab === 'management'
+            ? 'border-hepco-green text-hepco-green'
+            : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}
+        >
+          <Building2 className="w-4 h-4" />
+          Ban Quản Lý Xí Nghiệp
+        </button>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center font-bold">
-            <Building2 className="w-6 h-6" />
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-purple-900">{bshEmployeesCount}</div>
-            <div className="text-xs text-gray-500 font-medium">XN Bắc Sông Hương</div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center font-bold">
-            <ShieldCheck className="w-6 h-6" />
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-blue-900">{nshEmployeesCount}</div>
-            <div className="text-xs text-gray-500 font-medium">XN Nam Sông Hương</div>
-          </div>
-        </div>
+        <button
+          onClick={() => { setActiveTab('fee_collector'); setPage(1); }}
+          className={`flex items-center gap-2 px-5 py-3 text-xs font-bold transition-all border-b-2 shrink-0 ${activeTab === 'fee_collector'
+            ? 'border-hepco-green text-hepco-green'
+            : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}
+        >
+          <UserCheck className="w-4 h-4" />
+          Nhân Viên Thu Phí
+        </button>
       </div>
 
       {/* Filter Bar Card */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-white rounded-b-xl shadow-sm border border-gray-100 p-4 flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto flex-1">
           <div className="relative flex-1 min-w-[240px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -219,9 +220,22 @@ const AdminPosEmployeeManager = () => {
             ))}
           </select>
 
-          {(searchQuery || departmentIdFilter) && (
+          <select
+            value={sortOption}
+            onChange={(e) => { setSortOption(e.target.value); setPage(1); }}
+            className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-700 focus:outline-none focus:bg-white font-medium"
+          >
+            <option value="created_at_desc">Mới nhất ➔ Cũ nhất</option>
+            <option value="created_at_asc">Cũ nhất ➔ Mới nhất</option>
+            <option value="code_asc">Mã NV (A ➔ Z)</option>
+            <option value="code_desc">Mã NV (Z ➔ A)</option>
+            <option value="name_asc">Họ tên (A ➔ Z)</option>
+            <option value="name_desc">Họ tên (Z ➔ A)</option>
+          </select>
+
+          {(searchQuery || departmentIdFilter || sortOption !== 'created_at_desc') && (
             <button
-              onClick={() => { setSearchQuery(''); setDepartmentIdFilter(''); setPage(1); }}
+              onClick={() => { setSearchQuery(''); setDepartmentIdFilter(''); setSortOption('created_at_desc'); setPage(1); }}
               className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100"
               title="Xóa bộ lọc"
             >
@@ -260,41 +274,34 @@ const AdminPosEmployeeManager = () => {
                         {emp.department?.name || 'Xí nghiệp chưa gán'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-gray-600 font-medium">{emp.position || 'Nhân viên xí nghiệp'}</td>
+                    <td className="px-6 py-4 text-gray-600 font-medium">
+                      <span>{emp.position || 'Nhân viên xí nghiệp'}</span>
+                    </td>
                     <td className="px-6 py-4 text-gray-500">
                       {emp.phone && <div className="flex items-center gap-1.5 font-medium text-gray-800"><Phone className="w-3.5 h-3.5 text-green-600" /> {emp.phone}</div>}
                       {emp.email && <div className="flex items-center gap-1.5 text-xs text-gray-400 mt-0.5"><Mail className="w-3 h-3" /> {emp.email}</div>}
                     </td>
                     <td className="px-6 py-4 text-right relative" onClick={(e) => e.stopPropagation()}>
                       <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setOpenDropdownId(openDropdownId === emp.id ? null : emp.id);
-                        }}
-                        className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors text-gray-500"
-                        title="Thao tác"
+                        onClick={() => setOpenDropdownId(openDropdownId === emp.id ? null : emp.id)}
+                        className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                       >
                         <MoreVertical className="w-5 h-5" />
                       </button>
 
                       {openDropdownId === emp.id && (
-                        <div className="absolute right-6 top-10 bg-white border border-gray-100 shadow-xl rounded-xl w-44 z-20 flex flex-col overflow-hidden py-1 text-left">
+                        <div className="absolute right-6 top-12 w-36 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-10 text-left">
                           <button
-                            onClick={(e) => { e.stopPropagation(); setOpenDropdownId(null); handleEdit(emp); }}
-                            className="w-full px-4 py-2.5 text-xs font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                            onClick={() => { handleEdit(emp); setOpenDropdownId(null); }}
+                            className="w-full px-4 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                           >
-                            <Edit2 className="w-4 h-4 text-blue-500" />
-                            Sửa thông tin
+                            <Edit2 className="w-3.5 h-3.5 text-blue-600" /> Chỉnh sửa
                           </button>
-
-                          <div className="border-t border-gray-100 my-1"></div>
-
                           <button
-                            onClick={(e) => { e.stopPropagation(); setOpenDropdownId(null); handleDelete(emp.id); }}
-                            className="w-full px-4 py-2.5 text-xs font-medium text-red-600 hover:bg-red-50 flex items-center gap-2"
+                            onClick={() => { handleDelete(emp.id); setOpenDropdownId(null); }}
+                            className="w-full px-4 py-2 text-xs font-medium text-red-600 hover:bg-red-50 flex items-center gap-2"
                           >
-                            <Trash2 className="w-4 h-4 text-red-500" />
-                            Xóa nhân viên
+                            <Trash2 className="w-3.5 h-3.5" /> Xóa NV
                           </button>
                         </div>
                       )}
@@ -308,8 +315,10 @@ const AdminPosEmployeeManager = () => {
         ) : (
           <div className="p-12 text-center flex flex-col items-center">
             <UserCheck className="w-12 h-12 text-gray-300 mb-3" />
-            <h3 className="text-lg font-bold text-gray-800">Chưa có dữ liệu nhân viên xí nghiệp</h3>
-            <p className="text-gray-500 text-sm mt-1">Chưa có nhân viên xí nghiệp thuộc các Xí Nghiệp địa bàn.</p>
+            <h3 className="text-lg font-bold text-gray-800">
+              {activeTab === 'management' ? 'Chưa có dữ liệu Ban Quản Lý Xí Nghiệp' : 'Chưa có dữ liệu Nhân Viên Thu Phí'}
+            </h3>
+            <p className="text-gray-500 text-sm mt-1">Chưa có nhân viên thuộc mục này trong các Xí Nghiệp địa bàn.</p>
           </div>
         )}
       </div>
@@ -365,6 +374,22 @@ const AdminPosEmployeeManager = () => {
                   />
                   {formik.touched.full_name && formik.errors.full_name && (
                     <div className="text-red-500 text-xs mt-1">{formik.errors.full_name}</div>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Loại Nhân Viên <span className="text-red-500">*</span></label>
+                  <select
+                    name="employee_type"
+                    className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-hepco-green/50 bg-white"
+                    value={formik.values.employee_type}
+                    onChange={formik.handleChange}
+                  >
+                    <option value={EMPLOYEE_TYPE.OFFICE_STAFF}>Ban Quản Lý Xí Nghiệp (NV Văn Phòng)</option>
+                    <option value={EMPLOYEE_TYPE.FEE_COLLECTOR}>Nhân Viên Thu Phí</option>
+                  </select>
+                  {formik.touched.employee_type && formik.errors.employee_type && (
+                    <div className="text-red-500 text-xs mt-1">{formik.errors.employee_type}</div>
                   )}
                 </div>
 

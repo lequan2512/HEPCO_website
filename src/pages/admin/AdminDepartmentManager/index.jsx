@@ -51,16 +51,17 @@ const AdminDepartmentManager = () => {
   };
 
   const formik = useFormik({
-    initialValues: { code: '', name: '', type: DEPARTMENT_TYPE.VAN_PHONG, parent_id: '', description: '' },
+    initialValues: { code: '', name: '', type: DEPARTMENT_TYPE.OFFICE, parent_id: '', description: '' },
     validationSchema: Yup.object({
       code: Yup.string().required('Vui lòng nhập mã phòng ban'),
       name: Yup.string().required('Vui lòng nhập tên phòng ban'),
-      type: Yup.string().required('Vui lòng chọn loại phòng ban'),
+      type: Yup.number().required('Vui lòng chọn loại phòng ban'),
     }),
     onSubmit: async (values, { setSubmitting }) => {
       try {
         const payload = {
           ...values,
+          type: Number(values.type),
           parent_id: values.parent_id ? Number(values.parent_id) : null
         };
         if (editingId) {
@@ -83,7 +84,7 @@ const AdminDepartmentManager = () => {
     formik.setValues({
       code: item.code || '',
       name: item.name,
-      type: item.type || DEPARTMENT_TYPE.VAN_PHONG,
+      type: item.type ? Number(item.type) : DEPARTMENT_TYPE.OFFICE,
       parent_id: item.parent_id ? String(item.parent_id) : '',
       description: item.description || ''
     });
@@ -191,8 +192,8 @@ const AdminDepartmentManager = () => {
                       )}
                     </td>
                     <td className="px-6 py-4 text-sm">
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${DEPARTMENT_TYPE_LABELS[item.type || DEPARTMENT_TYPE.VAN_PHONG]?.bg}`}>
-                        {DEPARTMENT_TYPE_LABELS[item.type || DEPARTMENT_TYPE.VAN_PHONG]?.label}
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${DEPARTMENT_TYPE_LABELS[item.type || DEPARTMENT_TYPE.OFFICE]?.bg}`}>
+                        {DEPARTMENT_TYPE_LABELS[item.type || DEPARTMENT_TYPE.OFFICE]?.label}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500 truncate max-w-[250px]">{item.description || '-'}</td>
