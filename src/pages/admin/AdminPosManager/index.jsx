@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import {
   CreditCard, Plus, Trash2, Edit2, X, Search, RefreshCw,
   UserCheck, History, ArrowRightLeft,
-  Phone, Download, Loader2, MoreVertical, RotateCcw
+  Phone, Download, Loader2, MoreVertical, RotateCcw, ArrowUpDown, ArrowUp, ArrowDown
 } from 'lucide-react';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
@@ -92,6 +92,7 @@ const AdminPosManager = () => {
   });
 
   const queryClient = useQueryClient();
+  const [sortOption, setSortOption] = useState('created_at_desc');
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -106,6 +107,7 @@ const AdminPosManager = () => {
     search: debouncedSearch,
     status: activeTab === 'assigned' ? POS_STATUS.IN_USE : activeTab === 'borrowed' ? `${POS_STATUS.IN_STOCK},${POS_STATUS.BORROWED}` : (status || undefined),
     department_id: departmentId || undefined,
+    sort: sortOption,
     page,
     limit: 20
   });
@@ -555,8 +557,8 @@ const AdminPosManager = () => {
         </div>
 
         {/* Filter Bar */}
-        <div className="p-4 bg-white border-b border-gray-100 flex flex-wrap items-center gap-4">
-          <div className="relative flex-1 min-w-[240px]">
+        <div className="p-4 bg-white border-b border-gray-100 flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3">
+          <div className="relative flex-1 min-w-[200px]">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
@@ -565,15 +567,14 @@ const AdminPosManager = () => {
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-hepco-green"
             />
-
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 w-full sm:w-auto">
             {/* Sub-Department Filter */}
             <select
               value={departmentId}
               onChange={(e) => { setDepartmentId(e.target.value); setPage(1); }}
-              className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-hepco-green bg-white text-gray-700 max-w-[260px]"
+              className="w-full sm:w-auto px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-hepco-green bg-white text-gray-700 max-w-none sm:max-w-[260px]"
             >
               <option value="">Tất cả Xí Nghiệp/Khu Vực</option>
               {departments.map(d => (
@@ -588,7 +589,7 @@ const AdminPosManager = () => {
               <select
                 value={status}
                 onChange={(e) => { setStatus(e.target.value); setPage(1); }}
-                className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-hepco-green bg-white text-gray-700"
+                className="w-full sm:w-auto px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-hepco-green bg-white text-gray-700"
               >
                 <option value="">Tất cả Trạng thái</option>
                 {POS_STATUS_OPTIONS.map(opt => (
@@ -597,14 +598,14 @@ const AdminPosManager = () => {
               </select>
             )}
 
-            {(search || status || departmentId) && (
+
+
+            {(search || status || departmentId || sortOption !== 'created_at_desc') && (
               <button
-                onClick={() => { setSearch(''); setStatus(''); setDepartmentId(''); setPage(1); }}
-                className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100"
+                onClick={() => { setSearch(''); setStatus(''); setDepartmentId(''); setSortOption('created_at_desc'); setPage(1); }}
+                className="self-end sm:self-center p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
                 title="Xóa bộ lọc"
               >
-
-
                 <RefreshCw className="w-4 h-4" />
               </button>
             )}
@@ -624,7 +625,21 @@ const AdminPosManager = () => {
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-100 text-gray-600 text-xs font-semibold uppercase tracking-wider">
                   <th className="py-3.5 px-4">Xí Nghiệp & Khu Vực</th>
-                  <th className="py-3.5 px-4">Serial/IMEI POS</th>
+                  <th 
+                    onClick={() => setSortOption(prev => prev === 'serial_asc' ? 'serial_desc' : 'serial_asc')}
+                    className="py-3.5 px-4 cursor-pointer hover:bg-gray-100 transition-colors select-none group"
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <span>Serial/IMEI POS</span>
+                      {sortOption === 'serial_asc' ? (
+                        <ArrowUp className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                      ) : sortOption === 'serial_desc' ? (
+                        <ArrowDown className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                      ) : (
+                        <ArrowUpDown className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-600" />
+                      )}
+                    </div>
+                  </th>
                   <th className="py-3.5 px-4">Thông Tin SIM</th>
                   <th className="py-3.5 px-4">Địa Bàn Phụ Trách</th>
                   <th className="py-3.5 px-4">Trạng Thái</th>

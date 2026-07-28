@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Printer, Plus, Trash2, Edit2, X, Search, Send, PackageCheck, History, UserCheck, MoreVertical, Package, CheckCircle2 } from 'lucide-react';
+import { Printer, Plus, Trash2, Edit2, X, Search, Send, PackageCheck, History, UserCheck, MoreVertical, Package, CheckCircle2, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import toast from 'react-hot-toast';
@@ -23,6 +23,7 @@ const AdminPosPaperManager = () => {
   const [isIssueModalOpen, setIsIssueModalOpen] = useState(false);
   const [selectedPaper, setSelectedPaper] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortOption, setSortOption] = useState('created_at_desc');
   const [openDropdownId, setOpenDropdownId] = useState(null);
   const [confirmConfig, setConfirmConfig] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
 
@@ -44,6 +45,7 @@ const AdminPosPaperManager = () => {
 
   const { data: papersRes, isLoading } = useGetPosPapers({
     search: debouncedSearch,
+    sort: sortOption,
     page,
     limit: 20
   });
@@ -273,9 +275,37 @@ const AdminPosPaperManager = () => {
                 <thead className="bg-gray-50">
                   <tr className="border-b border-gray-100 text-xs font-bold text-gray-700 uppercase tracking-wider">
                     <th className="px-6 py-4">Mã Ký Hiệu</th>
-                    <th className="px-6 py-4">Tên Loại Giấy In POS</th>
+                    <th 
+                      onClick={() => setSortOption(prev => prev === 'name_asc' ? 'name_desc' : 'name_asc')}
+                      className="px-6 py-4 cursor-pointer hover:bg-gray-100 transition-colors select-none group"
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <span>Tên Loại Giấy In POS</span>
+                        {sortOption === 'name_asc' ? (
+                          <ArrowUp className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                        ) : sortOption === 'name_desc' ? (
+                          <ArrowDown className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                        ) : (
+                          <ArrowUpDown className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-600" />
+                        )}
+                      </div>
+                    </th>
                     <th className="px-6 py-4">Tổng Nhập</th>
-                    <th className="px-6 py-4">Tồn Kho</th>
+                    <th 
+                      onClick={() => setSortOption(prev => prev === 'quantity_desc' ? 'quantity_asc' : 'quantity_desc')}
+                      className="px-6 py-4 cursor-pointer hover:bg-gray-100 transition-colors select-none group"
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <span>Tồn Kho</span>
+                        {sortOption === 'quantity_asc' ? (
+                          <ArrowUp className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                        ) : sortOption === 'quantity_desc' ? (
+                          <ArrowDown className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                        ) : (
+                          <ArrowUpDown className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-600" />
+                        )}
+                      </div>
+                    </th>
                     <th className="px-6 py-4">Đã Phát</th>
                     <th className="px-6 py-4">Nhà Cung Cấp</th>
                     <th className="px-6 py-4 text-right">Thao Tác</th>

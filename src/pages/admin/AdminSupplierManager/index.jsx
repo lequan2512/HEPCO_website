@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Building2, Plus, Trash2, Edit2, X, Search } from 'lucide-react';
+import { Building2, Plus, Trash2, Edit2, X, Search, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import toast from 'react-hot-toast';
@@ -15,6 +15,7 @@ const AdminSupplierManager = () => {
   const [editingId, setEditingId] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortOption, setSortOption] = useState('id_desc');
   const [confirmConfig, setConfirmConfig] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
   const queryClient = useQueryClient();
 
@@ -28,7 +29,7 @@ const AdminSupplierManager = () => {
     return () => clearTimeout(handler);
   }, [searchQuery]);
 
-  const { data: suppliersRes, isLoading } = useGetSuppliers({ search: debouncedSearch, page, limit: 20 });
+  const { data: suppliersRes, isLoading } = useGetSuppliers({ search: debouncedSearch, sort: sortOption, page, limit: 20 });
   const suppliers = suppliersRes?.data || [];
   const meta = suppliersRes?.meta;
   const addSupplier = useAddSupplier();
@@ -75,7 +76,7 @@ const AdminSupplierManager = () => {
     <div className="w-full relative">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b pb-4 gap-4">
         <h1 className="text-2xl font-bold flex items-center gap-2"><Building2 className="w-6 h-6 text-hepco-green" /> Nhà Cung Cấp</h1>
-        <div className="flex items-center w-full sm:w-auto gap-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center w-full sm:w-auto gap-3">
           <div className="relative w-full sm:w-64">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
@@ -94,6 +95,8 @@ const AdminSupplierManager = () => {
               </button>
             )}
           </div>
+
+
           <button onClick={() => { setIsFormOpen(true); setEditingId(null); formik.resetForm(); }} className="flex items-center whitespace-nowrap gap-2 px-4 py-2 bg-hepco-green text-white font-semibold rounded-lg hover:bg-green-700 transition-colors shadow-sm w-full sm:w-auto justify-center"><Plus className="w-5 h-5" /> <span>Thêm NCC</span></button>
         </div>
       </div>
@@ -148,8 +151,36 @@ const AdminSupplierManager = () => {
             <table className="w-full text-left border-collapse min-w-[600px]">
               <thead className="bg-gray-50">
                 <tr className="border-b border-gray-100">
-                  <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">ID</th>
-                  <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Tên</th>
+                  <th 
+                    onClick={() => setSortOption(prev => prev === 'id_desc' ? 'id_asc' : 'id_desc')}
+                    className="px-6 py-4 text-sm font-bold text-gray-700 uppercase cursor-pointer hover:bg-gray-100 transition-colors select-none group"
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <span>ID</span>
+                      {sortOption === 'id_asc' ? (
+                        <ArrowUp className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                      ) : sortOption === 'id_desc' ? (
+                        <ArrowDown className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                      ) : (
+                        <ArrowUpDown className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-600" />
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    onClick={() => setSortOption(prev => prev === 'name_asc' ? 'name_desc' : 'name_asc')}
+                    className="px-6 py-4 text-sm font-bold text-gray-700 uppercase cursor-pointer hover:bg-gray-100 transition-colors select-none group"
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <span>Tên Nhà Cung Cấp</span>
+                      {sortOption === 'name_asc' ? (
+                        <ArrowUp className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                      ) : sortOption === 'name_desc' ? (
+                        <ArrowDown className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                      ) : (
+                        <ArrowUpDown className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-600" />
+                      )}
+                    </div>
+                  </th>
                   <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Liên Hệ</th>
                   <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Thông Tin</th>
                   <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase text-right">Tác vụ</th>

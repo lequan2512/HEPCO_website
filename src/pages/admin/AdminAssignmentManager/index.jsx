@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { ClipboardList, Plus, RotateCcw, X, Search, Package, Download, Loader2, Edit2, Trash2, MoreVertical } from 'lucide-react';
+import { ClipboardList, Plus, RotateCcw, X, Search, Package, Download, Loader2, Edit2, Trash2, MoreVertical, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import toast from 'react-hot-toast';
@@ -30,7 +30,7 @@ const AdminAssignmentManager = () => {
   const [editItem, setEditItem] = useState(null);
   const [confirmConfig, setConfirmConfig] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
   const queryClient = useQueryClient();
-  const [filters, setFilters] = useState({ search: '', department_id: '', category_id: '', start_date: '', end_date: '', status: '' });
+  const [filters, setFilters] = useState({ search: '', department_id: '', category_id: '', start_date: '', end_date: '', status: '', sort: 'assigned_date_desc' });
   const [debouncedFilters, setDebouncedFilters] = useState(filters);
   const [isExporting, setIsExporting] = useState(false);
   const [openDropdownId, setOpenDropdownId] = useState(null);
@@ -380,7 +380,7 @@ const AdminAssignmentManager = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           <input
@@ -553,9 +553,37 @@ const AdminAssignmentManager = () => {
             <table className="w-full text-left border-collapse min-w-[700px]">
               <thead className="bg-gray-50">
                 <tr className="border-b border-gray-100">
-                  <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Ngày Cấp</th>
+                  <th 
+                    onClick={() => setFilters(prev => ({ ...prev, sort: prev.sort === 'assigned_date_desc' ? 'assigned_date_asc' : 'assigned_date_desc' }))}
+                    className="px-6 py-4 text-sm font-bold text-gray-700 uppercase cursor-pointer hover:bg-gray-100 transition-colors select-none group"
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <span>Ngày Cấp</span>
+                      {filters.sort === 'assigned_date_asc' ? (
+                        <ArrowUp className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                      ) : filters.sort === 'assigned_date_desc' ? (
+                        <ArrowDown className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                      ) : (
+                        <ArrowUpDown className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-600" />
+                      )}
+                    </div>
+                  </th>
                   <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Mã NV</th>
-                  <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Nhân Viên</th>
+                  <th 
+                    onClick={() => setFilters(prev => ({ ...prev, sort: prev.sort === 'employee_name_asc' ? 'employee_name_desc' : 'employee_name_asc' }))}
+                    className="px-6 py-4 text-sm font-bold text-gray-700 uppercase cursor-pointer hover:bg-gray-100 transition-colors select-none group"
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <span>Nhân Viên</span>
+                      {filters.sort === 'employee_name_asc' ? (
+                        <ArrowUp className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                      ) : filters.sort === 'employee_name_desc' ? (
+                        <ArrowDown className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                      ) : (
+                        <ArrowUpDown className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-600" />
+                      )}
+                    </div>
+                  </th>
                   <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Chức Vụ</th>
                   <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Trạng thái</th>
                   <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase text-right">Tác vụ</th>

@@ -3,7 +3,7 @@ import RichTextEditor from '../../../components/RichTextEditor';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useQueryClient } from '@tanstack/react-query';
-import { Plus, Trash2, Edit2, X, Image as ImageIcon, FileText, Search } from 'lucide-react';
+import { Plus, Trash2, Edit2, X, Image as ImageIcon, FileText, Search, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { API_BASE_URL } from '../../../constants/api';
 import toast from 'react-hot-toast';
 import { getErrorMessage } from '../../../utils/errorMapper';
@@ -24,6 +24,7 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [sortOption, setSortOption] = useState('created_at_desc');
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -33,7 +34,7 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
     return () => clearTimeout(handler);
   }, [searchQuery]);
 
-  const { data: newsResponse = {}, isLoading } = useGetNews({ type, limit: 20, search: debouncedSearch, page });
+  const { data: newsResponse = {}, isLoading } = useGetNews({ type, limit: 20, search: debouncedSearch, sort: sortOption, page });
   const articles = newsResponse.data || [];
   const meta = newsResponse.meta;
 
@@ -326,7 +327,7 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b pb-4 gap-4">
         <h1 className="text-2xl font-bold text-gray-800">{titleText}</h1>
-        <div className="flex items-center w-full sm:w-auto gap-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center w-full sm:w-auto gap-3">
           <div className="relative w-full sm:w-64">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
@@ -345,6 +346,7 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
               </button>
             )}
           </div>
+
           {!editOnly && (
             <button
               onClick={() => {
@@ -372,8 +374,36 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
                 <tr className="bg-gray-50 border-b border-gray-100">
                   <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase w-16">ID</th>
                   <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Hình Ảnh</th>
-                  <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Tiêu đề</th>
-                  <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Ngày đăng</th>
+                  <th 
+                    onClick={() => setSortOption(prev => prev === 'title_asc' ? 'title_desc' : 'title_asc')}
+                    className="px-6 py-4 text-sm font-bold text-gray-700 uppercase cursor-pointer hover:bg-gray-100 transition-colors select-none group"
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <span>Tiêu đề</span>
+                      {sortOption === 'title_asc' ? (
+                        <ArrowUp className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                      ) : sortOption === 'title_desc' ? (
+                        <ArrowDown className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                      ) : (
+                        <ArrowUpDown className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-600" />
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    onClick={() => setSortOption(prev => prev === 'created_at_desc' ? 'created_at_asc' : 'created_at_desc')}
+                    className="px-6 py-4 text-sm font-bold text-gray-700 uppercase cursor-pointer hover:bg-gray-100 transition-colors select-none group"
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <span>Ngày đăng</span>
+                      {sortOption === 'created_at_asc' ? (
+                        <ArrowUp className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                      ) : sortOption === 'created_at_desc' ? (
+                        <ArrowDown className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                      ) : (
+                        <ArrowUpDown className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-600" />
+                      )}
+                    </div>
+                  </th>
                   <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase text-right"></th>
                 </tr>
               </thead>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Building2, Plus, Trash2, Edit2, X, Search } from 'lucide-react';
+import { Building2, Plus, Trash2, Edit2, X, Search, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import toast from 'react-hot-toast';
@@ -17,6 +17,7 @@ const AdminDepartmentManager = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
+  const [sortOption, setSortOption] = useState('id_asc');
   const [confirmConfig, setConfirmConfig] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
   const queryClient = useQueryClient();
 
@@ -30,7 +31,7 @@ const AdminDepartmentManager = () => {
     return () => clearTimeout(handler);
   }, [searchQuery]);
 
-  const { data: departmentsRes, isLoading } = useGetDepartments({ search: debouncedSearch, type: typeFilter || undefined, page, limit: 20 });
+  const { data: departmentsRes, isLoading } = useGetDepartments({ search: debouncedSearch, type: typeFilter || undefined, sort: sortOption, page, limit: 20 });
   const departments = departmentsRes?.data || [];
   const meta = departmentsRes?.meta;
   const addMutation = useAddDepartment();
@@ -119,17 +120,19 @@ const AdminDepartmentManager = () => {
           </h1>
         </div>
 
-        <div className="flex items-center w-full sm:w-auto gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center w-full sm:w-auto gap-3">
           <select
             value={typeFilter}
             onChange={(e) => { setTypeFilter(e.target.value); setPage(1); }}
-            className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:outline-none focus:bg-white text-gray-700"
+            className="w-full sm:w-auto px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:outline-none focus:bg-white text-gray-700"
           >
             <option value="">Tất cả Loại</option>
             {DEPARTMENT_TYPE_OPTIONS.map(opt => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))}
           </select>
+
+
 
           <div className="relative w-full sm:w-64">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -166,8 +169,36 @@ const AdminDepartmentManager = () => {
             <table className="w-full text-left border-collapse min-w-[800px]">
               <thead className="bg-gray-50">
                 <tr className="border-b border-gray-100">
-                  <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Mã PB</th>
-                  <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Tên Phòng Ban</th>
+                  <th 
+                    onClick={() => setSortOption(prev => prev === 'code_asc' ? 'code_desc' : 'code_asc')}
+                    className="px-6 py-4 text-sm font-bold text-gray-700 uppercase cursor-pointer hover:bg-gray-100 transition-colors select-none group"
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <span>Mã PB</span>
+                      {sortOption === 'code_asc' ? (
+                        <ArrowUp className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                      ) : sortOption === 'code_desc' ? (
+                        <ArrowDown className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                      ) : (
+                        <ArrowUpDown className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-600" />
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    onClick={() => setSortOption(prev => prev === 'name_asc' ? 'name_desc' : 'name_asc')}
+                    className="px-6 py-4 text-sm font-bold text-gray-700 uppercase cursor-pointer hover:bg-gray-100 transition-colors select-none group"
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <span>Tên Phòng Ban</span>
+                      {sortOption === 'name_asc' ? (
+                        <ArrowUp className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                      ) : sortOption === 'name_desc' ? (
+                        <ArrowDown className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                      ) : (
+                        <ArrowUpDown className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-600" />
+                      )}
+                    </div>
+                  </th>
                   <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Đơn vị</th>
                   <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Mô tả</th>
                   <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase text-right">Thao tác</th>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Users, Plus, Trash2, Edit2, X, Search, Phone, Mail, MoreVertical, RefreshCw } from 'lucide-react';
+import { Users, Plus, Trash2, Edit2, X, Search, Phone, Mail, MoreVertical, RefreshCw, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import toast from 'react-hot-toast';
@@ -159,9 +159,9 @@ const AdminEmployeeManager = () => {
       </div>
 
       {/* Filter Bar Card */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex flex-wrap items-center justify-between gap-4">
-        <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto flex-1">
-          <div className="relative flex-1 min-w-[240px]">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center justify-between gap-3">
+        <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 w-full flex-1">
+          <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
               type="text"
@@ -180,7 +180,7 @@ const AdminEmployeeManager = () => {
           <select
             value={departmentIdFilter}
             onChange={(e) => { setDepartmentIdFilter(e.target.value); setPage(1); }}
-            className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-700 focus:outline-none focus:bg-white"
+            className="w-full sm:w-auto px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-700 focus:outline-none focus:bg-white"
           >
             <option value="">Tất cả Phòng Ban</option>
             {departments.map(d => (
@@ -188,23 +188,12 @@ const AdminEmployeeManager = () => {
             ))}
           </select>
 
-          <select
-            value={sortOption}
-            onChange={(e) => { setSortOption(e.target.value); setPage(1); }}
-            className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-700 focus:outline-none focus:bg-white font-medium"
-          >
-            <option value="created_at_desc">Mới nhất ➔ Cũ nhất</option>
-            <option value="created_at_asc">Cũ nhất ➔ Mới nhất</option>
-            <option value="code_asc">Mã NV (A ➔ Z)</option>
-            <option value="code_desc">Mã NV (Z ➔ A)</option>
-            <option value="name_asc">Họ tên (A ➔ Z)</option>
-            <option value="name_desc">Họ tên (Z ➔ A)</option>
-          </select>
+
 
           {(searchQuery || departmentIdFilter || sortOption !== 'created_at_desc') && (
             <button
               onClick={() => { setSearchQuery(''); setDepartmentIdFilter(''); setSortOption('created_at_desc'); setPage(1); }}
-              className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100"
+              className="self-end sm:self-center p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
               title="Xóa bộ lọc"
             >
               <RefreshCw className="w-4 h-4" />
@@ -222,8 +211,36 @@ const AdminEmployeeManager = () => {
             <table className="w-full text-left border-collapse min-w-[800px]">
               <thead className="bg-gray-50">
                 <tr className="border-b border-gray-100 text-xs font-bold text-gray-700 uppercase tracking-wider">
-                  <th className="px-6 py-4">Mã NV</th>
-                  <th className="px-6 py-4">Họ & Tên</th>
+                  <th 
+                    onClick={() => setSortOption(prev => prev === 'code_asc' ? 'code_desc' : 'code_asc')}
+                    className="px-6 py-4 cursor-pointer hover:bg-gray-100 transition-colors select-none group"
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <span>Mã NV</span>
+                      {sortOption === 'code_asc' ? (
+                        <ArrowUp className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                      ) : sortOption === 'code_desc' ? (
+                        <ArrowDown className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                      ) : (
+                        <ArrowUpDown className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-600" />
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    onClick={() => setSortOption(prev => prev === 'name_asc' ? 'name_desc' : 'name_asc')}
+                    className="px-6 py-4 cursor-pointer hover:bg-gray-100 transition-colors select-none group"
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <span>Họ & Tên</span>
+                      {sortOption === 'name_asc' ? (
+                        <ArrowUp className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                      ) : sortOption === 'name_desc' ? (
+                        <ArrowDown className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                      ) : (
+                        <ArrowUpDown className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-600" />
+                      )}
+                    </div>
+                  </th>
                   <th className="px-6 py-4">Phòng Ban</th>
                   <th className="px-6 py-4">Chức Vụ</th>
                   <th className="px-6 py-4">Liên Hệ</th>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Laptop, Plus, Trash2, ShieldAlert, Edit2, X, Search, Package, AlertTriangle, Filter, Box, CheckCircle, Wrench, Copy } from 'lucide-react';
+import { Laptop, Plus, Trash2, ShieldAlert, Edit2, X, Search, Package, AlertTriangle, Filter, Box, CheckCircle, Wrench, Copy, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import toast from 'react-hot-toast';
@@ -27,7 +27,8 @@ const AdminDeviceManager = () => {
     status: '',
     supplier_id: '',
     min_price: '',
-    max_price: ''
+    max_price: '',
+    sort: 'created_at_desc'
   });
   const [debouncedFilters, setDebouncedFilters] = useState(filters);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
@@ -327,6 +328,7 @@ const AdminDeviceManager = () => {
               </button>
             )}
           </div>
+
           <button
             onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
             className={`flex items-center justify-center w-full sm:w-auto whitespace-nowrap gap-2 px-3 py-2 border rounded-lg text-sm transition-colors ${showAdvancedFilters ? 'bg-blue-50 border-blue-200 text-blue-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}`}
@@ -668,8 +670,36 @@ const AdminDeviceManager = () => {
                       }}
                     />
                   </th>
-                  <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Mã TS</th>
-                  <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Thiết Bị</th>
+                  <th 
+                    onClick={() => setFilters(prev => ({ ...prev, sort: prev.sort === 'code_asc' ? 'code_desc' : 'code_asc' }))}
+                    className="px-6 py-4 text-sm font-bold text-gray-700 uppercase cursor-pointer hover:bg-gray-100 transition-colors select-none group"
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <span>Mã TS</span>
+                      {filters.sort === 'code_asc' ? (
+                        <ArrowUp className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                      ) : filters.sort === 'code_desc' ? (
+                        <ArrowDown className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                      ) : (
+                        <ArrowUpDown className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-600" />
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    onClick={() => setFilters(prev => ({ ...prev, sort: prev.sort === 'name_asc' ? 'name_desc' : 'name_asc' }))}
+                    className="px-6 py-4 text-sm font-bold text-gray-700 uppercase cursor-pointer hover:bg-gray-100 transition-colors select-none group"
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <span>Thiết Bị</span>
+                      {filters.sort === 'name_asc' ? (
+                        <ArrowUp className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                      ) : filters.sort === 'name_desc' ? (
+                        <ArrowDown className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                      ) : (
+                        <ArrowUpDown className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-600" />
+                      )}
+                    </div>
+                  </th>
                   <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Thương Hiệu</th>
                   <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Trạng Thái</th>
                   <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase text-right">Thao tác</th>
