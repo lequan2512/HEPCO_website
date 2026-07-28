@@ -10,7 +10,7 @@ import { useGetEmployees, useAddEmployee, useUpdateEmployee, useDeleteEmployee }
 import { useGetDepartments } from '../../../apis/department';
 import ConfirmModal from '../../../components/ConfirmModal';
 import Pagination from '../../../components/Pagination';
-import { EMPLOYEE_STATUS, EMPLOYEE_STATUS_LABELS, EMPLOYEE_STATUS_OPTIONS } from '../../../constants/employee';
+import { EMPLOYEE_STATUS, EMPLOYEE_STATUS_LABELS, EMPLOYEE_STATUS_OPTIONS, EMPLOYEE_TYPE, EMPLOYEE_TYPE_OPTIONS } from '../../../constants/employee';
 
 const AdminEmployeeManager = () => {
   const [editingId, setEditingId] = useState(null);
@@ -75,7 +75,7 @@ const AdminEmployeeManager = () => {
   };
 
   const formik = useFormik({
-    initialValues: { employee_code: '', full_name: '', department_id: '', position: '', email: '', phone: '', status: EMPLOYEE_STATUS.ACTIVE },
+    initialValues: { employee_code: '', full_name: '', department_id: '', position: '', employee_type: EMPLOYEE_TYPE.OFFICE_STAFF, email: '', phone: '', status: EMPLOYEE_STATUS.ACTIVE },
     validationSchema: Yup.object({
       employee_code: Yup.string().required('Vui lòng nhập mã nhân viên'),
       full_name: Yup.string().required('Vui lòng nhập họ tên'),
@@ -87,7 +87,9 @@ const AdminEmployeeManager = () => {
       try {
         const payload = {
           ...values,
-          department_id: Number(values.department_id)
+          department_id: Number(values.department_id),
+          employee_type: Number(values.employee_type),
+          status: Number(values.status)
         };
         if (editingId) {
           await updateEmployeeMutation.mutateAsync({ id: editingId, ...payload });
@@ -111,9 +113,10 @@ const AdminEmployeeManager = () => {
       full_name: item.full_name,
       department_id: item.department_id ? String(item.department_id) : '',
       position: item.position || '',
+      employee_type: item.employee_type !== undefined && item.employee_type !== null ? item.employee_type : EMPLOYEE_TYPE.OFFICE_STAFF,
       email: item.email || '',
       phone: item.phone || '',
-      status: item.status || EMPLOYEE_STATUS.ACTIVE
+      status: item.status !== undefined && item.status !== null ? item.status : EMPLOYEE_STATUS.ACTIVE
     });
     setIsFormOpen(true);
   };
@@ -391,6 +394,15 @@ const AdminEmployeeManager = () => {
                     ))}
                   </select>
                   {formik.touched.department_id && formik.errors.department_id && <div className="text-red-500 text-xs mt-1">{formik.errors.department_id}</div>}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Nhóm Cấp Phát Thiết Bị</label>
+                  <select name="employee_type" className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-hepco-green/50 bg-white" value={formik.values.employee_type} onChange={formik.handleChange}>
+                    {EMPLOYEE_TYPE_OPTIONS.map(opt => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
                 </div>
 
                 <div>

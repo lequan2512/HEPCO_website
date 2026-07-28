@@ -20,7 +20,7 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
   const [confirmConfig, setConfirmConfig] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
   const queryClient = useQueryClient();
 
-  const titleText = type === 'news' ? 'Tin Tức' : type === 'shareholders' ? 'Cổ Đông' : 'Dịch Vụ';
+  const titleText = type === 'news' ? 'Tin Tức' : type === 'shareholders' ? 'Quan Hệ Cổ Đông' : 'Dịch Vụ';
 
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');

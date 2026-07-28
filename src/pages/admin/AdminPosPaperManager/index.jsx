@@ -11,6 +11,7 @@ import {
   useDeletePosPaper, useIssuePosPaper, useGetPosPaperIssues
 } from '../../../apis/posPaper';
 import { useGetEmployees } from '../../../apis/employee';
+import { EMPLOYEE_TYPE } from '../../../constants/employee';
 import Select from 'react-select';
 
 
@@ -52,7 +53,7 @@ const AdminPosPaperManager = () => {
     limit: 20
   });
 
-  const { data: employeesRes } = useGetEmployees({ dept_type: 'xi_nghiep', limit: 500 });
+  const { data: employeesRes } = useGetEmployees({ employee_type: EMPLOYEE_TYPE.FEE_COLLECTOR, limit: 500 });
   const collectorEmployees = employeesRes?.data || (Array.isArray(employeesRes) ? employeesRes : []);
 
   const papers = Array.isArray(papersRes?.data) ? papersRes.data : (Array.isArray(papersRes) ? papersRes : []);

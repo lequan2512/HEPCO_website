@@ -67,8 +67,8 @@ const AdminLayout = () => {
             to={ROUTES.ADMIN_NEWS}
             onClick={() => setIsSidebarOpen(false)}
             className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${location.pathname === ROUTES.ADMIN_NEWS || location.pathname === ROUTES.ADMIN_DASHBOARD
-                ? 'bg-green-800 text-white font-semibold'
-                : 'text-green-100 hover:bg-green-700 hover:text-white'
+              ? 'bg-green-800 text-white font-semibold'
+              : 'text-green-100 hover:bg-green-700 hover:text-white'
               }`}
           >
             <FileText className="w-5 h-5" />
@@ -78,19 +78,19 @@ const AdminLayout = () => {
             to={ROUTES.ADMIN_SHAREHOLDERS}
             onClick={() => setIsSidebarOpen(false)}
             className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${location.pathname === ROUTES.ADMIN_SHAREHOLDERS
-                ? 'bg-green-800 text-white font-semibold'
-                : 'text-green-100 hover:bg-green-700 hover:text-white'
+              ? 'bg-green-800 text-white font-semibold'
+              : 'text-green-100 hover:bg-green-700 hover:text-white'
               }`}
           >
             <FileText className="w-5 h-5" />
-            <span>Cổ Đông</span>
+            <span>Quan Hệ Cổ Đông</span>
           </Link>
           <Link
             to={`${ROUTES.ADMIN_DASHBOARD}/services`}
             onClick={() => setIsSidebarOpen(false)}
             className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${location.pathname.includes('/services')
-                ? 'bg-green-800 text-white font-semibold'
-                : 'text-green-100 hover:bg-green-700 hover:text-white'
+              ? 'bg-green-800 text-white font-semibold'
+              : 'text-green-100 hover:bg-green-700 hover:text-white'
               }`}
           >
             <FileText className="w-5 h-5" />
@@ -100,8 +100,8 @@ const AdminLayout = () => {
             to={`${ROUTES.ADMIN_DASHBOARD}/banners`}
             onClick={() => setIsSidebarOpen(false)}
             className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${location.pathname.includes('/banners')
-                ? 'bg-green-800 text-white font-semibold'
-                : 'text-green-100 hover:bg-green-700 hover:text-white'
+              ? 'bg-green-800 text-white font-semibold'
+              : 'text-green-100 hover:bg-green-700 hover:text-white'
               }`}
           >
             <FileText className="w-5 h-5" />
@@ -117,8 +117,8 @@ const AdminLayout = () => {
             to={`${ROUTES.ADMIN_DASHBOARD}/devices`}
             onClick={() => setIsSidebarOpen(false)}
             className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${location.pathname.endsWith('/devices')
-                ? 'bg-green-800 text-white font-semibold'
-                : 'text-green-100 hover:bg-green-700 hover:text-white'
+              ? 'bg-green-800 text-white font-semibold'
+              : 'text-green-100 hover:bg-green-700 hover:text-white'
               }`}
           >
             <Laptop className="w-5 h-5" />
@@ -128,8 +128,8 @@ const AdminLayout = () => {
             to={`${ROUTES.ADMIN_DASHBOARD}/suppliers`}
             onClick={() => setIsSidebarOpen(false)}
             className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${location.pathname.includes('suppliers')
-                ? 'bg-green-800 text-white font-semibold'
-                : 'text-green-100 hover:bg-green-700 hover:text-white'
+              ? 'bg-green-800 text-white font-semibold'
+              : 'text-green-100 hover:bg-green-700 hover:text-white'
               }`}
           >
             <Building2 className="w-5 h-5" />
@@ -139,8 +139,8 @@ const AdminLayout = () => {
             to={`${ROUTES.ADMIN_DASHBOARD}/assignments`}
             onClick={() => setIsSidebarOpen(false)}
             className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${location.pathname.includes('assignments')
-                ? 'bg-green-800 text-white font-semibold'
-                : 'text-green-100 hover:bg-green-700 hover:text-white'
+              ? 'bg-green-800 text-white font-semibold'
+              : 'text-green-100 hover:bg-green-700 hover:text-white'
               }`}
           >
             <ClipboardList className="w-5 h-5" />
@@ -155,8 +155,8 @@ const AdminLayout = () => {
             to={ROUTES.ADMIN_POS}
             onClick={() => setIsSidebarOpen(false)}
             className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${location.pathname === ROUTES.ADMIN_POS
-                ? 'bg-green-800 text-white font-semibold'
-                : 'text-green-100 hover:bg-green-700 hover:text-white'
+              ? 'bg-green-800 text-white font-semibold'
+              : 'text-green-100 hover:bg-green-700 hover:text-white'
               }`}
           >
             <CreditCard className="w-5 h-5" />
@@ -172,8 +172,8 @@ const AdminLayout = () => {
             to={`${ROUTES.ADMIN_DASHBOARD}/employees`}
             onClick={() => setIsSidebarOpen(false)}
             className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${location.pathname.includes('employees') && !location.pathname.includes('pos-employees')
-                ? 'bg-green-800 text-white font-semibold'
-                : 'text-green-100 hover:bg-green-700 hover:text-white'
+              ? 'bg-green-800 text-white font-semibold'
+              : 'text-green-100 hover:bg-green-700 hover:text-white'
               }`}
           >
             <Users className="w-5 h-5" />
@@ -183,8 +183,8 @@ const AdminLayout = () => {
             to={ROUTES.ADMIN_POS_EMPLOYEES}
             onClick={() => setIsSidebarOpen(false)}
             className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${location.pathname.includes('pos-employees')
-                ? 'bg-green-800 text-white font-semibold'
-                : 'text-green-100 hover:bg-green-700 hover:text-white'
+              ? 'bg-green-800 text-white font-semibold'
+              : 'text-green-100 hover:bg-green-700 hover:text-white'
               }`}
           >
             <UserCheck className="w-5 h-5" />
@@ -194,8 +194,8 @@ const AdminLayout = () => {
             to={`${ROUTES.ADMIN_DASHBOARD}/departments`}
             onClick={() => setIsSidebarOpen(false)}
             className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${location.pathname.includes('departments')
-                ? 'bg-green-800 text-white font-semibold'
-                : 'text-green-100 hover:bg-green-700 hover:text-white'
+              ? 'bg-green-800 text-white font-semibold'
+              : 'text-green-100 hover:bg-green-700 hover:text-white'
               }`}
           >
             <Building2 className="w-5 h-5" />
@@ -211,8 +211,8 @@ const AdminLayout = () => {
             to={ROUTES.ADMIN_FUEL}
             onClick={() => setIsSidebarOpen(false)}
             className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${location.pathname.includes('fuel-comparison')
-                ? 'bg-green-800 text-white font-semibold'
-                : 'text-green-100 hover:bg-green-700 hover:text-white'
+              ? 'bg-green-800 text-white font-semibold'
+              : 'text-green-100 hover:bg-green-700 hover:text-white'
               }`}
           >
             <FileText className="w-5 h-5" />
@@ -227,8 +227,8 @@ const AdminLayout = () => {
             to={ROUTES.ADMIN_BASE_OFFICE}
             onClick={() => setIsSidebarOpen(false)}
             className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${location.pathname.includes('base-office')
-                ? 'bg-green-800 text-white font-semibold'
-                : 'text-green-100 hover:bg-green-700 hover:text-white'
+              ? 'bg-green-800 text-white font-semibold'
+              : 'text-green-100 hover:bg-green-700 hover:text-white'
               }`}
           >
             <Briefcase className="w-5 h-5" />

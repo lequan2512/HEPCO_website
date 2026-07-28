@@ -23,6 +23,7 @@ import {
 } from '../../../apis/pos';
 import { useGetEmployees } from '../../../apis/employee';
 import { useGetDepartments } from '../../../apis/department';
+import { EMPLOYEE_TYPE } from '../../../constants/employee';
 
 
 const ENTERPRISE_LABELS = {
@@ -112,7 +113,7 @@ const AdminPosManager = () => {
   const { data: deptsRes } = useGetDepartments({ type: 'xi_nghiep', limit: 1000 });
   const departments = deptsRes?.data || [];
 
-  const { data: employeesRes } = useGetEmployees({ dept_type: 'xi_nghiep', limit: 1000 });
+  const { data: employeesRes } = useGetEmployees({ employee_type: EMPLOYEE_TYPE.FEE_COLLECTOR, limit: 1000 });
   const employees = employeesRes?.data || employeesRes || [];
 
 
@@ -994,15 +995,15 @@ const AdminPosManager = () => {
 
             <form onSubmit={handleAssignSubmit} className="p-6 space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">Chọn Nhân Viên Thu Tiền (Khối Xí Nghiệp) *</label>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">Chọn Nhân Viên Thu Phí *</label>
                 <Select
                   options={(employees || []).map(emp => ({
                     value: emp.id,
-                    label: `${emp.full_name} (${emp.employee_code || 'NV'}) - ${emp.department?.name || 'Xí nghiệp'}`,
+                    label: `${emp.full_name} (${emp.employee_code || 'NV'}) - ${emp.department?.name || 'Thu phí'}`,
                     empName: emp.full_name
                   }))}
                   value={(employees || [])
-                    .map(emp => ({ value: emp.id, label: `${emp.full_name} (${emp.employee_code || 'NV'}) - ${emp.department?.name || 'Xí nghiệp'}`, empName: emp.full_name }))
+                    .map(emp => ({ value: emp.id, label: `${emp.full_name} (${emp.employee_code || 'NV'}) - ${emp.department?.name || 'Thu phí'}`, empName: emp.full_name }))
                     .find(o => String(o.value) === String(assignValues.employee_id)) || null
                   }
                   onChange={(option) => {
@@ -1012,10 +1013,10 @@ const AdminPosManager = () => {
                       employee_name: option ? option.empName : ''
                     });
                   }}
-                  placeholder="-- Gõ để tìm kiếm và chọn nhân viên thu tiền --"
+                  placeholder="-- Gõ để tìm kiếm và chọn nhân viên thu phí --"
                   isSearchable
                   isClearable
-                  noOptionsMessage={() => "Không tìm thấy nhân viên Xí nghiệp nào"}
+                  noOptionsMessage={() => "Không tìm thấy nhân viên Thu phí nào"}
                   styles={{
                     control: (base) => ({
                       ...base,

@@ -12,6 +12,7 @@ import { useGetDepartments } from '../../../apis/department';
 import ConfirmModal from '../../../components/ConfirmModal';
 import Pagination from '../../../components/Pagination';
 import { DEVICE_CATEGORY_CODES, DEVICE_STATUS, ASSIGNMENT_STATUS, ASSIGNMENT_STATUS_LABELS, ASSIGNMENT_STATUS_OPTIONS } from '../../../constants/device';
+import { EMPLOYEE_TYPE } from '../../../constants/employee';
 import AssembleDeviceModal from '../../../components/AssembleDeviceModal';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
@@ -76,7 +77,7 @@ const AdminAssignmentManager = () => {
   const loadEmployees = async (inputValue) => {
     try {
       const res = await axiosInstance.get('/api/employees', {
-        params: { search: inputValue, limit: 25, dept_type: 'van_phong' }
+        params: { search: inputValue, limit: 25, employee_type: EMPLOYEE_TYPE.OFFICE_STAFF }
       });
       return (res.data.data || []).map(e => ({
         value: e.id,

@@ -170,7 +170,20 @@ The backend follows a strict MVC-like architecture, separating routing, business
   };
 
   export const POS_STATUS_OPTIONS = Object.values(POS_STATUS_LABELS);
+
+  export const EMPLOYEE_TYPE = {
+    FEE_COLLECTOR: 1,
+    OFFICE_STAFF: 2
+  };
+
+  export const EMPLOYEE_TYPE_LABELS = {
+    [EMPLOYEE_TYPE.FEE_COLLECTOR]: { value: EMPLOYEE_TYPE.FEE_COLLECTOR, label: 'NV Thu phí', bg: 'bg-orange-100 text-orange-800 border-orange-200' },
+    [EMPLOYEE_TYPE.OFFICE_STAFF]: { value: EMPLOYEE_TYPE.OFFICE_STAFF, label: 'NV Văn phòng', bg: 'bg-blue-100 text-blue-800 border-blue-200' }
+  };
+
+  export const EMPLOYEE_TYPE_OPTIONS = Object.values(EMPLOYEE_TYPE_LABELS);
   ```
+- **English Keys Rule:** Always use English uppercase identifiers for Enum keys (e.g., `FEE_COLLECTOR`, `OFFICE_STAFF`, `ACTIVE`, `INACTIVE`) and numeric or standardized values.
 - **Enum & Constants Definition Location:**
   - **Frontend:** Define in `src/constants/[domain].js` or `src/utils/constants.js`.
   - **Backend:** Define in a dedicated `src/constants/` or `src/utils/constants.js` file, exported for reuse across controllers and models.

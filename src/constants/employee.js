@@ -1,6 +1,6 @@
 export const EMPLOYEE_STATUS = {
-  ACTIVE: 'active',
-  INACTIVE: 'inactive'
+  ACTIVE: 1,
+  INACTIVE: 0
 };
 
 export const EMPLOYEE_STATUS_LABELS = {
@@ -9,3 +9,15 @@ export const EMPLOYEE_STATUS_LABELS = {
 };
 
 export const EMPLOYEE_STATUS_OPTIONS = Object.values(EMPLOYEE_STATUS_LABELS);
+
+export const EMPLOYEE_TYPE = {
+  FEE_COLLECTOR: 1,
+  OFFICE_STAFF: 2
+};
+
+export const EMPLOYEE_TYPE_LABELS = {
+  [EMPLOYEE_TYPE.FEE_COLLECTOR]: { value: EMPLOYEE_TYPE.FEE_COLLECTOR, label: 'NV Thu phí', bg: 'bg-orange-100 text-orange-800 border-orange-200' },
+  [EMPLOYEE_TYPE.OFFICE_STAFF]: { value: EMPLOYEE_TYPE.OFFICE_STAFF, label: 'NV Văn phòng', bg: 'bg-blue-100 text-blue-800 border-blue-200' }
+};
+
+export const EMPLOYEE_TYPE_OPTIONS = Object.values(EMPLOYEE_TYPE_LABELS);

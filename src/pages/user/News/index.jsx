@@ -134,7 +134,7 @@ const News = ({ pageType = 'news' }) => {
     return () => clearTimeout(handler);
   }, [searchQuery]);
 
-  const bannerInfo = pageType === 'news' 
+  const bannerInfo = pageType === 'news'
     ? { title: "Tin tức & Sự kiện", description: "Cập nhật những thông tin mới nhất về hoạt động và sự kiện của HEPCO." }
     : { title: "Thông tin Cổ đông", description: "Cập nhật các báo cáo, thông cáo và thông tin dành cho cổ đông của HEPCO." };
 
@@ -156,13 +156,13 @@ const News = ({ pageType = 'news' }) => {
   const lastElementRef = useCallback(node => {
     if (loading || isFetchingNextPage) return;
     if (observer.current) observer.current.disconnect();
-    
+
     observer.current = new IntersectionObserver(entries => {
       if (entries[0].isIntersecting && hasNextPage) {
         fetchNextPage();
       }
     });
-    
+
     if (node) observer.current.observe(node);
   }, [loading, isFetchingNextPage, hasNextPage, fetchNextPage]);
 
@@ -176,7 +176,7 @@ const News = ({ pageType = 'news' }) => {
 
   return (
     <div className="bg-gray-50 pb-20 flex-grow min-h-screen">
-      <PageBanner 
+      <PageBanner
         title={bannerInfo.title}
         description={bannerInfo.description}
       />
@@ -184,10 +184,10 @@ const News = ({ pageType = 'news' }) => {
       <div className="container mx-auto px-4 max-w-7xl mt-12">
         {/* Controls Layout: Category & Search bar */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-12 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-          
+
           {/* Left spacing if needed, but since we removed categories, just a title or empty div to push search right */}
           <div className="flex-grow">
-             <h2 className="text-xl font-bold text-gray-800">{bannerInfo.title}</h2>
+            <h2 className="text-xl font-bold text-gray-800">{bannerInfo.title}</h2>
           </div>
 
           {/* Search Box */}
@@ -201,7 +201,7 @@ const News = ({ pageType = 'news' }) => {
               className="w-full pl-10 pr-10 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:outline-none focus:bg-white focus:ring-2 focus:ring-hepco-green focus:border-transparent transition-all"
             />
             {searchQuery && (
-              <button 
+              <button
                 onClick={handleClearSearch}
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5 rounded-full hover:bg-gray-200 transition-colors"
               >
@@ -218,24 +218,24 @@ const News = ({ pageType = 'news' }) => {
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredArticles.map((article, index) => (
-                <div 
+                <div
                   key={article.id}
                   ref={index === filteredArticles.length - 1 ? lastElementRef : null}
                   className="bg-white rounded-2xl shadow-lg border border-gray-100/80 overflow-hidden flex flex-col group hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
                 >
                   {/* Image Section */}
-                  <div 
+                  <div
                     className="h-56 bg-gray-100 relative overflow-hidden cursor-pointer"
                     onClick={() => navigate(ROUTES.ARTICLE_DETAIL.replace(':id', article.id))}
                   >
-                    <img 
-                      src={article.thumbnail?.startsWith('http') ? article.thumbnail : `${API_BASE_URL}${article.thumbnail}`} 
-                      alt={article.title} 
+                    <img
+                      src={article.thumbnail?.startsWith('http') ? article.thumbnail : `${API_BASE_URL}${article.thumbnail}`}
+                      alt={article.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                     {/* Badge over image */}
                     <span className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm text-hepco-green font-bold text-xs px-3 py-1 rounded-full shadow-sm">
-                      {pageType === 'news' ? 'Tin Mới' : 'Cổ Đông'}
+                      {pageType === 'news' ? 'Tin Mới' : 'Quan Hệ Cổ Đông'}
                     </span>
                   </div>
 
@@ -251,7 +251,7 @@ const News = ({ pageType = 'news' }) => {
                       </div>
 
                       {/* Title */}
-                      <h3 
+                      <h3
                         className="text-gray-900 font-bold text-lg mb-3 line-clamp-2 leading-snug cursor-pointer group-hover:text-hepco-orange transition-colors"
                         onClick={() => navigate(ROUTES.ARTICLE_DETAIL.replace(':id', article.id))}
                       >
@@ -267,7 +267,7 @@ const News = ({ pageType = 'news' }) => {
                 </div>
               ))}
             </div>
-            
+
             {/* Loading more indicator */}
             {isFetchingNextPage && (
               <div className="flex justify-center mt-12 mb-4">
@@ -282,7 +282,7 @@ const News = ({ pageType = 'news' }) => {
             <p className="text-gray-500 text-sm px-6">
               Không tìm thấy kết quả nào phù hợp với danh mục hoặc từ khóa tìm kiếm của bạn. Hãy thử thay đổi bộ lọc hoặc nhập từ khóa khác.
             </p>
-            <button 
+            <button
               onClick={() => { handleClearSearch(); }}
               className="mt-6 bg-hepco-green text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-opacity-90 shadow-md transition-all"
             >
