@@ -13,7 +13,7 @@ const Header = () => {
     { name: 'DỊCH VỤ', path: ROUTES.SERVICES },
     { name: 'TIN TỨC', path: ROUTES.NEWS },
     { name: 'QUAN HỆ CỔ ĐÔNG', path: ROUTES.SHAREHOLDERS },
-    { name: 'HÓA ĐƠN', href: 'https://hoadondientu.hepco.com.vn/', isExternal: true },
+    { name: 'HÓA ĐƠN ĐIỆN TỬ', href: 'https://hoadondientu.hepco.com.vn/', isExternal: true },
   ];
 
   return (
