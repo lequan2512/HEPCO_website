@@ -51,19 +51,19 @@ const AdminBaseOffice = () => {
     data: dispatchesRes = {},
     isLoading: isLoadingDispatches,
     refetch: refetchDispatches
-  } = useGetDispatches({ ...debouncedFilters, page, limit: 10 }, { enabled: activeTab === 'dispatches' });
+  } = useGetDispatches({ ...debouncedFilters, page, limit: 20 }, { enabled: activeTab === 'dispatches' });
 
   const {
     data: requestsRes = {},
     isLoading: isLoadingRequests,
     refetch: refetchRequests
-  } = useGetRequests({ search: debouncedFilters.search, page, limit: 10 }, { enabled: activeTab === 'requests' });
+  } = useGetRequests({ search: debouncedFilters.search, page, limit: 20 }, { enabled: activeTab === 'requests' });
 
   const {
     data: tasksRes = {},
     isLoading: isLoadingTasks,
     refetch: refetchTasks
-  } = useGetTasks({ search: debouncedFilters.search, page, limit: 10 }, { enabled: activeTab === 'tasks' });
+  } = useGetTasks({ search: debouncedFilters.search, page, limit: 20 }, { enabled: activeTab === 'tasks' });
 
   const { refetch: refetchHealth } = useGetBaseHealth();
 

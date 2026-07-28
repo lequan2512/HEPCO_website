@@ -12,7 +12,8 @@ const Header = () => {
     { name: 'GIỚI THIỆU', path: ROUTES.ABOUT },
     { name: 'DỊCH VỤ', path: ROUTES.SERVICES },
     { name: 'TIN TỨC', path: ROUTES.NEWS },
-    { name: 'CỔ ĐÔNG', path: ROUTES.SHAREHOLDERS },
+    { name: 'QUAN HỆ CỔ ĐÔNG', path: ROUTES.SHAREHOLDERS },
+    { name: 'HÓA ĐƠN', href: 'https://hoadondientu.hepco.com.vn/', isExternal: true },
   ];
 
   return (
@@ -26,15 +27,27 @@ const Header = () => {
         {/* Desktop Navigation */}
         <nav className="hidden lg:flex space-x-6 text-sm font-semibold tracking-wide flex-grow justify-center">
           {navItems.map((item, index) => (
-            <NavLink
-              key={index}
-              to={item.path}
-              className={({ isActive }) =>
-                `hover:text-yellow-300 transition-colors ${isActive ? 'text-yellow-400' : ''}`
-              }
-            >
-              {item.name}
-            </NavLink>
+            item.isExternal ? (
+              <a
+                key={index}
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-yellow-300 transition-colors"
+              >
+                {item.name}
+              </a>
+            ) : (
+              <NavLink
+                key={index}
+                to={item.path}
+                className={({ isActive }) =>
+                  `hover:text-yellow-300 transition-colors ${isActive ? 'text-yellow-400' : ''}`
+                }
+              >
+                {item.name}
+              </NavLink>
+            )
           ))}
         </nav>
 
@@ -54,9 +67,9 @@ const Header = () => {
               <div className="text-yellow-400 text-[10px] md:text-xs">★</div>
             </div>
           </div>
-          
+
           {/* Mobile Menu Toggle */}
-          <button 
+          <button
             className="lg:hidden p-2 mr-4 text-white hover:text-yellow-300 focus:outline-none z-50"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
@@ -66,33 +79,44 @@ const Header = () => {
       </div>
 
       {/* Mobile Navigation Menu */}
-      <div 
-        className={`lg:hidden absolute top-20 left-0 w-full bg-hepco-green shadow-xl transition-all duration-300 ease-in-out origin-top ${
-          isMenuOpen ? 'opacity-100 scale-y-100' : 'opacity-0 scale-y-0 pointer-events-none'
-        }`}
+      <div
+        className={`lg:hidden absolute top-20 left-0 w-full bg-hepco-green shadow-xl transition-all duration-300 ease-in-out origin-top ${isMenuOpen ? 'opacity-100 scale-y-100' : 'opacity-0 scale-y-0 pointer-events-none'
+          }`}
       >
         <nav className="flex flex-col px-6 py-4 space-y-4 font-semibold tracking-wide">
           {navItems.map((item, index) => (
-            <NavLink
-              key={index}
-              to={item.path}
-              onClick={() => setIsMenuOpen(false)}
-              className={({ isActive }) =>
-                `block pb-2 border-b border-white/10 hover:text-yellow-300 transition-colors ${
-                  isActive ? 'text-yellow-400 border-yellow-400/30' : ''
-                }`
-              }
-            >
-              {item.name}
-            </NavLink>
+            item.isExternal ? (
+              <a
+                key={index}
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setIsMenuOpen(false)}
+                className="block pb-2 border-b border-white/10 hover:text-yellow-300 transition-colors"
+              >
+                {item.name}
+              </a>
+            ) : (
+              <NavLink
+                key={index}
+                to={item.path}
+                onClick={() => setIsMenuOpen(false)}
+                className={({ isActive }) =>
+                  `block pb-2 border-b border-white/10 hover:text-yellow-300 transition-colors ${isActive ? 'text-yellow-400 border-yellow-400/30' : ''
+                  }`
+                }
+              >
+                {item.name}
+              </NavLink>
+            )
           ))}
           {/* Mobile Hotline */}
           <div className="flex items-center space-x-3 pt-2 text-yellow-400">
-             <Phone className="w-5 h-5" />
-             <div className="flex flex-col">
-               <span className="text-xs font-bold leading-tight text-white">Hotline</span>
-               <a href="tel:02343997799" className="text-sm font-bold leading-tight hover:underline">(0234) 3997799</a>
-             </div>
+            <Phone className="w-5 h-5" />
+            <div className="flex flex-col">
+              <span className="text-xs font-bold leading-tight text-white">Hotline</span>
+              <a href="tel:02343997799" className="text-sm font-bold leading-tight hover:underline">(0234) 3997799</a>
+            </div>
           </div>
         </nav>
       </div>
