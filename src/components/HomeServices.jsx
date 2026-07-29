@@ -10,7 +10,7 @@ const HomeServices = () => {
 
   return (
     <section className="py-20 bg-gray-50 relative">
-      <div className="container mx-auto px-4 max-w-7xl">
+      <div className="container mx-auto px-4 max-w-8xl">
         
         <div className="text-center mb-16 relative">
           <h2 className="text-4xl font-extrabold text-green-900 inline-block relative pb-4">

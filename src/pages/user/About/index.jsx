@@ -15,7 +15,7 @@ const About = () => {
       />
       <SubNav items={subNavItems} activeIndex={activeTab} onSelect={setActiveTab} />
       
-      <div className="container mx-auto px-4 mt-16 max-w-7xl">
+      <div className="container mx-auto px-4 mt-16 max-w-8xl">
         
         {activeTab === 0 && (
           <div className="space-y-24">

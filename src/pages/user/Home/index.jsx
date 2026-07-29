@@ -8,7 +8,7 @@ import HomeImageSlider from '../../../components/HomeImageSlider';
 
 const Home = () => {
   return (
-    <div className="max-w-7xl mx-auto w-full bg-white shadow-xl min-h-screen">
+    <div className="w-full bg-white min-h-screen">
       <Hero />
       <VisionMission />
       <CoreValues />

@@ -23,21 +23,31 @@ import {
   DISPATCH_STATUS,
   DISPATCH_STATUS_LABELS,
   URGENCY_LEVEL_LABELS,
-  REQUEST_STATUS_LABELS
+  REQUEST_STATUS,
+  REQUEST_STATUS_LABELS,
+  TASK_STATUS,
+  TASK_STATUS_LABELS
 } from '../../../constants/baseOffice';
 import { formatDate } from '../../../utils/formatDate';
 import CreateDispatchModal from './components/CreateDispatchModal';
 import DispatchDetailModal from './components/DispatchDetailModal';
 
 const AdminBaseOffice = () => {
-  const [activeTab, setActiveTab] = useState('dispatches'); // 'dispatches' | 'requests' | 'tasks' | 'settings'
+  const [activeTab, setActiveTab] = useState('dispatches'); // 'dispatches' | 'requests' | 'tasks'
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState({ search: '', type: '', status: '' });
   const [debouncedFilters, setDebouncedFilters] = useState(filters);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedDispatch, setSelectedDispatch] = useState(null);
 
-  // Debounce search filter
+  // Reset page & search when tab changes
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    setPage(1);
+    setFilters({ search: '', type: '', status: '' });
+  };
+
+  // Debounce search & filter inputs
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedFilters(filters);
@@ -57,26 +67,39 @@ const AdminBaseOffice = () => {
     data: requestsRes = {},
     isLoading: isLoadingRequests,
     refetch: refetchRequests
-  } = useGetRequests({ search: debouncedFilters.search, page, limit: 20 }, { enabled: activeTab === 'requests' });
+  } = useGetRequests({ ...debouncedFilters, page, limit: 20 }, { enabled: activeTab === 'requests' });
 
   const {
     data: tasksRes = {},
     isLoading: isLoadingTasks,
     refetch: refetchTasks
-  } = useGetTasks({ search: debouncedFilters.search, page, limit: 20 }, { enabled: activeTab === 'tasks' });
+  } = useGetTasks({ ...debouncedFilters, page, limit: 20 }, { enabled: activeTab === 'tasks' });
 
   const { refetch: refetchHealth } = useGetBaseHealth();
 
-
-
   const dispatches = dispatchesRes?.data || [];
-  const dispatchesMeta = dispatchesRes?.meta;
+  const dispatchesMeta = dispatchesRes?.meta || (dispatchesRes?.total ? {
+    page,
+    limit: 20,
+    total: dispatchesRes.total,
+    totalPages: Math.ceil(dispatchesRes.total / 20) || 1
+  } : null);
 
   const requests = requestsRes?.data || [];
-  const requestsMeta = requestsRes?.meta;
+  const requestsMeta = requestsRes?.meta || (requestsRes?.total ? {
+    page,
+    limit: 20,
+    total: requestsRes.total,
+    totalPages: Math.ceil(requestsRes.total / 20) || 1
+  } : null);
 
   const tasks = tasksRes?.data || [];
-  const tasksMeta = tasksRes?.meta;
+  const tasksMeta = tasksRes?.meta || (tasksRes?.total ? {
+    page,
+    limit: 20,
+    total: tasksRes.total,
+    totalPages: Math.ceil(tasksRes.total / 20) || 1
+  } : null);
 
   const handleRefresh = () => {
     if (activeTab === 'dispatches') refetchDispatches();
@@ -123,7 +146,7 @@ const AdminBaseOffice = () => {
       {/* Tabs Navigation */}
       <div className="flex border-b border-gray-200 bg-white px-4 pt-2 rounded-t-xl overflow-x-auto whitespace-nowrap scrollbar-none">
         <button
-          onClick={() => { setActiveTab('dispatches'); setPage(1); }}
+          onClick={() => handleTabChange('dispatches')}
           className={`flex items-center gap-2 px-5 py-3 text-xs font-bold transition-all border-b-2 shrink-0 ${activeTab === 'dispatches'
             ? 'border-hepco-green text-hepco-green'
             : 'border-transparent text-gray-500 hover:text-gray-700'
@@ -134,7 +157,7 @@ const AdminBaseOffice = () => {
         </button>
 
         <button
-          onClick={() => { setActiveTab('requests'); setPage(1); }}
+          onClick={() => handleTabChange('requests')}
           className={`flex items-center gap-2 px-5 py-3 text-xs font-bold transition-all border-b-2 shrink-0 ${activeTab === 'requests'
             ? 'border-hepco-green text-hepco-green'
             : 'border-transparent text-gray-500 hover:text-gray-700'
@@ -145,7 +168,7 @@ const AdminBaseOffice = () => {
         </button>
 
         <button
-          onClick={() => { setActiveTab('tasks'); setPage(1); }}
+          onClick={() => handleTabChange('tasks')}
           className={`flex items-center gap-2 px-5 py-3 text-xs font-bold transition-all border-b-2 shrink-0 ${activeTab === 'tasks'
             ? 'border-hepco-green text-hepco-green'
             : 'border-transparent text-gray-500 hover:text-gray-700'
@@ -195,6 +218,7 @@ const AdminBaseOffice = () => {
                 <option value={DISPATCH_STATUS.PENDING}>Chờ phân công</option>
                 <option value={DISPATCH_STATUS.PROCESSING}>Đang xử lý</option>
                 <option value={DISPATCH_STATUS.COMPLETED}>Đã hoàn thành</option>
+                <option value={DISPATCH_STATUS.REJECTED}>Từ chối/Hủy</option>
               </select>
             </div>
           </div>
@@ -222,9 +246,9 @@ const AdminBaseOffice = () => {
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {dispatches.map((item) => {
-                    const typeLabel = DISPATCH_TYPE_LABELS[item.type] || { label: item.type, bg: 'bg-gray-100', text: 'text-gray-700' };
-                    const statusLabel = DISPATCH_STATUS_LABELS[item.status] || { label: item.status, bg: 'bg-gray-100', text: 'text-gray-700' };
-                    const urgencyLabel = URGENCY_LEVEL_LABELS[item.urgency] || { label: item.urgency || 'Thường', badge: 'bg-gray-100 text-gray-700' };
+                    const typeLabel = item.typeConfig || DISPATCH_TYPE_LABELS[item.type] || { label: item.type, bg: 'bg-gray-100', text: 'text-gray-700' };
+                    const statusLabel = item.statusConfig || DISPATCH_STATUS_LABELS[item.status] || { label: item.status, bg: 'bg-gray-100', text: 'text-gray-700' };
+                    const urgencyLabel = item.urgencyConfig || URGENCY_LEVEL_LABELS[item.urgency] || { label: item.urgency || 'Thường', badge: 'bg-gray-100 text-gray-700' };
 
                     return (
                       <tr
@@ -278,6 +302,33 @@ const AdminBaseOffice = () => {
       {/* TAB 2: REQUESTS (Base Request) */}
       {activeTab === 'requests' && (
         <div className="bg-white rounded-b-xl rounded-t-none shadow-xs border border-gray-100 p-6 space-y-6">
+          {/* Filters Bar for Requests */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="relative md:col-span-2">
+              <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Tìm kiếm tờ trình theo tiêu đề, mã đề xuất, người trình..."
+                value={filters.search}
+                onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+                className="w-full pl-9 pr-4 py-2 text-xs border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-hepco-green/20 focus:border-hepco-green"
+              />
+            </div>
+            <div>
+              <select
+                value={filters.status}
+                onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
+                className="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-hepco-green/20 focus:border-hepco-green"
+              >
+                <option value="">-- Tất cả trạng thái phê duyệt --</option>
+                <option value={REQUEST_STATUS.PENDING}>Chờ duyệt</option>
+                <option value={REQUEST_STATUS.APPROVED}>Đã phê duyệt</option>
+                <option value={REQUEST_STATUS.REJECTED}>Từ chối</option>
+                <option value={REQUEST_STATUS.CANCELLED}>Đã hủy</option>
+              </select>
+            </div>
+          </div>
+
           {isLoadingRequests ? (
             <Loading />
           ) : requests.length === 0 ? (
@@ -297,7 +348,7 @@ const AdminBaseOffice = () => {
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {requests.map((item) => {
-                    const statusConfig = REQUEST_STATUS_LABELS[item.status] || { label: 'Chờ duyệt', bg: 'bg-amber-50', text: 'text-amber-700' };
+                    const statusConfig = item.statusConfig || REQUEST_STATUS_LABELS[item.status] || { label: 'Chờ duyệt', bg: 'bg-amber-50', text: 'text-amber-700' };
                     return (
                       <tr key={item.id} className="hover:bg-gray-50/80 transition-colors">
                         <td className="p-3.5 font-bold text-gray-900 whitespace-nowrap">{item.code}</td>
@@ -327,6 +378,34 @@ const AdminBaseOffice = () => {
       {/* TAB 3: TASKS (Base Wework) */}
       {activeTab === 'tasks' && (
         <div className="bg-white rounded-b-xl rounded-t-none shadow-xs border border-gray-100 p-6 space-y-6">
+          {/* Filters Bar for Tasks */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="relative md:col-span-2">
+              <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Tìm kiếm công việc theo tên, dự án, người thực hiện..."
+                value={filters.search}
+                onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+                className="w-full pl-9 pr-4 py-2 text-xs border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-hepco-green/20 focus:border-hepco-green"
+              />
+            </div>
+            <div>
+              <select
+                value={filters.status}
+                onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
+                className="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-hepco-green/20 focus:border-hepco-green"
+              >
+                <option value="">-- Tất cả trạng thái công việc --</option>
+                <option value={TASK_STATUS.TODO}>Mới giao / Chưa làm</option>
+                <option value={TASK_STATUS.IN_PROGRESS}>Đang thực hiện</option>
+                <option value={TASK_STATUS.COMPLETED}>Hoàn thành</option>
+                <option value={TASK_STATUS.FAILED}>Quá hạn / Thất bại</option>
+                <option value={TASK_STATUS.PENDING_REVIEW}>Chờ duyệt</option>
+              </select>
+            </div>
+          </div>
+
           {isLoadingTasks ? (
             <Loading />
           ) : tasks.length === 0 ? (
@@ -344,19 +423,22 @@ const AdminBaseOffice = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {tasks.map((item) => (
-                    <tr key={item.id} className="hover:bg-gray-50/80 transition-colors">
-                      <td className="p-3.5 font-semibold text-gray-900 min-w-[200px]">{item.title}</td>
-                      <td className="p-3.5 text-gray-600 whitespace-nowrap">{item.project}</td>
-                      <td className="p-3.5 font-medium text-gray-900 whitespace-nowrap">{item.assignee}</td>
-                      <td className="p-3.5 text-gray-600 whitespace-nowrap">{item.due_date}</td>
-                      <td className="p-3.5 whitespace-nowrap">
-                        <span className="inline-block whitespace-nowrap px-2.5 py-1 rounded-md text-[11px] font-semibold bg-blue-50 text-blue-700">
-                          {item.status === 'in_progress' ? 'Đang thực hiện' : 'Mới giao'}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
+                  {tasks.map((item) => {
+                    const statusConfig = item.statusConfig || TASK_STATUS_LABELS[item.status] || { label: 'Mới giao', bg: 'bg-gray-100', text: 'text-gray-700' };
+                    return (
+                      <tr key={item.id} className="hover:bg-gray-50/80 transition-colors">
+                        <td className="p-3.5 font-semibold text-gray-900 min-w-[200px]">{item.title}</td>
+                        <td className="p-3.5 text-gray-600 whitespace-nowrap">{item.project}</td>
+                        <td className="p-3.5 font-medium text-gray-900 whitespace-nowrap">{item.assignee}</td>
+                        <td className="p-3.5 text-gray-600 whitespace-nowrap">{item.due_date}</td>
+                        <td className="p-3.5 whitespace-nowrap">
+                          <span className={`inline-block whitespace-nowrap px-2.5 py-1 rounded-md text-[11px] font-semibold ${statusConfig.bg || 'bg-gray-100'} ${statusConfig.text || 'text-gray-700'}`}>
+                            {statusConfig.label || 'Mới giao'}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

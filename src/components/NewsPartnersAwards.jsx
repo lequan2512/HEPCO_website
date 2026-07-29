@@ -24,7 +24,7 @@ const NewsPartnersAwards = () => {
         </svg>
       </div>
 
-      <div className="container mx-auto px-4 max-w-7xl relative z-10">
+      <div className="container mx-auto px-4 max-w-8xl relative z-10">
         {/* News Section */}
         {news.length > 0 && (
           <div className="mb-24">
