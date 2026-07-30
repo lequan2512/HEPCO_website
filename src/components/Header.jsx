@@ -68,13 +68,24 @@ const Header = () => {
             </div>
           </div>
 
-          {/* Mobile Menu Toggle */}
-          <button
-            className="lg:hidden p-2 mr-4 text-white hover:text-yellow-300 focus:outline-none z-50"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
+          {/* Mobile Quick Call Button & Menu Toggle */}
+          <div className="flex items-center gap-1 sm:gap-2 mr-3 lg:mr-0 z-50">
+            <a
+              href="tel:02343997799"
+              className="sm:hidden flex items-center justify-center w-9 h-9 rounded-full bg-white/20 text-yellow-300 hover:bg-white/30 transition-colors shadow-xs"
+              title="Gọi hotline (0234) 3997799"
+            >
+              <Phone className="w-4.5 h-4.5" />
+            </a>
+
+            <button
+              className="lg:hidden p-2 text-white hover:text-yellow-300 focus:outline-none"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
         </div>
       </div>
 

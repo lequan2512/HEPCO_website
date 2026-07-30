@@ -116,7 +116,7 @@ const RichTextEditor = ({ value, onChange, onBlur, className }) => {
   }), [imageHandler]);
 
   return (
-    <>
+    <div className={`quill-wrapper flex flex-col ${className || ''}`}>
       <ReactQuill 
         ref={quillRef}
         theme="snow"
@@ -124,18 +124,18 @@ const RichTextEditor = ({ value, onChange, onBlur, className }) => {
         onChange={onChange}
         onBlur={onBlur}
         modules={modules}
-        className={className}
+        className="flex-1 flex flex-col overflow-hidden"
       />
       {linkModal.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-xl p-6 w-96 shadow-2xl border border-gray-100">
-            <h3 className="text-xl font-bold text-gray-800 mb-5">Chèn Liên Kết</h3>
-            <div className="space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
+          <div className="bg-white rounded-xl p-5 sm:p-6 w-full max-w-sm sm:max-w-md shadow-2xl border border-gray-100">
+            <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-4">Chèn Liên Kết</h3>
+            <div className="space-y-3.5">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Đường dẫn (URL) <span className="text-red-500">*</span></label>
+                <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Đường dẫn (URL) <span className="text-red-500">*</span></label>
                 <input 
                   type="text"
-                  className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hepco-green focus:border-transparent outline-none transition-all"
+                  className="w-full p-2.5 border border-gray-200 rounded-lg text-xs sm:text-sm focus:ring-2 focus:ring-hepco-green focus:border-transparent outline-none transition-all"
                   placeholder="https://example.com"
                   value={linkModal.url}
                   onChange={(e) => setLinkModal({...linkModal, url: e.target.value})}
@@ -143,27 +143,27 @@ const RichTextEditor = ({ value, onChange, onBlur, className }) => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Văn bản hiển thị</label>
+                <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1">Văn bản hiển thị</label>
                 <input 
                   type="text"
-                  className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hepco-green focus:border-transparent outline-none transition-all"
+                  className="w-full p-2.5 border border-gray-200 rounded-lg text-xs sm:text-sm focus:ring-2 focus:ring-hepco-green focus:border-transparent outline-none transition-all"
                   placeholder="Để trống sẽ dùng URL làm văn bản"
                   value={linkModal.text}
                   onChange={(e) => setLinkModal({...linkModal, text: e.target.value})}
                 />
               </div>
             </div>
-            <div className="flex justify-end gap-3 mt-8">
+            <div className="flex justify-end gap-2.5 sm:gap-3 mt-6">
               <button 
                 type="button"
-                className="px-5 py-2.5 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                className="px-4 py-2 text-xs sm:text-sm text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-medium"
                 onClick={() => setLinkModal({ ...linkModal, isOpen: false })}
               >
                 Hủy Bỏ
               </button>
               <button 
                 type="button"
-                className="px-5 py-2.5 text-white bg-hepco-green rounded-lg hover:bg-green-700 transition-colors font-medium shadow-sm"
+                className="px-4 py-2 text-xs sm:text-sm text-white bg-hepco-green rounded-lg hover:bg-green-700 transition-colors font-medium shadow-xs"
                 onClick={handleInsertLink}
               >
                 Xác Nhận
@@ -172,7 +172,7 @@ const RichTextEditor = ({ value, onChange, onBlur, className }) => {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 

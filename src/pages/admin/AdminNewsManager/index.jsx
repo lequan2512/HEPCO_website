@@ -291,8 +291,8 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
           </div>
 
           <div>
-            <label className="block text-lg font-medium text-gray-700 mb-2">Nội dung</label>
-            <div className={`bg-white ${formik.touched.content && formik.errors.content ? 'border border-red-500 rounded' : ''}`}>
+            <label className="block text-base sm:text-lg font-medium text-gray-700 mb-2">Nội dung</label>
+            <div className={`bg-white rounded-lg ${formik.touched.content && formik.errors.content ? 'border border-red-500' : ''}`}>
               <RichTextEditor
                 value={formik.values.content}
                 onChange={(content) => {
@@ -301,7 +301,7 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
                 onBlur={() => {
                   formik.setFieldTouched('content', true);
                 }}
-                className="h-96 mb-12"
+                className="h-80 sm:h-96"
               />
             </div>
             {formik.touched.content && formik.errors.content ? (
@@ -309,17 +309,17 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
             ) : null}
           </div>
 
-          <div className="flex justify-end pt-4 gap-4">
+          <div className="flex justify-end pt-4 mt-4 border-t border-gray-100 gap-3 sm:gap-4">
             <button
               type="button"
               onClick={handleCloseForm}
-              className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold rounded shadow transition-colors"
+              className="px-4 py-2.5 sm:px-6 sm:py-3 text-sm font-semibold bg-gray-200 hover:bg-gray-300 text-gray-800 rounded shadow-xs transition-colors"
             >
               Hủy Bỏ
             </button>
             <button
               type="submit"
-              className="px-8 py-3 bg-hepco-green hover:bg-green-700 text-white font-semibold rounded shadow transition-colors"
+              className="px-6 py-2.5 sm:px-8 sm:py-3 text-sm font-semibold bg-hepco-green hover:bg-green-700 text-white rounded shadow-xs transition-colors"
             >
               {editingId ? 'Cập Nhật' : 'Đăng Bài'}
             </button>

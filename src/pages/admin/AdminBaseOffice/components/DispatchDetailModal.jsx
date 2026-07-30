@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { X, FileText, Calendar, Building2, User, Paperclip, CheckCircle2, Clock, ExternalLink } from 'lucide-react';
-import { DISPATCH_TYPE_LABELS, DISPATCH_STATUS_LABELS, URGENCY_LEVEL_LABELS } from '../../../../constants/baseOffice';
+import { DISPATCH_TYPE_LABELS, DISPATCH_STATUS_LABELS } from '../../../../constants/baseOffice';
 import { formatDate } from '../../../../utils/formatDate';
 import FilePreviewModal from './FilePreviewModal';
 
@@ -11,7 +11,6 @@ const DispatchDetailModal = ({ isOpen, onClose, dispatch }) => {
 
   const typeConfig = DISPATCH_TYPE_LABELS[dispatch.type] || { label: dispatch.type, bg: 'bg-gray-100', text: 'text-gray-700' };
   const statusConfig = DISPATCH_STATUS_LABELS[dispatch.status] || { label: dispatch.status, bg: 'bg-gray-100', text: 'text-gray-700' };
-  const urgencyConfig = URGENCY_LEVEL_LABELS[dispatch.urgency] || { label: dispatch.urgency || 'Thường', badge: 'bg-gray-100 text-gray-700' };
 
   const handleOpenFile = () => {
     if (dispatch.file_url) {
@@ -31,7 +30,6 @@ const DispatchDetailModal = ({ isOpen, onClose, dispatch }) => {
               <FileText className="w-5 h-5" />
             </div>
             <div>
-              <span className="text-xs font-semibold uppercase tracking-wider text-hepco-green">{dispatch.code}</span>
               <h3 className="text-base font-bold text-gray-900 line-clamp-1">{dispatch.title}</h3>
             </div>
           </div>
@@ -52,9 +50,6 @@ const DispatchDetailModal = ({ isOpen, onClose, dispatch }) => {
             </span>
             <span className={`px-2.5 py-1 rounded-md text-xs font-semibold ${statusConfig.bg} ${statusConfig.text}`}>
               {statusConfig.label}
-            </span>
-            <span className={`px-2.5 py-1 rounded-md text-xs font-semibold ${urgencyConfig.badge}`}>
-              Độ khẩn: {urgencyConfig.label}
             </span>
           </div>
 

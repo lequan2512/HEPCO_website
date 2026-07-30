@@ -332,90 +332,92 @@ const AdminEmployeeManager = () => {
 
       {/* Modal Add/Edit Form */}
       {isFormOpen && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto relative">
-            <form onSubmit={formik.handleSubmit} className="p-6">
-              <div className="flex justify-between items-center mb-6 border-b pb-4 sticky top-0 bg-white z-10">
-                <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col relative">
+            <form onSubmit={formik.handleSubmit} className="flex flex-col flex-1 overflow-hidden">
+              <div className="flex justify-between items-center px-4 sm:px-6 py-4 border-b shrink-0 bg-gray-50/50">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-800 flex items-center gap-2">
                   {editingId ? <Edit2 className="w-5 h-5 text-blue-500" /> : <Plus className="w-5 h-5 text-hepco-green" />}
                   {editingId ? 'Cập Nhật NV Văn Phòng' : 'Thêm Nhân Viên Văn Phòng'}
                 </h2>
                 <button
                   type="button"
                   onClick={() => setIsFormOpen(false)}
-                  className="text-gray-400 hover:text-red-500 transition-colors p-2 rounded-lg hover:bg-red-50"
+                  className="text-gray-400 hover:text-red-500 transition-colors p-1.5 rounded-lg hover:bg-red-50"
                 >
-                  <X className="w-6 h-6" />
+                  <X className="w-5 h-5 sm:w-6 sm:h-6" />
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Mã NV <span className="text-red-500">*</span></label>
-                  <input type="text" name="employee_code" placeholder="VD: NV001" className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-hepco-green/50" value={formik.values.employee_code} onChange={formik.handleChange} />
-                  {formik.touched.employee_code && formik.errors.employee_code && <div className="text-red-500 text-xs mt-1">{formik.errors.employee_code}</div>}
-                </div>
+              <div className="p-4 sm:p-6 overflow-y-auto flex-1">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
+                  <div>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Mã NV <span className="text-red-500">*</span></label>
+                    <input type="text" name="employee_code" placeholder="VD: NV001" className="w-full p-2.5 border border-gray-300 rounded-lg text-xs sm:text-sm outline-none focus:ring-2 focus:ring-hepco-green/50" value={formik.values.employee_code} onChange={formik.handleChange} />
+                    {formik.touched.employee_code && formik.errors.employee_code && <div className="text-red-500 text-xs mt-1">{formik.errors.employee_code}</div>}
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Họ Tên <span className="text-red-500">*</span></label>
-                  <input type="text" name="full_name" placeholder="Nhập họ và tên..." className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-hepco-green/50" value={formik.values.full_name} onChange={formik.handleChange} />
-                  {formik.touched.full_name && formik.errors.full_name && <div className="text-red-500 text-xs mt-1">{formik.errors.full_name}</div>}
-                </div>
+                  <div>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Họ Tên <span className="text-red-500">*</span></label>
+                    <input type="text" name="full_name" placeholder="Nhập họ và tên..." className="w-full p-2.5 border border-gray-300 rounded-lg text-xs sm:text-sm outline-none focus:ring-2 focus:ring-hepco-green/50" value={formik.values.full_name} onChange={formik.handleChange} />
+                    {formik.touched.full_name && formik.errors.full_name && <div className="text-red-500 text-xs mt-1">{formik.errors.full_name}</div>}
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Chức Vụ</label>
-                  <input type="text" name="position" placeholder="VD: Trưởng phòng, Chuyên viên..." className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-hepco-green/50" value={formik.values.position} onChange={formik.handleChange} />
-                </div>
+                  <div>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Chức Vụ</label>
+                    <input type="text" name="position" placeholder="VD: Trưởng phòng, Chuyên viên..." className="w-full p-2.5 border border-gray-300 rounded-lg text-xs sm:text-sm outline-none focus:ring-2 focus:ring-hepco-green/50" value={formik.values.position} onChange={formik.handleChange} />
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                  <input type="email" name="email" placeholder="email@hepco.com.vn" className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-hepco-green/50" value={formik.values.email} onChange={formik.handleChange} />
-                  {formik.touched.email && formik.errors.email && <div className="text-red-500 text-xs mt-1">{formik.errors.email}</div>}
-                </div>
+                  <div>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input type="email" name="email" placeholder="email@hepco.com.vn" className="w-full p-2.5 border border-gray-300 rounded-lg text-xs sm:text-sm outline-none focus:ring-2 focus:ring-hepco-green/50" value={formik.values.email} onChange={formik.handleChange} />
+                    {formik.touched.email && formik.errors.email && <div className="text-red-500 text-xs mt-1">{formik.errors.email}</div>}
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Điện Thoại</label>
-                  <input type="text" name="phone" placeholder="Nhập số điện thoại..." className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-hepco-green/50" value={formik.values.phone} onChange={formik.handleChange} />
-                </div>
+                  <div>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Điện Thoại</label>
+                    <input type="text" name="phone" placeholder="Nhập số điện thoại..." className="w-full p-2.5 border border-gray-300 rounded-lg text-xs sm:text-sm outline-none focus:ring-2 focus:ring-hepco-green/50" value={formik.values.phone} onChange={formik.handleChange} />
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Phòng Ban <span className="text-red-500">*</span></label>
-                  <select
-                    name="department_id"
-                    className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-hepco-green/50 bg-white"
-                    value={formik.values.department_id}
-                    onChange={formik.handleChange}
-                  >
-                    <option value="">-- Chọn phòng ban --</option>
-                    {departments.map(d => (
-                      <option key={d.id} value={d.id}>{d.name}</option>
-                    ))}
-                  </select>
-                  {formik.touched.department_id && formik.errors.department_id && <div className="text-red-500 text-xs mt-1">{formik.errors.department_id}</div>}
-                </div>
+                  <div>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Phòng Ban <span className="text-red-500">*</span></label>
+                    <select
+                      name="department_id"
+                      className="w-full p-2.5 border border-gray-300 rounded-lg text-xs sm:text-sm outline-none focus:ring-2 focus:ring-hepco-green/50 bg-white"
+                      value={formik.values.department_id}
+                      onChange={formik.handleChange}
+                    >
+                      <option value="">-- Chọn phòng ban --</option>
+                      {departments.map(d => (
+                        <option key={d.id} value={d.id}>{d.name}</option>
+                      ))}
+                    </select>
+                    {formik.touched.department_id && formik.errors.department_id && <div className="text-red-500 text-xs mt-1">{formik.errors.department_id}</div>}
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nhóm Cấp Phát Thiết Bị</label>
-                  <select name="employee_type" className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-hepco-green/50 bg-white" value={formik.values.employee_type} onChange={formik.handleChange}>
-                    {EMPLOYEE_TYPE_OPTIONS.map(opt => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                    ))}
-                  </select>
-                </div>
+                  <div>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Nhóm Cấp Phát Thiết Bị</label>
+                    <select name="employee_type" className="w-full p-2.5 border border-gray-300 rounded-lg text-xs sm:text-sm outline-none focus:ring-2 focus:ring-hepco-green/50 bg-white" value={formik.values.employee_type} onChange={formik.handleChange}>
+                      {EMPLOYEE_TYPE_OPTIONS.map(opt => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      ))}
+                    </select>
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
-                  <select name="status" className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-hepco-green/50 bg-white" value={formik.values.status} onChange={formik.handleChange}>
-                    {EMPLOYEE_STATUS_OPTIONS.map(opt => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                    ))}
-                  </select>
+                  <div>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
+                    <select name="status" className="w-full p-2.5 border border-gray-300 rounded-lg text-xs sm:text-sm outline-none focus:ring-2 focus:ring-hepco-green/50 bg-white" value={formik.values.status} onChange={formik.handleChange}>
+                      {EMPLOYEE_STATUS_OPTIONS.map(opt => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </div>
 
-              <div className="mt-8 pt-4 border-t flex justify-end gap-3 sticky bottom-0 bg-white">
-                <button type="button" onClick={() => setIsFormOpen(false)} className="py-2.5 px-5 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors">Hủy Bỏ</button>
-                <button type="submit" disabled={formik.isSubmitting} className="py-2.5 px-6 font-bold rounded-lg text-white bg-hepco-green hover:bg-green-700 shadow-sm">
+              <div className="p-3.5 sm:p-4 border-t bg-gray-50 flex justify-end gap-2.5 sm:gap-3 shrink-0">
+                <button type="button" onClick={() => setIsFormOpen(false)} className="py-2 px-4 sm:py-2.5 sm:px-5 border border-gray-300 text-gray-700 text-xs sm:text-sm font-medium rounded-lg hover:bg-gray-100 transition-colors">Hủy Bỏ</button>
+                <button type="submit" disabled={formik.isSubmitting} className="py-2 px-5 sm:py-2.5 sm:px-6 font-bold text-xs sm:text-sm rounded-lg text-white bg-hepco-green hover:bg-green-700 shadow-xs">
                   {editingId ? 'Cập Nhật Nhân Viên' : 'Thêm Nhân Viên'}
                 </button>
               </div>

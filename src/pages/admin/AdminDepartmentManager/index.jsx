@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 import { getErrorMessage } from '../../../utils/errorMapper';
 import Loading from '../../../components/Loading';
 import { useGetDepartments, useAddDepartment, useUpdateDepartment, useDeleteDepartment } from '../../../apis/department';
-import { DEPARTMENT_TYPE, DEPARTMENT_TYPE_LABELS, DEPARTMENT_TYPE_OPTIONS } from '../../../constants/department';
+import { DEPARTMENT_TYPE, DEPARTMENT_TYPE_OPTIONS, getDepartmentTypeConfig } from '../../../constants/department';
 import ConfirmModal from '../../../components/ConfirmModal';
 import Pagination from '../../../components/Pagination';
 
@@ -169,7 +169,7 @@ const AdminDepartmentManager = () => {
             <table className="w-full text-left border-collapse min-w-[800px]">
               <thead className="bg-gray-50">
                 <tr className="border-b border-gray-100">
-                  <th 
+                  <th
                     onClick={() => setSortOption(prev => prev === 'code_asc' ? 'code_desc' : 'code_asc')}
                     className="px-6 py-4 text-sm font-bold text-gray-700 uppercase cursor-pointer hover:bg-gray-100 transition-colors select-none group"
                   >
@@ -184,7 +184,7 @@ const AdminDepartmentManager = () => {
                       )}
                     </div>
                   </th>
-                  <th 
+                  <th
                     onClick={() => setSortOption(prev => prev === 'name_asc' ? 'name_desc' : 'name_asc')}
                     className="px-6 py-4 text-sm font-bold text-gray-700 uppercase cursor-pointer hover:bg-gray-100 transition-colors select-none group"
                   >
@@ -205,49 +205,52 @@ const AdminDepartmentManager = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {filteredDepartments.map((item) => (
-                  <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
-                    <td className="px-6 py-4 text-sm font-mono text-gray-800 font-bold">{item.code || '-'}</td>
-                    <td className="px-6 py-4 text-sm">
-                      {item.parent ? (
-                        <div className="pl-3 border-l-2 border-purple-400">
-                          <div className="font-semibold text-gray-900">{item.name}</div>
-                          <div className="text-xs text-purple-700 font-medium mt-0.5">
-                            ↳ Trực thuộc: <span className="font-bold">{item.parent.name}</span>
+                {filteredDepartments.map((item) => {
+                  const typeConfig = getDepartmentTypeConfig(item.type);
+                  return (
+                    <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
+                      <td className="px-6 py-4 text-sm font-mono text-gray-800 font-bold">{item.code || '-'}</td>
+                      <td className="px-6 py-4 text-sm">
+                        {item.parent ? (
+                          <div className="pl-3 border-l-2 border-purple-400">
+                            <div className="font-semibold text-gray-900">{item.name}</div>
+                            <div className="text-xs text-purple-700 font-medium mt-0.5 whitespace-nowrap">
+                              ↳ Trực thuộc: <span className="font-bold">{item.parent.name}</span>
+                            </div>
                           </div>
+                        ) : (
+                          <div className="font-bold text-gray-900 flex items-center gap-1.5">
+                            {item.name}
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 text-sm whitespace-nowrap">
+                        <span className={`inline-block whitespace-nowrap px-2.5 py-1 rounded-full text-xs font-semibold border ${typeConfig.bg}`}>
+                          {typeConfig.label}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-500 truncate max-w-[250px]">{item.description || '-'}</td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => handleEdit(item)}
+                            className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
+                            title="Sửa"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(item.id)}
+                            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                            title="Xóa"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                         </div>
-                      ) : (
-                        <div className="font-bold text-gray-900 flex items-center gap-1.5">
-                          {item.name}
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-sm">
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${DEPARTMENT_TYPE_LABELS[item.type || DEPARTMENT_TYPE.OFFICE]?.bg}`}>
-                        {DEPARTMENT_TYPE_LABELS[item.type || DEPARTMENT_TYPE.OFFICE]?.label}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-500 truncate max-w-[250px]">{item.description || '-'}</td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => handleEdit(item)}
-                          className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
-                          title="Sửa"
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(item.id)}
-                          className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                          title="Xóa"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
             <Pagination meta={meta} onPageChange={setPage} />
@@ -272,27 +275,27 @@ const AdminDepartmentManager = () => {
       />
 
       {isFormOpen && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden flex flex-col relative">
-            <form onSubmit={formik.handleSubmit}>
-              <div className="flex justify-between items-center p-6 border-b">
-                <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh] relative">
+            <form onSubmit={formik.handleSubmit} className="flex flex-col flex-1 overflow-hidden">
+              <div className="flex justify-between items-center p-4 sm:p-6 border-b shrink-0 bg-gray-50/50">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-800 flex items-center gap-2">
                   {editingId ? <Edit2 className="w-5 h-5 text-blue-500" /> : <Plus className="w-5 h-5 text-hepco-green" />}
                   {editingId ? 'Cập nhật Phòng Ban' : 'Thêm Phòng Ban'}
                 </h2>
-                <button type="button" onClick={() => setIsFormOpen(false)} className="text-gray-400 hover:text-red-500 p-2 rounded-lg hover:bg-red-50">
+                <button type="button" onClick={() => setIsFormOpen(false)} className="text-gray-400 hover:text-red-500 p-1.5 rounded-lg hover:bg-red-50">
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <div className="p-6 space-y-4">
+              <div className="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Mã Phòng Ban<span className="text-red-500">*</span></label>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Mã Phòng Ban<span className="text-red-500">*</span></label>
                   <input
                     type="text"
                     name="code"
                     placeholder="Nhập mã phòng ban..."
-                    className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-hepco-green/50"
+                    className="w-full p-2.5 border border-gray-300 rounded-lg text-xs sm:text-sm outline-none focus:ring-2 focus:ring-hepco-green/50"
                     value={formik.values.code}
                     onChange={formik.handleChange}
                   />
@@ -301,12 +304,12 @@ const AdminDepartmentManager = () => {
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Tên Phòng Ban <span className="text-red-500">*</span></label>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Tên Phòng Ban <span className="text-red-500">*</span></label>
                   <input
                     type="text"
                     name="name"
                     placeholder="Nhập tên phòng ban hoặc khu vực..."
-                    className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-hepco-green/50"
+                    className="w-full p-2.5 border border-gray-300 rounded-lg text-xs sm:text-sm outline-none focus:ring-2 focus:ring-hepco-green/50"
                     value={formik.values.name}
                     onChange={formik.handleChange}
                   />
@@ -316,10 +319,10 @@ const AdminDepartmentManager = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Đơn Vị Trực Thuộc </label>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Đơn Vị Trực Thuộc </label>
                   <select
                     name="parent_id"
-                    className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-hepco-green/50 bg-white text-gray-800 font-medium"
+                    className="w-full p-2.5 border border-gray-300 rounded-lg text-xs sm:text-sm outline-none focus:ring-2 focus:ring-hepco-green/50 bg-white text-gray-800 font-medium"
                     value={formik.values.parent_id}
                     onChange={formik.handleChange}
                   >
@@ -331,10 +334,10 @@ const AdminDepartmentManager = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Phân Loại Đơn Vị <span className="text-red-500">*</span></label>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Phân Loại Đơn Vị <span className="text-red-500">*</span></label>
                   <select
                     name="type"
-                    className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-hepco-green/50 bg-white"
+                    className="w-full p-2.5 border border-gray-300 rounded-lg text-xs sm:text-sm outline-none focus:ring-2 focus:ring-hepco-green/50 bg-white"
                     value={formik.values.type}
                     onChange={formik.handleChange}
                   >
@@ -345,21 +348,21 @@ const AdminDepartmentManager = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Mô tả</label>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Mô tả</label>
                   <textarea
                     name="description"
-                    className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-hepco-green/50 min-h-[80px]"
+                    className="w-full p-2.5 border border-gray-300 rounded-lg text-xs sm:text-sm outline-none focus:ring-2 focus:ring-hepco-green/50 min-h-[80px]"
                     value={formik.values.description}
                     onChange={formik.handleChange}
                   />
                 </div>
               </div>
 
-              <div className="p-4 border-t bg-gray-50 flex justify-end gap-3">
-                <button type="button" onClick={() => setIsFormOpen(false)} className="py-2.5 px-5 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-100">
+              <div className="p-3.5 sm:p-4 border-t bg-gray-50 flex justify-end gap-2.5 sm:gap-3 shrink-0">
+                <button type="button" onClick={() => setIsFormOpen(false)} className="py-2 px-4 sm:py-2.5 sm:px-5 border border-gray-300 text-gray-700 text-xs sm:text-sm font-medium rounded-lg hover:bg-gray-100">
                   Hủy Bỏ
                 </button>
-                <button type="submit" disabled={formik.isSubmitting} className="py-2.5 px-6 font-bold rounded-lg text-white bg-hepco-green hover:bg-green-700">
+                <button type="submit" disabled={formik.isSubmitting} className="py-2 px-5 sm:py-2.5 sm:px-6 font-bold text-xs sm:text-sm rounded-lg text-white bg-hepco-green hover:bg-green-700">
                   {editingId ? 'Cập Nhật' : 'Thêm Mới'}
                 </button>
               </div>
