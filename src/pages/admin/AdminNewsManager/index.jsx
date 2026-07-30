@@ -96,11 +96,15 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
     }),
     onSubmit: async (values, { setSubmitting }) => {
       try {
+        const cleanValues = {
+          ...values,
+          content: values.content ? values.content.replace(/(https?:\/\/[^\s"'<>]+)?(https:\/\/res\.cloudinary\.com\/[^\s"'<>]+)/g, '$2') : values.content
+        };
         if (editingId) {
-          await updateNewsMutation.mutateAsync({ id: editingId, ...values });
+          await updateNewsMutation.mutateAsync({ id: editingId, ...cleanValues });
           handleUpdateSuccess();
         } else {
-          await createNewsMutation.mutateAsync(values);
+          await createNewsMutation.mutateAsync(cleanValues);
           handleCreateSuccess();
         }
       } catch (err) {
@@ -114,9 +118,10 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
 
   const handleEdit = (article) => {
     setEditingId(article.id);
+    const cleanContent = article.content ? article.content.replace(/(https?:\/\/[^\s"'<>]+)?(https:\/\/res\.cloudinary\.com\/[^\s"'<>]+)/g, '$2') : '';
     formik.setValues({
       title: article.title,
-      content: article.content,
+      content: cleanContent,
       thumbnail: article.thumbnail || '',
       type: article.type
     });
@@ -135,12 +140,11 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
             let match;
             while ((match = imgRegex.exec(article.content)) !== null) {
               let imgUrl = match[1];
-              if (imgUrl.includes('/images/news/')) {
-                const relativePath = imgUrl.substring(imgUrl.indexOf('/images/news/'));
+              if (imgUrl) {
                 try {
-                  await deleteImageMutation.mutateAsync(relativePath);
+                  await deleteImageMutation.mutateAsync(imgUrl);
                 } catch {
-                  console.error('Failed to delete content image:', relativePath);
+                  console.error('Failed to delete content image:', imgUrl);
                 }
               }
             }
@@ -148,8 +152,12 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
 
           await deleteNewsMutation.mutateAsync(article.id);
 
-          if (article.thumbnail && article.thumbnail.startsWith('/images/news/')) {
-            await deleteImageMutation.mutateAsync(article.thumbnail);
+          if (article.thumbnail) {
+            try {
+              await deleteImageMutation.mutateAsync(article.thumbnail);
+            } catch {
+              console.error('Failed to delete thumbnail:', article.thumbnail);
+            }
           }
 
           handleDeleteSuccess();
@@ -219,8 +227,12 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
                     if (res.success) {
                       const oldThumb = formik.values.thumbnail;
 
-                      if (oldThumb && oldThumb.startsWith('/images/news/')) {
-                        await deleteImageMutation.mutateAsync(oldThumb);
+                      if (oldThumb) {
+                        try {
+                          await deleteImageMutation.mutateAsync(oldThumb);
+                        } catch {
+                          console.error('Failed to delete old thumbnail');
+                        }
                       }
 
                       formik.setFieldValue('thumbnail', res.url);
@@ -252,8 +264,12 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
 
                           const currThumb = formik.values.thumbnail;
 
-                          if (currThumb && currThumb.startsWith('/images/news/')) {
-                            await deleteImageMutation.mutateAsync(currThumb);
+                          if (currThumb) {
+                            try {
+                              await deleteImageMutation.mutateAsync(currThumb);
+                            } catch {
+                              console.error('Failed to delete currThumb');
+                            }
                           }
 
                           formik.setFieldValue('thumbnail', '');

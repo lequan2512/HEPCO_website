@@ -62,7 +62,8 @@ const RichTextEditor = ({ value, onChange, onBlur, className }) => {
           if (res.success) {
             const quill = quillRef.current.getEditor();
             const range = quill.getSelection(true);
-            quill.insertEmbed(range.index, 'image', `${API_BASE_URL}${res.url}`);
+            const imageUrl = res.url.startsWith('http') ? res.url : `${API_BASE_URL}${res.url}`;
+            quill.insertEmbed(range.index, 'image', imageUrl);
             toast.success('Tải ảnh thành công!', { id: 'upload_quill' });
           }
         } catch {

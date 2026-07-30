@@ -88,7 +88,9 @@ const ArticleDetail = () => {
                     prose-strong:text-gray-900
                     prose-ul:list-disc prose-ol:list-decimal prose-li:mb-2
                     prose-blockquote:border-l-4 prose-blockquote:border-hepco-green prose-blockquote:pl-6 prose-blockquote:italic prose-blockquote:my-8 prose-blockquote:text-gray-600 prose-blockquote:bg-gray-50 prose-blockquote:py-4 prose-blockquote:rounded-r-lg" 
-                  dangerouslySetInnerHTML={{ __html: article.content }} 
+                  dangerouslySetInnerHTML={{ 
+                    __html: article.content.replace(/(https?:\/\/[^\s"'<>]+)?(https:\/\/res\.cloudinary\.com\/[^\s"'<>]+)/g, '$2') 
+                  }} 
                 />
               ) : (
                 article.content

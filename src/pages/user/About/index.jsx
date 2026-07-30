@@ -1,11 +1,19 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Award, Leaf, Building2, Users, CheckCircle2 } from 'lucide-react';
 import PageBanner from '../../../components/PageBanner';
 import SubNav from '../../../components/SubNav';
 
 const About = () => {
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState(0);
   const subNavItems = ['Về Hepco', 'Chức năng - Giấy phép', 'Sơ đồ tổ chức', 'Thành tựu đạt được', 'Hồ sơ năng lực', 'Thư viện ảnh'];
+
+  useEffect(() => {
+    if (location.state && typeof location.state.tab === 'number') {
+      setActiveTab(location.state.tab);
+    }
+  }, [location.state]);
 
   return (
     <div className="bg-gray-50 pb-20 min-h-screen">
@@ -25,7 +33,7 @@ const About = () => {
               <div className="w-full lg:w-5/12 relative group">
                 <div className="absolute inset-0 bg-hepco-green rounded-2xl transform translate-x-4 translate-y-4 group-hover:translate-x-6 group-hover:translate-y-6 transition-transform duration-500"></div>
                 <div className="relative bg-white rounded-2xl overflow-hidden shadow-2xl h-[400px] border-4 border-white flex flex-col items-center justify-center">
-                  <div className="w-full h-full bg-[url('/public/images/cover.png')] bg-cover bg-center">
+                  <div className="w-full h-full bg-[url('/images/cover.png')] bg-cover bg-center">
                     <div className="absolute inset-0 bg-black/30 flex items-center justify-center backdrop-blur-[2px]">
                       <div className="text-center p-6 bg-white/90 rounded-xl shadow-lg transform group-hover:scale-105 transition-transform duration-500">
                         <Building2 className="w-12 h-12 text-hepco-green mx-auto mb-2" />
@@ -99,7 +107,31 @@ const About = () => {
           </div>
         )}
 
-        {activeTab !== 0 && (
+        {/* Tab 2: Sơ đồ tổ chức */}
+        {activeTab === 2 && (
+          <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-6 md:p-12">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-extrabold text-green-900 uppercase relative inline-block pb-3">
+                Sơ đồ bộ máy tổ chức HEPCO
+                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-hepco-orange rounded-full"></div>
+              </h2>
+              <p className="text-gray-600 mt-3 max-w-2xl mx-auto text-sm md:text-base">
+                Cấu trúc sơ đồ tổ chức bộ máy điều hành, các phòng nghiệp vụ và các đơn vị xí nghiệp trực thuộc Công ty Cổ phần Môi trường và Công trình Đô thị Huế.
+              </p>
+            </div>
+
+            <div className="relative w-full overflow-hidden rounded-2xl border border-gray-200 bg-gray-50/50 shadow-sm flex flex-col items-center justify-center p-4 md:p-8">
+              <img 
+                src="/images/organizational_chart.png" 
+                alt="Sơ đồ tổ chức HEPCO" 
+                className="w-full h-auto max-w-5xl object-contain shadow-md rounded-xl border border-gray-100 transition-transform duration-300 hover:scale-[1.01]"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Fallback for other tabs */}
+        {activeTab !== 0 && activeTab !== 2 && (
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center min-h-[400px] flex flex-col items-center justify-center">
             <Building2 className="w-16 h-16 text-gray-300 mb-4" />
             <h3 className="text-2xl font-bold text-gray-800 mb-2">Nội dung đang được cập nhật</h3>
