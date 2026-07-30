@@ -6,9 +6,9 @@ import {
   RefreshCw,
   Building2,
   CheckSquare,
+  Loader2,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import Loading from '../../../components/Loading';
 import Pagination from '../../../components/Pagination';
 import {
   useGetDispatches,
@@ -193,26 +193,37 @@ const AdminBaseOffice = () => {
           </div>
 
           {/* Table */}
-          {isLoadingDispatches ? (
-            <Loading />
-          ) : dispatches.length === 0 ? (
-            <div className="py-8 sm:py-12 text-center text-gray-500 space-y-2">
-              <FileText className="w-10 h-10 mx-auto text-gray-300" />
-              <p className="text-sm font-medium">Không tìm thấy công văn phù hợp</p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto rounded-xl border border-gray-200">
-              <table className="w-full text-left text-xs text-gray-700 min-w-[650px]">
-                <thead className="bg-gray-50 text-gray-600 font-bold uppercase tracking-wider border-b border-gray-200">
+          <div className="overflow-x-auto rounded-xl border border-gray-200 min-h-[250px]">
+            <table className="w-full text-left text-xs text-gray-700 min-w-[650px]">
+              <thead className="bg-gray-50 text-gray-600 font-bold uppercase tracking-wider border-b border-gray-200">
+                <tr>
+                  <th className="p-2.5 sm:p-3.5 min-w-[200px]">Tiêu đề công văn</th>
+                  <th className="p-2.5 sm:p-3.5 whitespace-nowrap">Loại văn bản</th>
+                  <th className="p-2.5 sm:p-3.5 min-w-[170px]">Đơn vị gửi/nhận</th>
+                  <th className="p-2.5 sm:p-3.5 whitespace-nowrap">Trạng thái</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {isLoadingDispatches ? (
                   <tr>
-                    <th className="p-2.5 sm:p-3.5 min-w-[200px]">Tiêu đề công văn</th>
-                    <th className="p-2.5 sm:p-3.5 whitespace-nowrap">Loại văn bản</th>
-                    <th className="p-2.5 sm:p-3.5 min-w-[170px]">Đơn vị gửi/nhận</th>
-                    <th className="p-2.5 sm:p-3.5 whitespace-nowrap">Trạng thái</th>
+                    <td colSpan={4} className="py-16 text-center text-gray-500">
+                      <div className="flex flex-col items-center justify-center gap-2">
+                        <Loader2 className="w-8 h-8 text-hepco-green animate-spin" />
+                        <span className="text-xs font-semibold text-gray-500">Đang tải dữ liệu công văn...</span>
+                      </div>
+                    </td>
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {dispatches.map((item) => {
+                ) : dispatches.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="py-16 text-center text-gray-500">
+                      <div className="flex flex-col items-center justify-center gap-2">
+                        <FileText className="w-10 h-10 text-gray-300" />
+                        <p className="text-sm font-medium">Không tìm thấy công văn phù hợp</p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  dispatches.map((item) => {
                     const typeLabel = item.typeConfig || DISPATCH_TYPE_LABELS[item.type] || { label: item.type, bg: 'bg-gray-100', text: 'text-gray-700' };
                     const statusLabel = item.statusConfig || DISPATCH_STATUS_LABELS[item.status] || { label: item.status, bg: 'bg-gray-100', text: 'text-gray-700' };
 
@@ -244,11 +255,11 @@ const AdminBaseOffice = () => {
                         </td>
                       </tr>
                     );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
 
           {/* Pagination */}
           {dispatchesMeta && (
@@ -288,24 +299,38 @@ const AdminBaseOffice = () => {
             </div>
           </div>
 
-          {isLoadingTasks ? (
-            <Loading />
-          ) : tasks.length === 0 ? (
-            <div className="py-8 sm:py-12 text-center text-gray-500">Không có công việc nào</div>
-          ) : (
-            <div className="overflow-x-auto rounded-xl border border-gray-200">
-              <table className="w-full text-left text-xs text-gray-700 min-w-[750px]">
-                <thead className="bg-gray-50 text-gray-600 font-bold uppercase tracking-wider border-b border-gray-200">
+          <div className="overflow-x-auto rounded-xl border border-gray-200 min-h-[250px]">
+            <table className="w-full text-left text-xs text-gray-700 min-w-[750px]">
+              <thead className="bg-gray-50 text-gray-600 font-bold uppercase tracking-wider border-b border-gray-200">
+                <tr>
+                  <th className="p-2.5 sm:p-3.5 min-w-[180px]">Tên công việc</th>
+                  <th className="p-2.5 sm:p-3.5 whitespace-nowrap">Dự án liên quan</th>
+                  <th className="p-2.5 sm:p-3.5 whitespace-nowrap">Người giao/Nhận</th>
+                  <th className="p-2.5 sm:p-3.5 whitespace-nowrap">Hạn hoàn thành</th>
+                  <th className="p-2.5 sm:p-3.5 whitespace-nowrap">Trạng thái</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {isLoadingTasks ? (
                   <tr>
-                    <th className="p-2.5 sm:p-3.5 min-w-[180px]">Tên công việc</th>
-                    <th className="p-2.5 sm:p-3.5 whitespace-nowrap">Dự án liên quan</th>
-                    <th className="p-2.5 sm:p-3.5 whitespace-nowrap">Người giao/Nhận</th>
-                    <th className="p-2.5 sm:p-3.5 whitespace-nowrap">Hạn hoàn thành</th>
-                    <th className="p-2.5 sm:p-3.5 whitespace-nowrap">Trạng thái</th>
+                    <td colSpan={5} className="py-16 text-center text-gray-500">
+                      <div className="flex flex-col items-center justify-center gap-2">
+                        <Loader2 className="w-8 h-8 text-hepco-green animate-spin" />
+                        <span className="text-xs font-semibold text-gray-500">Đang tải dữ liệu công việc...</span>
+                      </div>
+                    </td>
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {tasks.map((item) => {
+                ) : tasks.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="py-16 text-center text-gray-500">
+                      <div className="flex flex-col items-center justify-center gap-2">
+                        <CheckSquare className="w-10 h-10 text-gray-300" />
+                        <p className="text-sm font-medium">Không tìm thấy công việc phù hợp</p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  tasks.map((item) => {
                     const statusConfig = item.statusConfig || TASK_STATUS_LABELS[item.status] || { label: 'Mới giao', bg: 'bg-gray-100', text: 'text-gray-700' };
                     return (
                       <tr key={item.id} className="hover:bg-gray-50/80 transition-colors">
@@ -320,11 +345,11 @@ const AdminBaseOffice = () => {
                         </td>
                       </tr>
                     );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
 
           {tasksMeta && (
             <Pagination meta={tasksMeta} onPageChange={setPage} />

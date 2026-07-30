@@ -545,52 +545,85 @@ const AdminAssignmentManager = () => {
         </div>
       )}
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden min-h-[300px] flex flex-col justify-center">
-        {isLoading ? (
-          <Loading />
-        ) : filteredAssignments.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse min-w-[700px]">
-              <thead className="bg-gray-50">
-                <tr className="border-b border-gray-100">
-                  <th 
-                    onClick={() => setFilters(prev => ({ ...prev, sort: prev.sort === 'assigned_date_desc' ? 'assigned_date_asc' : 'assigned_date_desc' }))}
-                    className="px-6 py-4 text-sm font-bold text-gray-700 uppercase cursor-pointer hover:bg-gray-100 transition-colors select-none group"
-                  >
-                    <div className="flex items-center gap-1.5">
-                      <span>Ngày Cấp</span>
-                      {filters.sort === 'assigned_date_asc' ? (
-                        <ArrowUp className="w-3.5 h-3.5 text-hepco-green font-bold" />
-                      ) : filters.sort === 'assigned_date_desc' ? (
-                        <ArrowDown className="w-3.5 h-3.5 text-hepco-green font-bold" />
-                      ) : (
-                        <ArrowUpDown className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-600" />
-                      )}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden min-h-[300px]">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse min-w-[700px]">
+            <thead className="bg-gray-50">
+              <tr className="border-b border-gray-100">
+                <th 
+                  onClick={() => setFilters(prev => ({ ...prev, sort: prev.sort === 'assigned_date_desc' ? 'assigned_date_asc' : 'assigned_date_desc' }))}
+                  className="px-6 py-4 text-sm font-bold text-gray-700 uppercase cursor-pointer hover:bg-gray-100 transition-colors select-none group"
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span>Ngày Cấp</span>
+                    {filters.sort === 'assigned_date_asc' ? (
+                      <ArrowUp className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                    ) : filters.sort === 'assigned_date_desc' ? (
+                      <ArrowDown className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                    ) : (
+                      <ArrowUpDown className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-600" />
+                    )}
+                  </div>
+                </th>
+                <th 
+                  onClick={() => setFilters(prev => ({ ...prev, sort: prev.sort === 'employee_code_asc' ? 'employee_code_desc' : 'employee_code_asc' }))}
+                  className="px-6 py-4 text-sm font-bold text-gray-700 uppercase cursor-pointer hover:bg-gray-100 transition-colors select-none group"
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span>Mã NV</span>
+                    {filters.sort === 'employee_code_asc' ? (
+                      <ArrowUp className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                    ) : filters.sort === 'employee_code_desc' ? (
+                      <ArrowDown className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                    ) : (
+                      <ArrowUpDown className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-600" />
+                    )}
+                  </div>
+                </th>
+                <th 
+                  onClick={() => setFilters(prev => ({ ...prev, sort: prev.sort === 'employee_name_asc' ? 'employee_name_desc' : 'employee_name_asc' }))}
+                  className="px-6 py-4 text-sm font-bold text-gray-700 uppercase cursor-pointer hover:bg-gray-100 transition-colors select-none group"
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span>Nhân Viên</span>
+                    {filters.sort === 'employee_name_asc' ? (
+                      <ArrowUp className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                    ) : filters.sort === 'employee_name_desc' ? (
+                      <ArrowDown className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                    ) : (
+                      <ArrowUpDown className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-600" />
+                    )}
+                  </div>
+                </th>
+                <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Chức Vụ</th>
+                <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Trạng thái</th>
+                <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase text-right">Tác vụ</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100 relative">
+              {isLoading ? (
+                <tr>
+                  <td colSpan={6} className="py-16 text-center text-gray-500">
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <Loader2 className="w-8 h-8 text-hepco-green animate-spin" />
+                      <span className="text-xs font-semibold text-gray-500">Đang tải dữ liệu...</span>
                     </div>
-                  </th>
-                  <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Mã NV</th>
-                  <th 
-                    onClick={() => setFilters(prev => ({ ...prev, sort: prev.sort === 'employee_name_asc' ? 'employee_name_desc' : 'employee_name_asc' }))}
-                    className="px-6 py-4 text-sm font-bold text-gray-700 uppercase cursor-pointer hover:bg-gray-100 transition-colors select-none group"
-                  >
-                    <div className="flex items-center gap-1.5">
-                      <span>Nhân Viên</span>
-                      {filters.sort === 'employee_name_asc' ? (
-                        <ArrowUp className="w-3.5 h-3.5 text-hepco-green font-bold" />
-                      ) : filters.sort === 'employee_name_desc' ? (
-                        <ArrowDown className="w-3.5 h-3.5 text-hepco-green font-bold" />
-                      ) : (
-                        <ArrowUpDown className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-600" />
-                      )}
-                    </div>
-                  </th>
-                  <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Chức Vụ</th>
-                  <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Trạng thái</th>
-                  <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase text-right">Tác vụ</th>
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {filteredAssignments.map(a => (
+              ) : filteredAssignments.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-16 text-center text-gray-500">
+                    <div className="flex flex-col items-center justify-center">
+                      <div className="w-14 h-14 bg-gray-50 rounded-full flex items-center justify-center mb-3">
+                        <ClipboardList className="w-7 h-7 text-gray-300" />
+                      </div>
+                      <h3 className="text-base font-bold text-gray-800">Không có dữ liệu cấp phát</h3>
+                      <p className="text-xs text-gray-500 mt-1">Chưa có thiết bị nào được cấp phát hoặc không khớp với tìm kiếm.</p>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                filteredAssignments.map(a => (
                   <tr key={a.id} onClick={() => setViewAssignmentDetail(a)} className="hover:bg-gray-50/50 transition-colors cursor-pointer">
                     <td className="px-6 py-4">
                       <div className="text-sm text-gray-800">{new Date(a.assigned_date).toLocaleDateString('vi-VN')}</div>
@@ -628,7 +661,7 @@ const AdminAssignmentManager = () => {
                                   <Package className="w-4 h-4 text-gray-500" /> Cấu hình
                                 </button>
                               )}
-                              <button onClick={(e) => { e.stopPropagation(); setOpenDropdownId(null); handleReturn(a); }} className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+                              <button onClick={(e) => { e.stopPropagation(); setOpenDropdownId(null); handleReturn(a); }} className="w-full text-left px-4 py-2.5 text-sm text-yellow-500 hover:bg-gray-50 flex items-center gap-2">
                                 <RotateCcw className="w-4 h-4 text-yellow-500" /> Thu hồi
                               </button>
                             </>
@@ -640,20 +673,12 @@ const AdminAssignmentManager = () => {
                       )}
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-            <Pagination meta={meta} onPageChange={setPage} />
-          </div>
-        ) : (
-          <div className="p-12 text-center flex flex-col items-center">
-            <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
-              <ClipboardList className="w-8 h-8 text-gray-300" />
-            </div>
-            <h3 className="text-lg font-bold text-gray-800">Không có dữ liệu cấp phát</h3>
-            <p className="text-gray-500 mt-1">Chưa có thiết bị nào được cấp phát hoặc không khớp với tìm kiếm.</p>
-          </div>
-        )}
+                ))
+              )}
+            </tbody>
+          </table>
+          <Pagination meta={meta} onPageChange={setPage} />
+        </div>
       </div>
       <ConfirmModal
         isOpen={confirmConfig.isOpen}

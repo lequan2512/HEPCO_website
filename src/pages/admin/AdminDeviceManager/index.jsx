@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Laptop, Plus, Trash2, ShieldAlert, Edit2, X, Search, Package, AlertTriangle, Filter, Box, CheckCircle, Wrench, Copy, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Laptop, Plus, Trash2, ShieldAlert, Edit2, X, Search, Package, AlertTriangle, Filter, Box, CheckCircle, Wrench, Copy, ArrowUpDown, ArrowUp, ArrowDown, Loader2 } from 'lucide-react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import toast from 'react-hot-toast';
@@ -647,66 +647,73 @@ const AdminDeviceManager = () => {
       )}
 
       {/* Danh sách */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        {isLoading ? (
-          <Loading />
-        ) : devices.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse min-w-[800px]">
-              <thead>
-                <tr className="bg-gray-50 border-b border-gray-100">
-                  <th className="px-6 py-4 w-12 text-center">
-                    <input
-                      type="checkbox"
-                      className="w-4 h-4 text-hepco-green focus:ring-hepco-green rounded border-gray-300"
-                      checked={devices.length > 0 && devices.filter(isDeletable).length > 0 && devices.filter(isDeletable).every(d => selectedIds.includes(d.id))}
-                      onChange={(e) => {
-                        const deletableIds = devices.filter(isDeletable).map(d => d.id);
-                        if (e.target.checked) {
-                          setSelectedIds(prev => [...new Set([...prev, ...deletableIds])]);
-                        } else {
-                          setSelectedIds(prev => prev.filter(id => !deletableIds.includes(id)));
-                        }
-                      }}
-                    />
-                  </th>
-                  <th 
-                    onClick={() => setFilters(prev => ({ ...prev, sort: prev.sort === 'code_asc' ? 'code_desc' : 'code_asc' }))}
-                    className="px-6 py-4 text-sm font-bold text-gray-700 uppercase cursor-pointer hover:bg-gray-100 transition-colors select-none group"
-                  >
-                    <div className="flex items-center gap-1.5">
-                      <span>Mã TS</span>
-                      {filters.sort === 'code_asc' ? (
-                        <ArrowUp className="w-3.5 h-3.5 text-hepco-green font-bold" />
-                      ) : filters.sort === 'code_desc' ? (
-                        <ArrowDown className="w-3.5 h-3.5 text-hepco-green font-bold" />
-                      ) : (
-                        <ArrowUpDown className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-600" />
-                      )}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden min-h-[300px]">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse min-w-[800px]">
+            <thead>
+              <tr className="bg-gray-50 border-b border-gray-100">
+                <th className="px-6 py-4 w-12 text-center">
+                  <input
+                    type="checkbox"
+                    className="w-4 h-4 text-hepco-green focus:ring-hepco-green rounded border-gray-300"
+                    checked={devices.length > 0 && devices.filter(isDeletable).length > 0 && devices.filter(isDeletable).every(d => selectedIds.includes(d.id))}
+                    onChange={(e) => {
+                      const deletableIds = devices.filter(isDeletable).map(d => d.id);
+                      if (e.target.checked) {
+                        setSelectedIds(prev => [...new Set([...prev, ...deletableIds])]);
+                      } else {
+                        setSelectedIds(prev => prev.filter(id => !deletableIds.includes(id)));
+                      }
+                    }}
+                  />
+                </th>
+                <th 
+                  onClick={() => setFilters(prev => ({ ...prev, sort: prev.sort === 'code_asc' ? 'code_desc' : 'code_asc' }))}
+                  className="px-6 py-4 text-sm font-bold text-gray-700 uppercase cursor-pointer hover:bg-gray-100 transition-colors select-none group"
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span>Mã TS</span>
+                    {filters.sort === 'code_asc' ? (
+                      <ArrowUp className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                    ) : filters.sort === 'code_desc' ? (
+                      <ArrowDown className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                    ) : (
+                      <ArrowUpDown className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-600" />
+                    )}
+                  </div>
+                </th>
+                <th 
+                  onClick={() => setFilters(prev => ({ ...prev, sort: prev.sort === 'name_asc' ? 'name_desc' : 'name_asc' }))}
+                  className="px-6 py-4 text-sm font-bold text-gray-700 uppercase cursor-pointer hover:bg-gray-100 transition-colors select-none group"
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span>Thiết Bị</span>
+                    {filters.sort === 'name_asc' ? (
+                      <ArrowUp className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                    ) : filters.sort === 'name_desc' ? (
+                      <ArrowDown className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                    ) : (
+                      <ArrowUpDown className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-600" />
+                    )}
+                  </div>
+                </th>
+                <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Thương Hiệu</th>
+                <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Trạng Thái</th>
+                <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase text-right">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {isLoading ? (
+                <tr>
+                  <td colSpan={6} className="py-16 text-center text-gray-500">
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <Loader2 className="w-8 h-8 text-hepco-green animate-spin" />
+                      <span className="text-xs font-semibold text-gray-500">Đang tải dữ liệu thiết bị...</span>
                     </div>
-                  </th>
-                  <th 
-                    onClick={() => setFilters(prev => ({ ...prev, sort: prev.sort === 'name_asc' ? 'name_desc' : 'name_asc' }))}
-                    className="px-6 py-4 text-sm font-bold text-gray-700 uppercase cursor-pointer hover:bg-gray-100 transition-colors select-none group"
-                  >
-                    <div className="flex items-center gap-1.5">
-                      <span>Thiết Bị</span>
-                      {filters.sort === 'name_asc' ? (
-                        <ArrowUp className="w-3.5 h-3.5 text-hepco-green font-bold" />
-                      ) : filters.sort === 'name_desc' ? (
-                        <ArrowDown className="w-3.5 h-3.5 text-hepco-green font-bold" />
-                      ) : (
-                        <ArrowUpDown className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-600" />
-                      )}
-                    </div>
-                  </th>
-                  <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Thương Hiệu</th>
-                  <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Trạng Thái</th>
-                  <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase text-right">Thao tác</th>
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {devices.map((item) => (
+              ) : devices.length > 0 ? (
+                devices.map((item) => (
                   <tr
                     key={item.id}
                     className={`hover:bg-gray-50/50 transition-colors ${item.is_grouped ? 'cursor-pointer' : ''}`}
@@ -797,18 +804,22 @@ const AdminDeviceManager = () => {
                       )}
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-            <Pagination meta={meta} onPageChange={setPage} />
-          </div>
-        ) : (
-          <div className="p-12 text-center flex flex-col items-center">
-            <ShieldAlert className="w-12 h-12 text-gray-300 mb-3" />
-            <h3 className="text-lg font-bold text-gray-800">Không có thiết bị nào</h3>
-            <p className="text-gray-500 mt-1">Hệ thống chưa có thiết bị phần cứng nào. Vui lòng thêm mới!</p>
-          </div>
-        )}
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={6} className="py-16 text-center text-gray-500">
+                    <div className="flex flex-col items-center justify-center">
+                      <ShieldAlert className="w-12 h-12 text-gray-300 mb-3" />
+                      <h3 className="text-base font-bold text-gray-800">Không tìm thấy thiết bị nào</h3>
+                      <p className="text-xs text-gray-500 mt-1">Hệ thống chưa có thiết bị phần cứng nào hoặc không khớp bộ lọc.</p>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+          <Pagination meta={meta} onPageChange={setPage} />
+        </div>
       </div>
 
       {/* Grouped Devices Modal */}

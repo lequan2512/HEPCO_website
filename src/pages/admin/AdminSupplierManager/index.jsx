@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Building2, Plus, Trash2, Edit2, X, Search, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Building2, Plus, Trash2, Edit2, X, Search, ArrowUpDown, ArrowUp, ArrowDown, Loader2 } from 'lucide-react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import toast from 'react-hot-toast';
 import { getErrorMessage } from '../../../utils/errorMapper';
-import Loading from '../../../components/Loading';
 import { useGetSuppliers, useAddSupplier, useUpdateSupplier, useDeleteSupplier } from '../../../apis/supplier';
 import ConfirmModal from '../../../components/ConfirmModal';
 import Pagination from '../../../components/Pagination';
@@ -143,51 +142,70 @@ const AdminSupplierManager = () => {
         </div>
       )}
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden min-h-[300px] flex flex-col justify-center">
-        {isLoading ? (
-          <Loading />
-        ) : filteredSuppliers.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse min-w-[600px]">
-              <thead className="bg-gray-50">
-                <tr className="border-b border-gray-100">
-                  <th 
-                    onClick={() => setSortOption(prev => prev === 'id_desc' ? 'id_asc' : 'id_desc')}
-                    className="px-6 py-4 text-sm font-bold text-gray-700 uppercase cursor-pointer hover:bg-gray-100 transition-colors select-none group"
-                  >
-                    <div className="flex items-center gap-1.5">
-                      <span>ID</span>
-                      {sortOption === 'id_asc' ? (
-                        <ArrowUp className="w-3.5 h-3.5 text-hepco-green font-bold" />
-                      ) : sortOption === 'id_desc' ? (
-                        <ArrowDown className="w-3.5 h-3.5 text-hepco-green font-bold" />
-                      ) : (
-                        <ArrowUpDown className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-600" />
-                      )}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden min-h-[300px]">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse min-w-[600px]">
+            <thead className="bg-gray-50">
+              <tr className="border-b border-gray-100">
+                <th 
+                  onClick={() => setSortOption(prev => prev === 'id_desc' ? 'id_asc' : 'id_desc')}
+                  className="px-6 py-4 text-sm font-bold text-gray-700 uppercase cursor-pointer hover:bg-gray-100 transition-colors select-none group"
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span>ID</span>
+                    {sortOption === 'id_asc' ? (
+                      <ArrowUp className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                    ) : sortOption === 'id_desc' ? (
+                      <ArrowDown className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                    ) : (
+                      <ArrowUpDown className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-600" />
+                    )}
+                  </div>
+                </th>
+                <th 
+                  onClick={() => setSortOption(prev => prev === 'name_asc' ? 'name_desc' : 'name_asc')}
+                  className="px-6 py-4 text-sm font-bold text-gray-700 uppercase cursor-pointer hover:bg-gray-100 transition-colors select-none group"
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span>Tên Nhà Cung Cấp</span>
+                    {sortOption === 'name_asc' ? (
+                      <ArrowUp className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                    ) : sortOption === 'name_desc' ? (
+                      <ArrowDown className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                    ) : (
+                      <ArrowUpDown className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-600" />
+                    )}
+                  </div>
+                </th>
+                <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Liên Hệ</th>
+                <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Thông Tin</th>
+                <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase text-right">Tác vụ</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {isLoading ? (
+                <tr>
+                  <td colSpan={5} className="py-16 text-center text-gray-500">
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <Loader2 className="w-8 h-8 text-hepco-green animate-spin" />
+                      <span className="text-xs font-semibold text-gray-500">Đang tải dữ liệu nhà cung cấp...</span>
                     </div>
-                  </th>
-                  <th 
-                    onClick={() => setSortOption(prev => prev === 'name_asc' ? 'name_desc' : 'name_asc')}
-                    className="px-6 py-4 text-sm font-bold text-gray-700 uppercase cursor-pointer hover:bg-gray-100 transition-colors select-none group"
-                  >
-                    <div className="flex items-center gap-1.5">
-                      <span>Tên Nhà Cung Cấp</span>
-                      {sortOption === 'name_asc' ? (
-                        <ArrowUp className="w-3.5 h-3.5 text-hepco-green font-bold" />
-                      ) : sortOption === 'name_desc' ? (
-                        <ArrowDown className="w-3.5 h-3.5 text-hepco-green font-bold" />
-                      ) : (
-                        <ArrowUpDown className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-600" />
-                      )}
-                    </div>
-                  </th>
-                  <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Liên Hệ</th>
-                  <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase">Thông Tin</th>
-                  <th className="px-6 py-4 text-sm font-bold text-gray-700 uppercase text-right">Tác vụ</th>
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {filteredSuppliers.map(s => (
+              ) : filteredSuppliers.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="py-16 text-center text-gray-500">
+                    <div className="flex flex-col items-center justify-center">
+                      <div className="w-14 h-14 bg-gray-50 rounded-full flex items-center justify-center mb-3">
+                        <Building2 className="w-7 h-7 text-gray-300" />
+                      </div>
+                      <h3 className="text-base font-bold text-gray-800">Không tìm thấy nhà cung cấp nào</h3>
+                      <p className="text-xs text-gray-500 mt-1">Chưa có nhà cung cấp nào hoặc không khớp bộ lọc.</p>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                filteredSuppliers.map(s => (
                   <tr key={s.id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="px-6 py-4 text-sm font-mono text-gray-500 font-medium">#{s.id}</td>
                     <td className="px-6 py-4 text-sm font-medium text-gray-800">{s.name}</td>
@@ -200,20 +218,12 @@ const AdminSupplierManager = () => {
                       </div>
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-            <Pagination meta={meta} onPageChange={setPage} />
-          </div>
-        ) : (
-          <div className="p-12 text-center flex flex-col items-center">
-            <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
-              <Building2 className="w-8 h-8 text-gray-300" />
-            </div>
-            <h3 className="text-lg font-bold text-gray-800">Không tìm thấy dữ liệu</h3>
-            <p className="text-gray-500 mt-1">Chưa có nhà cung cấp nào hoặc không khớp với tìm kiếm.</p>
-          </div>
-        )}
+                ))
+              )}
+            </tbody>
+          </table>
+          <Pagination meta={meta} onPageChange={setPage} />
+        </div>
       </div>
       <ConfirmModal isOpen={confirmConfig.isOpen} title={confirmConfig.title} message={confirmConfig.message} onConfirm={confirmConfig.onConfirm} onClose={() => setConfirmConfig({ ...confirmConfig, isOpen: false })} />
     </div>

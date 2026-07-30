@@ -613,42 +613,55 @@ const AdminPosManager = () => {
         </div>
 
         {/* POS Devices Table */}
-        {isLoading ? (
-          <div className="py-12"><Loading /></div>
-        ) : posDevices.length === 0 ? (
-          <div className="py-12 text-center text-gray-500 text-sm">
-            Không tìm thấy máy POS nào phù hợp với điều kiện tìm kiếm.
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm border-collapse">
-              <thead>
-                <tr className="bg-gray-50 border-b border-gray-100 text-gray-600 text-xs font-semibold uppercase tracking-wider">
-                  <th className="py-3.5 px-4">Xí Nghiệp & Khu Vực</th>
-                  <th 
-                    onClick={() => setSortOption(prev => prev === 'serial_asc' ? 'serial_desc' : 'serial_asc')}
-                    className="py-3.5 px-4 cursor-pointer hover:bg-gray-100 transition-colors select-none group"
-                  >
-                    <div className="flex items-center gap-1.5">
-                      <span>Serial/IMEI POS</span>
-                      {sortOption === 'serial_asc' ? (
-                        <ArrowUp className="w-3.5 h-3.5 text-hepco-green font-bold" />
-                      ) : sortOption === 'serial_desc' ? (
-                        <ArrowDown className="w-3.5 h-3.5 text-hepco-green font-bold" />
-                      ) : (
-                        <ArrowUpDown className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-600" />
-                      )}
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm border-collapse">
+            <thead>
+              <tr className="bg-gray-50 border-b border-gray-100 text-gray-600 text-xs font-semibold uppercase tracking-wider">
+                <th className="py-3.5 px-4">Xí Nghiệp & Khu Vực</th>
+                <th 
+                  onClick={() => setSortOption(prev => prev === 'serial_asc' ? 'serial_desc' : 'serial_asc')}
+                  className="py-3.5 px-4 cursor-pointer hover:bg-gray-100 transition-colors select-none group"
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span>Serial/IMEI POS</span>
+                    {sortOption === 'serial_asc' ? (
+                      <ArrowUp className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                    ) : sortOption === 'serial_desc' ? (
+                      <ArrowDown className="w-3.5 h-3.5 text-hepco-green font-bold" />
+                    ) : (
+                      <ArrowUpDown className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-600" />
+                    )}
+                  </div>
+                </th>
+                <th className="py-3.5 px-4">Thông Tin SIM</th>
+                <th className="py-3.5 px-4">Địa Bàn Phụ Trách</th>
+                <th className="py-3.5 px-4">Trạng Thái</th>
+                <th className="py-3.5 px-4">Người Sử Dụng/Mượn</th>
+                <th className="py-3.5 px-4 text-right">Thao Tác</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {isLoading ? (
+                <tr>
+                  <td colSpan={7} className="py-16 text-center text-gray-500">
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <Loader2 className="w-8 h-8 text-hepco-green animate-spin" />
+                      <span className="text-xs font-semibold text-gray-500">Đang tải dữ liệu máy POS...</span>
                     </div>
-                  </th>
-                  <th className="py-3.5 px-4">Thông Tin SIM</th>
-                  <th className="py-3.5 px-4">Địa Bàn Phụ Trách</th>
-                  <th className="py-3.5 px-4">Trạng Thái</th>
-                  <th className="py-3.5 px-4">Người Sử Dụng/Mượn</th>
-                  <th className="py-3.5 px-4 text-right">Thao Tác</th>
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {posDevices.map((device) => {
+              ) : posDevices.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-16 text-center text-gray-500">
+                    <div className="flex flex-col items-center justify-center">
+                      <CreditCard className="w-12 h-12 text-gray-300 mb-3" />
+                      <h3 className="text-base font-bold text-gray-800">Không tìm thấy máy POS nào</h3>
+                      <p className="text-xs text-gray-500 mt-1">Chưa có máy POS nào hoặc không khớp với điều kiện lọc tìm kiếm.</p>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                posDevices.map((device) => {
                   const activeAss = device.assignments?.[0];
                   const activeBor = device.borrowings?.[0];
                   const stLabel = POS_STATUS_LABELS[device.status] || { label: device.status, bg: 'bg-gray-100' };
@@ -769,15 +782,24 @@ const AdminPosManager = () => {
                         </button>
 
                         {openDropdownId === device.id && (
-                          <div className="absolute right-4 top-10 bg-white border border-gray-100 shadow-xl rounded-xl w-48 z-20 flex flex-col overflow-hidden py-1 text-left">
+                          <div className="absolute right-6 top-10 bg-white border border-gray-100 shadow-xl rounded-xl w-48 z-20 flex flex-col overflow-hidden py-1 text-left">
                             {device.status === POS_STATUS.IN_STOCK && (
-                              <button
-                                onClick={(e) => { e.stopPropagation(); setOpenDropdownId(null); handleOpenAssignModal(device); }}
-                                className="w-full px-4 py-2.5 text-xs font-medium text-green-700 hover:bg-green-50 flex items-center gap-2"
-                              >
-                                <UserCheck className="w-4 h-4 text-green-600" />
-                                Cấp phát POS
-                              </button>
+                              <>
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); setOpenDropdownId(null); handleOpenAssignModal(device); }}
+                                  className="w-full px-4 py-2.5 text-xs font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                                >
+                                  <UserCheck className="w-4 h-4 text-green-600" />
+                                  Cấp phát cho NV
+                                </button>
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); setOpenDropdownId(null); handleOpenBorrowModal(device); }}
+                                  className="w-full px-4 py-2.5 text-xs font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                                >
+                                  <ArrowRightLeft className="w-4 h-4 text-amber-600" />
+                                  Cho mượn tạm
+                                </button>
+                              </>
                             )}
 
                             {device.status === POS_STATUS.IN_USE && (
@@ -786,17 +808,7 @@ const AdminPosManager = () => {
                                 className="w-full px-4 py-2.5 text-xs font-medium text-amber-700 hover:bg-amber-50 flex items-center gap-2"
                               >
                                 <RotateCcw className="w-4 h-4 text-amber-600" />
-                                Thu hồi về kho
-                              </button>
-                            )}
-
-                            {device.status === POS_STATUS.IN_STOCK && (
-                              <button
-                                onClick={(e) => { e.stopPropagation(); setOpenDropdownId(null); handleOpenBorrowModal(device); }}
-                                className="w-full px-4 py-2.5 text-xs font-medium text-blue-700 hover:bg-blue-50 flex items-center gap-2"
-                              >
-                                <ArrowRightLeft className="w-4 h-4 text-blue-600" />
-                                Cho mượn dự phòng
+                                Thu hồi về Kho
                               </button>
                             )}
 
@@ -840,13 +852,12 @@ const AdminPosManager = () => {
                       </td>
                     </tr>
                   );
-                })}
-              </tbody>
-            </table>
-            <Pagination meta={meta} onPageChange={setPage} />
-          </div>
-        )}
-
+                })
+              )}
+            </tbody>
+          </table>
+          <Pagination meta={meta} onPageChange={setPage} />
+        </div>
       </div>
 
       {/* Modal Add/Edit POS */}
