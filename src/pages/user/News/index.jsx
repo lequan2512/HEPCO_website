@@ -181,9 +181,9 @@ const News = ({ pageType = 'news' }) => {
         description={bannerInfo.description}
       />
 
-      <div className="container mx-auto px-4 max-w-8xl mt-12">
+      <div className="container mx-auto px-2.5 sm:px-4 max-w-8xl mt-6 sm:mt-8 md:mt-10">
         {/* Controls Layout: Category & Search bar */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-12 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6 sm:mb-8 bg-white p-3.5 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl shadow-sm border border-gray-100">
 
           {/* Left spacing if needed, but since we removed categories, just a title or empty div to push search right */}
           <div className="flex-grow">
