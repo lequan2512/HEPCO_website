@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { Calendar } from 'lucide-react';
 import { ROUTES } from '../constants/routes';
 import { useGetNews } from '../apis/news';
 import { API_BASE_URL } from '../constants/api';
@@ -10,9 +11,20 @@ const stripHtml = (html) => {
   return tmp.textContent || tmp.innerText || '';
 };
 
+const formatDate = (dateStr) => {
+  if (!dateStr) return '';
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  } catch {
+    return dateStr;
+  }
+};
+
 const NewsPartnersAwards = () => {
   const navigate = useNavigate();
-  const { data: newsResponse = {} } = useGetNews({ type: 'news', limit: 3 });
+  const { data: newsResponse = {} } = useGetNews({ type: 'news', limit: 4 });
   const news = newsResponse.data || [];
 
   return (
@@ -34,43 +46,49 @@ const NewsPartnersAwards = () => {
                 <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-hepco-orange rounded-full"></div>
               </h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {news.map((item, i) => (
-                <div
-                  key={i}
-                  className="bg-white rounded-2xl shadow-lg hover:shadow-2xl overflow-hidden border border-gray-100 flex flex-col group cursor-pointer transition-all duration-500 hover:-translate-y-2"
-                  onClick={() => navigate(ROUTES.ARTICLE_DETAIL.replace(':id', item.id))}
-                >
-                  <div className="h-48 bg-gray-100 relative overflow-hidden">
-                    {item.thumbnail ? (
-                      <img
-                        src={item.thumbnail?.startsWith('http') ? item.thumbnail : `${API_BASE_URL}${item.thumbnail}`}
-                        alt={item.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center font-bold text-hepco-green">
-                        HEPCO News
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-black/5 group-hover:scale-105 transition-transform duration-500"></div>
-                    <div className="absolute bottom-[-16px] left-1/2 transform -translate-x-1/2 bg-hepco-green text-white text-xs font-bold py-1 px-4 rounded-full z-10 whitespace-nowrap">
-                      {item.date}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {news.map((item, i) => {
+                const displayDate = item.date || formatDate(item.created_at);
+                return (
+                  <div
+                    key={i}
+                    className="bg-white rounded-2xl shadow-lg hover:shadow-2xl overflow-hidden border border-gray-100 flex flex-col group cursor-pointer transition-all duration-500 hover:-translate-y-2"
+                    onClick={() => navigate(ROUTES.ARTICLE_DETAIL.replace(':id', item.id))}
+                  >
+                    <div className="h-48 bg-gray-100 relative overflow-hidden">
+                      {item.thumbnail ? (
+                        <img
+                          src={item.thumbnail?.startsWith('http') ? item.thumbnail : `${API_BASE_URL}${item.thumbnail}`}
+                          alt={item.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center font-bold text-hepco-green">
+                          HEPCO News
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-black/5 group-hover:scale-105 transition-transform duration-500"></div>
+                      {displayDate && (
+                        <div className="absolute top-3 left-3 bg-hepco-green/90 backdrop-blur-sm text-white text-xs font-semibold py-1 px-3 rounded-full z-10 whitespace-nowrap shadow-md border border-white/20 flex items-center gap-1.5">
+                          <Calendar className="w-3.5 h-3.5" />
+                          <span>{displayDate}</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-6 flex-grow flex flex-col">
+                      <h3 className="text-hepco-green font-extrabold text-base mb-2 line-clamp-2 leading-snug group-hover:text-hepco-orange transition-colors">
+                        {item.title}
+                      </h3>
+                      <p className="text-gray-400 text-xs mb-3">
+                        {item.author || 'HEPCO'} - {item.category || 'Tin tức'}
+                      </p>
+                      <p className="text-gray-500 text-sm line-clamp-2 mt-auto leading-relaxed">
+                        {typeof item.content === 'string' ? stripHtml(item.content) : 'Click vào để xem chi tiết bài viết...'}
+                      </p>
                     </div>
                   </div>
-                  <div className="p-8 pt-8 flex-grow flex flex-col">
-                    <h3 className="text-hepco-green font-extrabold text-lg mb-2 line-clamp-3 leading-snug group-hover:text-hepco-orange transition-colors">
-                      {item.title}
-                    </h3>
-                    <p className="text-gray-400 text-xs mb-4">
-                      {item.author} - {item.category || 'Tin tức'}
-                    </p>
-                    <p className="text-gray-500 text-sm line-clamp-2 mt-auto leading-relaxed">
-                      {typeof item.content === 'string' ? stripHtml(item.content) : 'Click vào để xem chi tiết bài viết...'}
-                    </p>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
