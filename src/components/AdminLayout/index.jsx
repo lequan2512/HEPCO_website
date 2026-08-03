@@ -291,15 +291,6 @@ const AdminLayout = () => {
               <Menu className="w-6 h-6" />
             </button>
 
-            {/* Desktop quick collapse toggle */}
-            <button
-              onClick={toggleCollapse}
-              className="hidden lg:flex items-center justify-center p-2 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors"
-              title={isCollapsed ? 'Mở rộng sidebar' : 'Thu gọn sidebar'}
-            >
-              {isCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
-            </button>
-
             <span className="font-bold text-sm hidden sm:block text-gray-800">
               Hệ thống Quản trị HEPCO
             </span>
