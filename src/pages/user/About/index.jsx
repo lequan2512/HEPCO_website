@@ -10,7 +10,7 @@ const About = () => {
   const [userSelectedTab, setUserSelectedTab] = useState(null);
   const [prevLocationKey, setPrevLocationKey] = useState(location.key);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-  const subNavItems = ['Về Hepco', 'Chức năng - Giấy phép', 'Sơ đồ tổ chức', 'Thành tựu đạt được', 'Hồ sơ năng lực'];
+  const subNavItems = ['Về Hepco', 'Chức năng - Giấy phép', 'Sơ đồ tổ chức', 'Hồ sơ năng lực'];
 
   if (location.key !== prevLocationKey) {
     setPrevLocationKey(location.key);
@@ -186,7 +186,7 @@ const About = () => {
         )}
 
         {/* Tab 4: Hồ sơ năng lực (3D Book PDF Reader) */}
-        {activeTab === 4 && (
+        {activeTab === 3 && (
           <div className="space-y-4">
             <div className="bg-white rounded-2xl md:rounded-3xl shadow-xl border border-gray-100 p-2.5 sm:p-4 md:p-5">
               <div className="text-center mb-4 sm:mb-5">
@@ -205,7 +205,7 @@ const About = () => {
         )}
 
         {/* Fallback for other tabs */}
-        {activeTab !== 0 && activeTab !== 2 && activeTab !== 4 && (
+        {activeTab !== 0 && activeTab !== 2 && activeTab !== 3 && (
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center min-h-[400px] flex flex-col items-center justify-center">
             <Building2 className="w-16 h-16 text-gray-300 mb-4" />
             <h3 className="text-2xl font-bold text-gray-800 mb-2">Nội dung đang được cập nhật</h3>
