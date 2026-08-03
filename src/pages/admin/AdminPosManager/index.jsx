@@ -10,6 +10,7 @@ import { saveAs } from 'file-saver';
 import axiosInstance from '../../../utils/axios';
 import Select from 'react-select';
 import { POS_STATUS, POS_STATUS_OPTIONS, POS_STATUS_LABELS } from '../../../constants/pos';
+import { EXCEL_STYLES, sanitizeSheetName } from '../../../utils/excelConfig';
 
 
 import toast from 'react-hot-toast';
@@ -311,31 +312,40 @@ const AdminPosManager = () => {
     });
   };
 
-  // Export Excel - Mỗi Phòng Ban Cha 1 Sheet, các khu vực con nằm trong Sheet của phòng ban cha
   const handleExportExcel = async () => {
-    setIsExporting(true);
     try {
-      const res = await axiosInstance.get('/api/pos', { params: { limit: 5000 } });
+      setIsExporting(true);
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      const res = await axiosInstance.get('/api/pos', {
+        params: { limit: 10000, sort: sortOption }
+      });
       const allDevices = res.data?.data || [];
 
       if (allDevices.length === 0) {
-        toast.error('Không có dữ liệu máy POS để xuất Excel!');
+        toast.error('Không có dữ liệu máy POS để xuất file Excel');
         return;
       }
 
-      // Hàm tìm tên phòng ban cha động từ CSDL theo mã xí nghiệp/mã phòng ban
+      const {
+        FONT_TITLE, FILL_TITLE,
+        FONT_SECTION, FILL_SECTION,
+        FONT_HEADER, FILL_HEADER,
+        FONT_DATA, FILL_EVEN, FILL_ODD,
+        BORDER_THIN, ALIGN_CENTER, ALIGN_LEFT
+      } = EXCEL_STYLES;
+
       const findParentDeptName = (entCode) => {
-        if (!entCode) return 'Kho Dự Phòng Chung';
-        const match = departments.find(d => (!d.parent_id || !d.parent) && (d.code === entCode || (d.code && d.code.includes(entCode))));
+        if (!entCode) return 'Chung / Khác';
+        const match = (departments || []).find(
+          (d) => d.code?.toUpperCase() === entCode?.toUpperCase() || d.name?.toUpperCase()?.includes(entCode?.toUpperCase())
+        );
         return match?.name || entCode;
       };
 
-      // Nhóm thiết bị theo Phòng Ban Cha (Sheet Name) và Khu Vực Con (Section Name)
       const parentGroups = {};
 
       allDevices.forEach((dev) => {
-
-
         const activeAss = dev.assignments?.[0];
         const activeBor = dev.borrowings?.[0];
         const dept = activeAss?.employee?.department;
@@ -344,7 +354,6 @@ const AdminPosManager = () => {
         let sectionName;
 
         if (dept) {
-
           if (dept.parent) {
             sheetName = dept.parent.name;
             sectionName = dept.name;
@@ -353,7 +362,6 @@ const AdminPosManager = () => {
             sectionName = `${dept.name} (Khối Chính)`;
           }
         } else {
-          // Lấy động tên phòng ban cha từ danh sách departments trong CSDL
           const dynamicParentName = findParentDeptName(dev.enterprise);
           sheetName = dynamicParentName;
 
@@ -369,25 +377,23 @@ const AdminPosManager = () => {
         parentGroups[sheetName][sectionName].push(dev);
       });
 
-
       const workbook = new ExcelJS.Workbook();
       workbook.creator = 'Hệ thống Quản trị HEPCO';
       workbook.created = new Date();
 
       Object.keys(parentGroups).sort().forEach((parentName) => {
-        const safeSheetName = parentName.replace(/[:\\/?*[\]]/g, ' ').substring(0, 31);
+        const safeSheetName = sanitizeSheetName(parentName);
         const sheet = workbook.addWorksheet(safeSheetName);
 
-        // Dòng Tiêu Đề Chính của Sheet
         sheet.addRow([`DANH SÁCH MÁY POS CHO NHÂN VIÊN ${parentName.toUpperCase()}`]);
         sheet.mergeCells('A1:J1');
         const titleCell = sheet.getCell('A1');
-        titleCell.font = { name: 'Times New Roman', size: 14, bold: true, color: { argb: 'FFFFFFFF' } };
-        titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF15803D' } }; // Hepco Green
-        titleCell.alignment = { vertical: 'middle', horizontal: 'center' };
+        titleCell.font = FONT_TITLE;
+        titleCell.fill = FILL_TITLE;
+        titleCell.alignment = ALIGN_CENTER;
         sheet.getRow(1).height = 35;
 
-        sheet.addRow([]); // Dòng trống
+        sheet.addRow([]); // Blank row
 
         const sections = parentGroups[parentName];
 
@@ -395,17 +401,17 @@ const AdminPosManager = () => {
           const devList = sections[secName];
           if (devList.length === 0) return;
 
-          // Dòng tiêu đề Khu Vực Con (Sub-section Header)
+          // Sub-section Header Row
           const secRow = sheet.addRow([secName.toUpperCase()]);
           const currentSecRowIdx = secRow.number;
           sheet.mergeCells(`A${currentSecRowIdx}:J${currentSecRowIdx}`);
           const secCell = sheet.getCell(`A${currentSecRowIdx}`);
-          secCell.font = { name: 'Times New Roman', size: 11, bold: true, color: { argb: 'FF0F172A' } };
-          secCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE2E8F0' } }; // Slate Gray Accent
+          secCell.font = FONT_SECTION;
+          secCell.fill = FILL_SECTION;
           secCell.alignment = { vertical: 'middle', horizontal: 'left' };
           secRow.height = 24;
 
-          // Dòng Tiêu Đề Cột cho Khu Vực
+          // Column Headers Row
           const headerRow = sheet.addRow([
             'STT',
             'Họ và Tên Nhân Viên/Người Mượn',
@@ -421,13 +427,13 @@ const AdminPosManager = () => {
           headerRow.height = 24;
           for (let c = 1; c <= 10; c++) {
             const cell = headerRow.getCell(c);
-            cell.font = { name: 'Times New Roman', bold: true, size: 10, color: { argb: 'FFFFFFFF' } };
-            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF166534' } };
-            cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
-            cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+            cell.font = FONT_HEADER;
+            cell.fill = FILL_HEADER;
+            cell.alignment = ALIGN_CENTER;
+            cell.border = BORDER_THIN;
           }
 
-          // Dòng dữ liệu Nhân viên/POS trong Khu vực
+          // Employee POS Data Rows
           devList.forEach((dev, idx) => {
             const activeAss = dev.assignments?.[0];
             const activeBor = dev.borrowings?.[0];
@@ -451,25 +457,14 @@ const AdminPosManager = () => {
             ]);
 
             dataRow.height = 22;
-            const isEven = idx % 2 === 0;
-            const rowBg = isEven ? 'FFFFFFFF' : 'FFF8FAFC';
+            const rowFill = idx % 2 !== 0 ? FILL_ODD : FILL_EVEN;
 
             for (let c = 1; c <= 10; c++) {
               const cell = dataRow.getCell(c);
-              cell.font = { name: 'Times New Roman', size: 10, color: { argb: 'FF1F2937' } };
-              cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: rowBg } };
-              cell.border = {
-                top: { style: 'thin', color: { argb: 'FFE2E8F0' } },
-                left: { style: 'thin', color: { argb: 'FFE2E8F0' } },
-                bottom: { style: 'thin', color: { argb: 'FFE2E8F0' } },
-                right: { style: 'thin', color: { argb: 'FFE2E8F0' } }
-              };
-
-              if (c === 1 || c === 4 || c === 5 || c === 6 || c === 7 || c === 9) {
-                cell.alignment = { vertical: 'middle', horizontal: 'center' };
-              } else {
-                cell.alignment = { vertical: 'middle', horizontal: 'left', wrapText: true };
-              }
+              cell.font = FONT_DATA;
+              cell.fill = rowFill;
+              cell.border = BORDER_THIN;
+              cell.alignment = (c === 1 || c === 4 || c === 5 || c === 6 || c === 7 || c === 9) ? ALIGN_CENTER : ALIGN_LEFT;
             }
           });
 
@@ -484,8 +479,8 @@ const AdminPosManager = () => {
       });
 
       const buffer = await workbook.xlsx.writeBuffer();
-      saveAs(new Blob([buffer]), `Danh_Sach_May_POS_HEPCO_${new Date().toISOString().slice(0, 10)}.xlsx`);
-      toast.success('Xuất file Excel thành công theo Phòng Ban Cha & Khu Vực Con!');
+      saveAs(new Blob([buffer]), `Danh_Sach_May_POS_${new Date().toISOString().slice(0, 10)}.xlsx`);
+      toast.success('Xuất file Excel thành công!');
     } catch (err) {
       console.error('Lỗi khi xuất Excel:', err);
       toast.error('Có lỗi xảy ra khi xuất file Excel');

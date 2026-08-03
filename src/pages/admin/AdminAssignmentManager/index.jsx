@@ -18,6 +18,7 @@ import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import AsyncSelect from 'react-select/async';
 import axiosInstance from '../../../utils/axios';
+import { EXCEL_STYLES, sanitizeSheetName } from '../../../utils/excelConfig';
 
 const AdminAssignmentManager = () => {
   const [page, setPage] = useState(1);
@@ -212,149 +213,199 @@ const AdminAssignmentManager = () => {
   const handleExportExcel = async () => {
     try {
       setIsExporting(true);
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
       const response = await axiosInstance.get('/api/assignments/export', {
         params: { ...debouncedFilters, status: ASSIGNMENT_STATUS.ACTIVE }
       });
-      const grouped = response.data || {};
+      const responseData = response.data || {};
 
-      const getComponent = (device, code) => {
-        if (!device?.child_devices) return '-';
-        const comps = device.child_devices.filter(c => c.category?.code === code);
-        return comps.length > 0 ? comps.map(c => c.name).join('\n') : '-';
-      };
-
-      const workbook = new ExcelJS.Workbook();
-      const sheet = workbook.addWorksheet('Cấp Phát Thiết Bị');
-
-      sheet.columns = [
-        { key: 'employee_code', width: 15 },
-        { key: 'employee', width: 20 },
-        { key: 'position', width: 18 },
-        { key: 'cpu', width: 12 },
-        { key: 'ram', width: 12 },
-        { key: 'drive', width: 12 },
-        { key: 'vga', width: 12 },
-        { key: 'monitor', width: 12 },
-        { key: 'keyboard', width: 12 },
-        { key: 'mouse', width: 12 },
-        { key: 'assigned_date', width: 15 },
-      ];
-
-      // Row 1: Title
-      const titleRow = sheet.addRow({ employee_code: 'BẢNG TỔNG HỢP CẤP PHÁT' });
-      sheet.mergeCells(titleRow.number, 1, titleRow.number, 11);
-
-      // Row 2: Main Headers
-      sheet.addRow({
-        employee_code: 'Mã NV',
-        employee: 'Nhân Viên',
-        position: 'Chức Vụ',
-        cpu: 'Máy tính bộ',
-        assigned_date: 'Ngày Cấp'
-      });
-
-      // Row 3: Sub Headers
-      sheet.addRow({
-        cpu: 'CPU',
-        ram: 'RAM',
-        drive: 'Ổ Cứng',
-        vga: 'VGA',
-        monitor: 'Màn Hình',
-        keyboard: 'Bàn Phím',
-        mouse: 'Chuột'
-      });
-
-      // Perform merges after adding all header rows to prevent auto-increment issues
-      sheet.mergeCells('A2:A3');
-      sheet.mergeCells('B2:B3');
-      sheet.mergeCells('C2:C3');
-      sheet.mergeCells('D2:J2');
-      sheet.mergeCells('K2:K3');
-
-      // Style row 1 (Title)
-      const titleCell = sheet.getRow(1).getCell(1);
-      titleCell.font = { name: 'Times New Roman', size: 14, bold: true, color: { argb: 'FFFFFFFF' } };
-      titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF15803D' } }; // Hepco Green
-      titleCell.alignment = { vertical: 'middle', horizontal: 'center' };
-      sheet.getRow(1).height = 35;
-
-      // Style headers (row 2 and 3)
-      for (let i = 2; i <= 3; i++) {
-        sheet.getRow(i).height = 25;
-        for (let c = 1; c <= 11; c++) {
-          const cell = sheet.getRow(i).getCell(c);
-          cell.font = { name: 'Times New Roman', bold: true, size: 10, color: { argb: 'FFFFFFFF' } };
-          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF166534' } }; // Hepco Deep Green
-          cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
-          cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
-        }
+      let allItems = [];
+      if (Array.isArray(responseData)) {
+        allItems = responseData;
+      } else if (typeof responseData === 'object') {
+        Object.values(responseData).forEach((arr) => {
+          if (Array.isArray(arr)) allItems.push(...arr);
+        });
       }
 
-      Object.keys(grouped).sort().forEach((dept) => {
-        // Department Header Row
-        const deptRow = sheet.addRow({ employee_code: `PHÒNG BAN: ${dept.toUpperCase()}` });
-        sheet.mergeCells(deptRow.number, 1, deptRow.number, 11);
-        deptRow.height = 24;
+      const {
+        FONT_TITLE, FILL_TITLE,
+        FONT_SECTION, FILL_SECTION,
+        FONT_HEADER, FILL_HEADER,
+        FONT_DATA, FILL_EVEN, FILL_ODD,
+        BORDER_THIN, ALIGN_CENTER, ALIGN_LEFT
+      } = EXCEL_STYLES;
 
-        const deptCell = deptRow.getCell(1);
-        deptCell.font = { name: 'Times New Roman', bold: true, size: 11, color: { argb: 'FF0F172A' } };
-        deptCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE2E8F0' } }; // Slate Gray Accent
-        deptCell.alignment = { vertical: 'middle', horizontal: 'left', wrapText: false };
+      const buildComponentMap = (device) => {
+        const map = {};
+        if (device?.child_devices && Array.isArray(device.child_devices)) {
+          device.child_devices.forEach(c => {
+            const code = c.category?.code;
+            if (code) {
+              if (!map[code]) map[code] = [];
+              map[code].push(c.name);
+            }
+          });
+        }
+        return map;
+      };
 
-        for (let c = 1; c <= 11; c++) {
-          deptRow.getCell(c).border = { top: { style: 'thin', color: { argb: 'FFE2E8F0' } }, left: { style: 'thin', color: { argb: 'FFE2E8F0' } }, bottom: { style: 'thin', color: { argb: 'FFE2E8F0' } }, right: { style: 'thin', color: { argb: 'FFE2E8F0' } } };
+      const parentGroups = {};
+
+      allItems.forEach((item) => {
+        const dept = item.employee?.department;
+        let sheetName = 'Khác / Chưa phân loại';
+        let sectionName = 'Chưa phân loại';
+
+        if (dept) {
+          if (dept.parent) {
+            sheetName = dept.parent.name;
+            sectionName = dept.name;
+          } else {
+            sheetName = dept.name;
+            sectionName = `${dept.name} (Khối Chính)`;
+          }
+        } else if (item.department_name || item.department) {
+          const dName = item.department_name || item.department;
+          sheetName = typeof dName === 'string' ? dName : dName.name || 'Chưa phân loại';
+          sectionName = sheetName;
         }
 
-        const items = grouped[dept];
-        items.forEach((item, i) => {
-          const isAlternate = i % 2 !== 0;
-          const color = isAlternate ? 'FFF8FAFC' : 'FFFFFFFF'; // Alternate rows within department
+        if (!parentGroups[sheetName]) parentGroups[sheetName] = {};
+        if (!parentGroups[sheetName][sectionName]) parentGroups[sheetName][sectionName] = [];
+        parentGroups[sheetName][sectionName].push(item);
+      });
 
+      const workbook = new ExcelJS.Workbook();
+      workbook.creator = 'Hệ thống Quản trị HEPCO';
+      workbook.created = new Date();
 
-          const row = sheet.addRow({
-            employee_code: item.employee?.employee_code || '-',
-            employee: item.employee?.full_name || item.employee?.name || '-',
-            position: item.employee?.position || '-',
-            cpu: getComponent(item.device, DEVICE_CATEGORY_CODES.CPU),
-            ram: getComponent(item.device, DEVICE_CATEGORY_CODES.RAM),
-            drive: getComponent(item.device, DEVICE_CATEGORY_CODES.DRIVE),
-            vga: getComponent(item.device, DEVICE_CATEGORY_CODES.VGA),
-            monitor: getComponent(item.device, DEVICE_CATEGORY_CODES.MONITOR),
-            keyboard: getComponent(item.device, DEVICE_CATEGORY_CODES.KEYBOARD),
-            mouse: getComponent(item.device, DEVICE_CATEGORY_CODES.MOUSE),
-            assigned_date: item.assigned_date ? new Date(item.assigned_date).toLocaleDateString('vi-VN') : '-'
-          });
+      Object.keys(parentGroups).sort().forEach((parentName) => {
+        const safeSheetName = sanitizeSheetName(parentName);
+        const sheet = workbook.addWorksheet(safeSheetName);
 
-          // Set a minimum reasonable height for data rows with wrapped text
-          row.height = 40;
+        sheet.columns = [
+          { key: 'employee_code', width: 14 },
+          { key: 'employee', width: 22 },
+          { key: 'position', width: 18 },
+          { key: 'cpu', width: 16 },
+          { key: 'ram', width: 14 },
+          { key: 'drive', width: 16 },
+          { key: 'vga', width: 14 },
+          { key: 'monitor', width: 16 },
+          { key: 'keyboard', width: 14 },
+          { key: 'mouse', width: 14 },
+          { key: 'assigned_date', width: 14 },
+        ];
 
-          for (let c = 1; c <= 11; c++) {
-            const cell = row.getCell(c);
-            cell.font = { name: 'Times New Roman', size: 10, color: { argb: 'FF1F2937' } };
-            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: color } };
-            cell.border = {
-              top: { style: 'thin', color: { argb: 'FFE2E8F0' } },
-              left: { style: 'thin', color: { argb: 'FFE2E8F0' } },
-              bottom: { style: 'thin', color: { argb: 'FFE2E8F0' } },
-              right: { style: 'thin', color: { argb: 'FFE2E8F0' } }
-            };
+        sheet.addRow([`BẢNG TỔNG HỢP CẤP PHÁT THIẾT BỊ PC - ${parentName.toUpperCase()}`]);
+        sheet.mergeCells('A1:K1');
+        const titleCell = sheet.getCell('A1');
+        titleCell.font = FONT_TITLE;
+        titleCell.fill = FILL_TITLE;
+        titleCell.alignment = ALIGN_CENTER;
+        sheet.getRow(1).height = 35;
 
-            if (c === 1 || c >= 4) {
-              cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
-            } else {
-              cell.alignment = { vertical: 'middle', horizontal: 'left', wrapText: true };
+        sheet.addRow([]);
+
+        const sections = parentGroups[parentName];
+        Object.keys(sections).sort().forEach((secName) => {
+          const items = sections[secName];
+          if (items.length === 0) return;
+
+          const secRow = sheet.addRow([secName.toUpperCase()]);
+          const secRowIdx = secRow.number;
+          sheet.mergeCells(`A${secRowIdx}:K${secRowIdx}`);
+          const secCell = sheet.getCell(`A${secRowIdx}`);
+          secCell.font = FONT_SECTION;
+          secCell.fill = FILL_SECTION;
+          secCell.alignment = { vertical: 'middle', horizontal: 'left' };
+          secRow.height = 24;
+
+          const headerRow1 = sheet.addRow([
+            'Mã NV',
+            'Nhân Viên',
+            'Chức Vụ',
+            'Máy tính bộ',
+            '', '', '', '', '', '',
+            'Ngày Cấp'
+          ]);
+
+          const headerRow2 = sheet.addRow([
+            '',
+            '',
+            '',
+            'CPU',
+            'RAM',
+            'Ổ Cứng',
+            'VGA',
+            'Màn Hình',
+            'Bàn Phím',
+            'Chuột',
+            ''
+          ]);
+
+          const h1Idx = headerRow1.number;
+          const h2Idx = headerRow2.number;
+
+          sheet.mergeCells(`A${h1Idx}:A${h2Idx}`);
+          sheet.mergeCells(`B${h1Idx}:B${h2Idx}`);
+          sheet.mergeCells(`C${h1Idx}:C${h2Idx}`);
+          sheet.mergeCells(`D${h1Idx}:J${h1Idx}`);
+          sheet.mergeCells(`K${h1Idx}:K${h2Idx}`);
+
+          for (let r = h1Idx; r <= h2Idx; r++) {
+            sheet.getRow(r).height = 24;
+            for (let c = 1; c <= 11; c++) {
+              const cell = sheet.getRow(r).getCell(c);
+              cell.font = FONT_HEADER;
+              cell.fill = FILL_HEADER;
+              cell.alignment = ALIGN_CENTER;
+              cell.border = BORDER_THIN;
             }
           }
+
+          items.forEach((item, i) => {
+            const compMap = buildComponentMap(item.device);
+            const getCompText = (code) => compMap[code]?.join('\n') || '-';
+
+            const row = sheet.addRow([
+              item.employee?.employee_code || '-',
+              item.employee?.full_name || item.employee?.name || '-',
+              item.employee?.position || '-',
+              getCompText(DEVICE_CATEGORY_CODES.CPU),
+              getCompText(DEVICE_CATEGORY_CODES.RAM),
+              getCompText(DEVICE_CATEGORY_CODES.DRIVE),
+              getCompText(DEVICE_CATEGORY_CODES.VGA),
+              getCompText(DEVICE_CATEGORY_CODES.MONITOR),
+              getCompText(DEVICE_CATEGORY_CODES.KEYBOARD),
+              getCompText(DEVICE_CATEGORY_CODES.MOUSE),
+              item.assigned_date ? new Date(item.assigned_date).toLocaleDateString('vi-VN') : '-'
+            ]);
+
+            row.height = 36;
+            const rowFill = i % 2 !== 0 ? FILL_ODD : FILL_EVEN;
+
+            for (let c = 1; c <= 11; c++) {
+              const cell = row.getCell(c);
+              cell.font = FONT_DATA;
+              cell.fill = rowFill;
+              cell.border = BORDER_THIN;
+              cell.alignment = (c === 1 || c >= 4) ? ALIGN_CENTER : ALIGN_LEFT;
+            }
+          });
+
+          sheet.addRow([]);
         });
       });
 
-
       const buffer = await workbook.xlsx.writeBuffer();
-      saveAs(new Blob([buffer]), `ThongKe_ThietBi_${new Date().toISOString().split('T')[0]}.xlsx`);
-      toast.success('Xuất file Excel thành công');
+      saveAs(new Blob([buffer]), `Danh_Sach_Cap_Phat_PC_${new Date().toISOString().split('T')[0]}.xlsx`);
+      toast.success('Xuất file Excel thành công!');
     } catch (error) {
-      console.error(error);
-      toast.error('Có lỗi xảy ra khi xuất Excel');
+      console.error('Lỗi khi xuất Excel:', error);
+      toast.error('Có lỗi xảy ra khi xuất file Excel');
     } finally {
       setIsExporting(false);
     }
