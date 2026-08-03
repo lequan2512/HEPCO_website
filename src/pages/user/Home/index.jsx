@@ -5,17 +5,36 @@ import HomeServices from '../../../components/HomeServices';
 import NewsPartnersAwards from '../../../components/NewsPartnersAwards';
 import FaqContact from '../../../components/FaqContact';
 import HomeImageSlider from '../../../components/HomeImageSlider';
+import ScrollAnimation from '../../../components/ScrollAnimation';
 
 const Home = () => {
   return (
-    <div className="w-full bg-white min-h-screen">
+    <div className="w-full bg-white">
       <Hero />
-      <VisionMission />
-      <CoreValues />
-      <HomeServices />
-      <HomeImageSlider />
-      <NewsPartnersAwards />
-      <FaqContact />
+
+      <ScrollAnimation animation="fade-up" duration={800}>
+        <VisionMission />
+      </ScrollAnimation>
+
+      <ScrollAnimation animation="zoom-in" duration={800}>
+        <CoreValues />
+      </ScrollAnimation>
+
+      <ScrollAnimation animation="fade-up" duration={800}>
+        <HomeServices />
+      </ScrollAnimation>
+
+      <ScrollAnimation animation="fade-up" duration={800}>
+        <HomeImageSlider />
+      </ScrollAnimation>
+
+      <ScrollAnimation animation="fade-up" duration={800}>
+        <NewsPartnersAwards />
+      </ScrollAnimation>
+
+      <ScrollAnimation animation="fade-up" duration={800}>
+        <FaqContact />
+      </ScrollAnimation>
     </div>
   );
 };

@@ -44,10 +44,42 @@ const AWARDS = [
   { img: '/images/merit/bang-khen5.jpg', alt: 'Bằng khen 5' },
 ];
 
+const parseNewsDate = (dStr) => {
+  if (!dStr) return 0;
+  if (typeof dStr === 'string') {
+    const cleanStr = dStr.trim();
+    const datePart = cleanStr.split(' ')[0];
+    const parts = datePart.split(/[-/]/);
+    if (parts.length === 3) {
+      if (parts[0].length === 4) {
+        return new Date(cleanStr).getTime() || 0;
+      }
+      const day = parts[0].padStart(2, '0');
+      const month = parts[1].padStart(2, '0');
+      const year = parts[2];
+      const timePart = cleanStr.split(' ')[1] || '00:00:00';
+      return new Date(`${year}-${month}-${day}T${timePart}`).getTime() || 0;
+    }
+  }
+  return new Date(dStr).getTime() || 0;
+};
+
 const NewsPartnersAwards = () => {
   const navigate = useNavigate();
-  const { data: newsResponse = {} } = useGetNews({ type: 'news,shareholders', limit: 4 });
-  const news = newsResponse.data || [];
+  const { data: newsResponse = {} } = useGetNews({
+    type: 'news,shareholders',
+    limit: 8,
+    sort: 'date_desc',
+    sortBy: 'date',
+    order: 'desc'
+  });
+
+  const rawNews = newsResponse.data || [];
+  const news = [...rawNews].sort((a, b) => {
+    const timeA = parseNewsDate(a.date || a.published_at || a.created_at);
+    const timeB = parseNewsDate(b.date || b.published_at || b.created_at);
+    return timeB - timeA;
+  });
 
   const partnerScrollRef = useRef(null);
   const awardScrollRef = useRef(null);
