@@ -54,17 +54,13 @@ const Header = () => {
         {/* Desktop Hotline Section & Mobile Toggle */}
         <div className="h-full flex items-center justify-end flex-1 lg:flex-none">
           {/* Hotline Desktop */}
-          <div className="hidden sm:flex h-full bg-white text-gray-800 items-center pr-4 md:pr-8 pl-8 md:pl-12 clip-diagonal" style={{ clipPath: 'polygon(15% 0, 100% 0, 100% 100%, 0% 100%)' }}>
-            <div className="flex items-center space-x-2 md:space-x-3 mr-4 md:mr-6 text-hepco-orange">
-              <Phone className="w-5 h-5 md:w-6 md:h-6" />
+          <div className="hidden sm:flex h-full bg-white text-gray-800 items-center pr-3 md:pr-5 pl-5 md:pl-8 clip-diagonal" style={{ clipPath: 'polygon(12% 0, 100% 0, 100% 100%, 0% 100%)' }}>
+            <div className="flex items-center space-x-1.5 md:space-x-2 text-hepco-orange">
+              <Phone className="w-4 h-4 md:w-4.5 md:h-4.5 shrink-0" />
               <div className="flex flex-col">
-                <span className="text-[10px] md:text-xs font-bold leading-tight">Hotline</span>
-                <a href="tel:02343997799" className="text-xs md:text-sm font-bold leading-tight hover:underline">(0234) 3997799</a>
+                <span className="text-[9px] md:text-[10px] font-bold leading-none tracking-wide text-gray-500 uppercase">Hotline</span>
+                <a href="tel:02343997799" className="text-xs md:text-xs font-extrabold leading-tight text-hepco-orange hover:underline whitespace-nowrap">(0234) 3997799</a>
               </div>
-            </div>
-            {/* Vietnam Flag Placeholder */}
-            <div className="w-6 h-4 md:w-8 md:h-5 bg-red-600 relative flex items-center justify-center">
-              <div className="text-yellow-400 text-[10px] md:text-xs">★</div>
             </div>
           </div>
 
