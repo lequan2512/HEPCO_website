@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Calendar } from 'lucide-react';
 import { ROUTES } from '../constants/routes';
@@ -26,10 +27,117 @@ const formatDate = (dateStr) => {
   }
 };
 
+const PARTNERS = [
+  { img: '/images/partner/benh-vien.jpg', alt: 'Bệnh viện Răng Hàm Mặt Huế', round: true, url: 'https://bvrhm.hue.gov.vn/' },
+  { img: '/images/partner/logomgreen.png', alt: 'mGreen', round: false, url: 'https://mgreen.vn' },
+  { img: '/images/partner/scavi.jpg', alt: 'Scavi Group', round: true, url: 'http://scavi.com.vn' },
+  { img: '/images/partner/toyota.png', alt: 'Toyota Việt Nam', round: false, url: 'https://www.toyota.com.vn' },
+  { img: '/images/partner/usaid.jpg', alt: 'USAID', round: true, url: 'https://www.usaid.gov' },
+  { img: '/images/partner/wwf.webp', alt: 'WWF Việt Nam', round: false, url: 'https://vietnam.wwf.org' },
+];
+
+const AWARDS = [
+  { img: '/images/merit/bang-khen1.jpg', alt: 'Bằng khen 1' },
+  { img: '/images/merit/bang-khen2.jpg', alt: 'Bằng khen 2' },
+  { img: '/images/merit/bang-khen3.jpg', alt: 'Bằng khen 3' },
+  { img: '/images/merit/bang-khen4.jpg', alt: 'Bằng khen 4' },
+  { img: '/images/merit/bang-khen5.jpg', alt: 'Bằng khen 5' },
+];
+
 const NewsPartnersAwards = () => {
   const navigate = useNavigate();
   const { data: newsResponse = {} } = useGetNews({ type: 'news,shareholders', limit: 4 });
   const news = newsResponse.data || [];
+
+  const partnerScrollRef = useRef(null);
+  const awardScrollRef = useRef(null);
+
+  const [isDraggingPartner, setIsDraggingPartner] = useState(false);
+  const [isHoveredPartner, setIsHoveredPartner] = useState(false);
+  const [startXPartner, setStartXPartner] = useState(0);
+  const [scrollLeftPartner, setScrollLeftPartner] = useState(0);
+  const [hasDraggedPartner, setHasDraggedPartner] = useState(false);
+
+  const [isDraggingAward, setIsDraggingAward] = useState(false);
+  const [isHoveredAward, setIsHoveredAward] = useState(false);
+  const [startXAward, setStartXAward] = useState(0);
+  const [scrollLeftAward, setScrollLeftAward] = useState(0);
+
+  // Auto-scroll Partner loop
+  useEffect(() => {
+    const el = partnerScrollRef.current;
+    if (!el) return;
+    let animId;
+    const step = () => {
+      if (!isDraggingPartner && !isHoveredPartner && el) {
+        el.scrollLeft += 0.8;
+        const halfWidth = el.scrollWidth / 2;
+        if (halfWidth > 0 && el.scrollLeft >= halfWidth) {
+          el.scrollLeft -= halfWidth;
+        }
+      }
+      animId = requestAnimationFrame(step);
+    };
+    animId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(animId);
+  }, [isDraggingPartner, isHoveredPartner]);
+
+  // Auto-scroll Award loop
+  useEffect(() => {
+    const el = awardScrollRef.current;
+    if (!el) return;
+    let animId;
+    const step = () => {
+      if (!isDraggingAward && !isHoveredAward && el) {
+        el.scrollLeft += 0.6;
+        const halfWidth = el.scrollWidth / 2;
+        if (halfWidth > 0 && el.scrollLeft >= halfWidth) {
+          el.scrollLeft -= halfWidth;
+        }
+      }
+      animId = requestAnimationFrame(step);
+    };
+    animId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(animId);
+  }, [isDraggingAward, isHoveredAward]);
+
+  const handleMouseDownPartner = (e) => {
+    if (!partnerScrollRef.current) return;
+    setIsDraggingPartner(true);
+    setHasDraggedPartner(false);
+    setStartXPartner(e.pageX - partnerScrollRef.current.offsetLeft);
+    setScrollLeftPartner(partnerScrollRef.current.scrollLeft);
+  };
+
+  const handleMouseMovePartner = (e) => {
+    if (!isDraggingPartner || !partnerScrollRef.current) return;
+    const x = e.pageX - partnerScrollRef.current.offsetLeft;
+    const walk = (x - startXPartner) * 1.8;
+    if (Math.abs(walk) > 5) setHasDraggedPartner(true);
+    e.preventDefault();
+    partnerScrollRef.current.scrollLeft = scrollLeftPartner - walk;
+  };
+
+  const handleMouseDownAward = (e) => {
+    if (!awardScrollRef.current) return;
+    setIsDraggingAward(true);
+    setStartXAward(e.pageX - awardScrollRef.current.offsetLeft);
+    setScrollLeftAward(awardScrollRef.current.scrollLeft);
+  };
+
+  const handleMouseMoveAward = (e) => {
+    if (!isDraggingAward || !awardScrollRef.current) return;
+    const x = e.pageX - awardScrollRef.current.offsetLeft;
+    const walk = (x - startXAward) * 1.8;
+    e.preventDefault();
+    awardScrollRef.current.scrollLeft = scrollLeftAward - walk;
+  };
+
+  const handlePartnerClick = (url) => {
+    if (!hasDraggedPartner && url) {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+  };
 
   return (
     <section className="py-20 relative bg-white overflow-hidden">
@@ -112,84 +220,66 @@ const NewsPartnersAwards = () => {
         )}
 
         {/* Partners Section */}
-        <div className="mb-20">
-          <div className="text-center mb-12 relative">
+        <div className="mb-20 relative">
+          <div className="text-center mb-10 relative">
             <h2 className="text-2xl sm:text-4xl font-extrabold text-green-900 inline-block relative pb-4 uppercase">
               Đối tác & Khách hàng
               <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-hepco-orange rounded-full"></div>
             </h2>
           </div>
 
-          <div className="overflow-hidden w-full relative py-2">
-            {/* Gradient masks on edges */}
-            <div className="absolute left-0 top-0 bottom-0 w-12 sm:w-20 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none"></div>
-            <div className="absolute right-0 top-0 bottom-0 w-12 sm:w-20 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none"></div>
-
-            <div className="animate-marquee flex items-center gap-8 sm:gap-12">
-              {[
-                { img: '/images/partner/benh-vien.jpg', alt: 'Bệnh Viện', round: true },
-                { img: '/images/partner/logomgreen.png', alt: 'mGreen', round: false },
-                { img: '/images/partner/scavi.jpg', alt: 'Scavi', round: true },
-                { img: '/images/partner/toyota.png', alt: 'Toyota', round: false },
-                { img: '/images/partner/usaid.jpg', alt: 'USAID', round: true },
-                { img: '/images/partner/wwf.webp', alt: 'WWF', round: false },
-                { img: '/images/partner/benh-vien.jpg', alt: 'Bệnh Viện', round: true },
-                { img: '/images/partner/logomgreen.png', alt: 'mGreen', round: false },
-                { img: '/images/partner/scavi.jpg', alt: 'Scavi', round: true },
-                { img: '/images/partner/toyota.png', alt: 'Toyota', round: false },
-                { img: '/images/partner/usaid.jpg', alt: 'USAID', round: true },
-                { img: '/images/partner/wwf.webp', alt: 'WWF', round: false },
-              ].map((item, idx) => (
-                <div
-                  key={idx}
-                  className={`${item.round ? 'w-20 h-20 sm:w-24 sm:h-24 rounded-full' : 'w-28 sm:w-36 h-14 sm:h-16 rounded-lg'} bg-white flex items-center justify-center shadow-md hover:shadow-xl hover:-translate-y-1 transition-all border border-gray-100 grayscale hover:grayscale-0 overflow-hidden shrink-0 cursor-pointer`}
-                >
-                  <img src={item.img} alt={item.alt} className="w-full h-full object-contain p-2" />
-                </div>
-              ))}
-            </div>
+          <div
+            ref={partnerScrollRef}
+            onMouseDown={handleMouseDownPartner}
+            onMouseLeave={() => { setIsDraggingPartner(false); setIsHoveredPartner(false); }}
+            onMouseUp={() => setIsDraggingPartner(false)}
+            onMouseMove={handleMouseMovePartner}
+            onMouseEnter={() => setIsHoveredPartner(true)}
+            className="flex items-center gap-8 sm:gap-12 overflow-x-auto py-4 px-2 no-scrollbar select-none cursor-grab active:cursor-grabbing"
+          >
+            {[...PARTNERS, ...PARTNERS].map((item, idx) => (
+              <div
+                key={idx}
+                onClick={() => handlePartnerClick(item.url)}
+                title={`Ghé thăm website ${item.alt}`}
+                className={`${item.round ? 'w-24 h-24 sm:w-28 sm:h-28 rounded-full' : 'w-32 sm:w-40 h-16 sm:h-20 rounded-xl'} bg-white flex items-center justify-center shadow-md hover:shadow-xl hover:-translate-y-1 transition-all border border-gray-100 overflow-hidden shrink-0 cursor-pointer group/item`}
+              >
+                <img src={item.img} alt={item.alt} className="w-full h-full object-contain p-2 pointer-events-none transition-transform duration-300 group-hover/item:scale-105" />
+              </div>
+            ))}
           </div>
         </div>
 
         {/* Awards Section */}
-        <div>
-          <div className="text-center mb-12 relative">
+        <div className="relative">
+          <div className="text-center mb-10 relative">
             <h2 className="text-2xl sm:text-4xl font-extrabold text-green-900 inline-block relative pb-4 uppercase">
               Thành tích & Khen thưởng
               <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-hepco-orange rounded-full"></div>
             </h2>
           </div>
 
-          <div className="overflow-hidden w-full relative py-2">
-            {/* Gradient masks on edges */}
-            <div className="absolute left-0 top-0 bottom-0 w-12 sm:w-20 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none"></div>
-            <div className="absolute right-0 top-0 bottom-0 w-12 sm:w-20 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none"></div>
-
-            <div className="animate-marquee-slow flex items-center gap-5 sm:gap-6">
-              {[
-                { img: '/images/merit/bang-khen1.jpg', alt: 'Bằng khen 1' },
-                { img: '/images/merit/bang-khen2.jpg', alt: 'Bằng khen 2' },
-                { img: '/images/merit/bang-khen3.jpg', alt: 'Bằng khen 3' },
-                { img: '/images/merit/bang-khen4.jpg', alt: 'Bằng khen 4' },
-                { img: '/images/merit/bang-khen5.jpg', alt: 'Bằng khen 5' },
-                { img: '/images/merit/bang-khen1.jpg', alt: 'Bằng khen 1' },
-                { img: '/images/merit/bang-khen2.jpg', alt: 'Bằng khen 2' },
-                { img: '/images/merit/bang-khen3.jpg', alt: 'Bằng khen 3' },
-                { img: '/images/merit/bang-khen4.jpg', alt: 'Bằng khen 4' },
-                { img: '/images/merit/bang-khen5.jpg', alt: 'Bằng khen 5' },
-              ].map((item, idx) => (
+          <div
+            ref={awardScrollRef}
+            onMouseDown={handleMouseDownAward}
+            onMouseLeave={() => { setIsDraggingAward(false); setIsHoveredAward(false); }}
+            onMouseUp={() => setIsDraggingAward(false)}
+            onMouseMove={handleMouseMoveAward}
+            onMouseEnter={() => setIsHoveredAward(true)}
+            className="flex items-center gap-6 overflow-x-auto py-4 px-2 no-scrollbar select-none cursor-grab active:cursor-grabbing"
+          >
+              {[...AWARDS, ...AWARDS].map((item, idx) => (
                 <div
                   key={idx}
                   className="w-72 sm:w-80 h-52 sm:h-60 bg-white border-2 border-yellow-400 rounded-xl shadow-md hover:shadow-2xl hover:-translate-y-1 shrink-0 flex items-center justify-center transition-all duration-300 overflow-hidden cursor-pointer"
                 >
-                  <img src={item.img} alt={item.alt} className="w-full h-full object-cover p-2" />
+                  <img src={item.img} alt={item.alt} className="w-full h-full object-cover p-2 pointer-events-none" />
                 </div>
               ))}
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
   );
 };
 
