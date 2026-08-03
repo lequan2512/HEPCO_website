@@ -6,9 +6,13 @@ import { API_BASE_URL } from '../constants/api';
 
 const stripHtml = (html) => {
   if (typeof html !== 'string') return '';
+  const cleaned = html
+    .replace(/&nbsp;|\u00a0/g, ' ')
+    .replace(/<\/(p|div|h[1-6]|li|blockquote)>/gi, ' ')
+    .replace(/<br\s*\/?>/gi, ' ');
   const tmp = document.createElement('DIV');
-  tmp.innerHTML = html;
-  return tmp.textContent || tmp.innerText || '';
+  tmp.innerHTML = cleaned;
+  return (tmp.textContent || tmp.innerText || '').replace(/\s+/g, ' ').trim();
 };
 
 const formatDate = (dateStr) => {
@@ -24,7 +28,7 @@ const formatDate = (dateStr) => {
 
 const NewsPartnersAwards = () => {
   const navigate = useNavigate();
-  const { data: newsResponse = {} } = useGetNews({ type: 'news', limit: 4 });
+  const { data: newsResponse = {} } = useGetNews({ type: 'news,shareholders', limit: 4 });
   const news = newsResponse.data || [];
 
   return (
@@ -49,6 +53,7 @@ const NewsPartnersAwards = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {news.map((item, i) => {
                 const displayDate = item.date || formatDate(item.created_at);
+                const categoryLabel = item.category || (item.type === 'shareholders' ? 'Quan hệ cổ đông' : item.type === 'service' ? 'Dịch vụ' : 'Tin tức');
                 return (
                   <div
                     key={i}
@@ -68,23 +73,36 @@ const NewsPartnersAwards = () => {
                         </div>
                       )}
                       <div className="absolute inset-0 bg-black/5 group-hover:scale-105 transition-transform duration-500"></div>
-                      {displayDate && (
-                        <div className="absolute top-3 left-3 bg-hepco-green/90 backdrop-blur-sm text-white text-xs font-semibold py-1 px-3 rounded-full z-10 whitespace-nowrap shadow-md border border-white/20 flex items-center gap-1.5">
-                          <Calendar className="w-3.5 h-3.5" />
-                          <span>{displayDate}</span>
-                        </div>
-                      )}
+                      {/* Category Badge on Home Page */}
+                      <span className={`absolute top-3 right-3 backdrop-blur-sm font-bold text-xs px-3 py-1 rounded-full shadow-md z-10 border border-white/20 ${item.type === 'shareholders'
+                        ? 'bg-hepco-orange text-white'
+                        : 'bg-white/95 text-hepco-green'
+                        }`}>
+                        {categoryLabel}
+                      </span>
                     </div>
-                    <div className="p-6 flex-grow flex flex-col">
-                      <h3 className="text-hepco-green font-extrabold text-base mb-2 line-clamp-2 leading-snug group-hover:text-hepco-orange transition-colors">
-                        {item.title}
-                      </h3>
-                      <p className="text-gray-400 text-xs mb-3">
-                        {item.author || 'HEPCO'} - {item.category || 'Tin tức'}
-                      </p>
-                      <p className="text-gray-500 text-sm line-clamp-2 mt-auto leading-relaxed">
-                        {typeof item.content === 'string' ? stripHtml(item.content) : 'Click vào để xem chi tiết bài viết...'}
-                      </p>
+                    <div className="p-6 flex-grow flex flex-col justify-between">
+                      <div>
+                        {/* Metadata */}
+                        <div className="flex items-center gap-4 text-gray-400 text-xs mb-3">
+                          {displayDate && (
+                            <div className="flex items-center gap-1">
+                              <Calendar className="w-3.5 h-3.5 text-hepco-green" />
+                              <span>{displayDate}</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Title */}
+                        <h3 className="text-hepco-green font-extrabold text-base mb-2 line-clamp-2 leading-snug group-hover:text-hepco-orange transition-colors">
+                          {item.title}
+                        </h3>
+
+                        {/* Description */}
+                        <p className="text-gray-500 text-sm line-clamp-2 leading-relaxed">
+                          {typeof item.content === 'string' ? stripHtml(item.content) : 'Click vào để xem chi tiết bài viết...'}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 );

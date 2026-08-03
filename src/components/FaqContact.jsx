@@ -64,7 +64,7 @@ const FaqContact = () => {
       <div className="absolute inset-0 bg-green-900/60 mix-blend-multiply"></div>
 
       <div className="container mx-auto px-4 max-w-6xl relative z-10">
-        <h2 className="text-3xl md:text-4xl font-bold text-white text-center mb-10 md:mb-16">Câu Hỏi & Vị Trí Bản Đồ</h2>
+        <h2 className="text-3xl md:text-4xl font-bold text-white text-center mb-10 md:mb-16">Liên Hệ</h2>
 
         <div className="flex flex-col lg:flex-row shadow-2xl rounded-2xl overflow-hidden bg-white/10 backdrop-blur-md border-2 border-hepco-green">
           {/* Left Side: Questions (FAQ Accordion & Contact Form) */}

@@ -9,9 +9,13 @@ import { useGetInfiniteNews } from '../../../apis/news';
 
 const stripHtml = (html) => {
   if (typeof html !== 'string') return '';
+  const cleaned = html
+    .replace(/&nbsp;|\u00a0/g, ' ')
+    .replace(/<\/(p|div|h[1-6]|li|blockquote)>/gi, ' ')
+    .replace(/<br\s*\/?>/gi, ' ');
   const tmp = document.createElement('DIV');
-  tmp.innerHTML = html;
-  return tmp.textContent || tmp.innerText || '';
+  tmp.innerHTML = cleaned;
+  return (tmp.textContent || tmp.innerText || '').replace(/\s+/g, ' ').trim();
 };
 
 const FALLBACK_NEWS_DATA = [
@@ -233,10 +237,6 @@ const News = ({ pageType = 'news' }) => {
                       alt={article.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
-                    {/* Badge over image */}
-                    <span className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm text-hepco-green font-bold text-xs px-3 py-1 rounded-full shadow-sm">
-                      {pageType === 'news' ? 'Tin Mới' : 'Quan Hệ Cổ Đông'}
-                    </span>
                   </div>
 
                   {/* Content Section */}
@@ -259,7 +259,7 @@ const News = ({ pageType = 'news' }) => {
                       </h3>
 
                       {/* Short Description */}
-                      <p className="text-gray-500 text-sm mb-4 line-clamp-3 leading-relaxed">
+                      <p className="text-gray-500 text-sm mb-4 line-clamp-2 leading-relaxed">
                         {typeof article.content === 'string' ? stripHtml(article.content) : 'Click vào để xem chi tiết bài viết...'}
                       </p>
                     </div>

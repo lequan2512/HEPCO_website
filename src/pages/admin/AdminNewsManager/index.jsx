@@ -13,6 +13,37 @@ import { useUploadImage, useDeleteImage } from '../../../apis/upload';
 import ConfirmModal from '../../../components/ConfirmModal';
 import Pagination from '../../../components/Pagination';
 
+const parseToInputDateTime = (dateStr) => {
+  if (!dateStr) return '';
+  if (dateStr.includes('T')) return dateStr.slice(0, 16);
+  const parts = dateStr.trim().split(' ');
+  const dateParts = parts[0].split(/[-/]/);
+  if (dateParts.length === 3) {
+    let day, month, year;
+    if (dateParts[0].length === 4) {
+      year = dateParts[0];
+      month = dateParts[1].padStart(2, '0');
+      day = dateParts[2].padStart(2, '0');
+    } else {
+      day = dateParts[0].padStart(2, '0');
+      month = dateParts[1].padStart(2, '0');
+      year = dateParts[2];
+    }
+    const timeStr = parts[1] ? parts[1].slice(0, 5) : '00:00';
+    return `${year}-${month}-${day}T${timeStr}`;
+  }
+  return '';
+};
+
+const formatInputToSaveDate = (inputVal) => {
+  if (!inputVal) return '';
+  const [datePart, timePart] = inputVal.split('T');
+  if (!datePart) return '';
+  const [year, month, day] = datePart.split('-');
+  const time = timePart ? timePart.slice(0, 5) : '00:00';
+  return `${day}-${month}-${year} ${time}`;
+};
+
 const AdminNewsManager = ({ type, editOnly = false }) => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -82,6 +113,7 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
       title: '',
       content: '',
       thumbnail: '',
+      date: '',
       type: type
     },
     enableReinitialize: true,
@@ -98,6 +130,7 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
       try {
         const cleanValues = {
           ...values,
+          date: formatInputToSaveDate(values.date),
           content: values.content ? values.content.replace(/(https?:\/\/[^\s"'<>]+)?(https:\/\/res\.cloudinary\.com\/[^\s"'<>]+)/g, '$2') : values.content
         };
         if (editingId) {
@@ -123,6 +156,7 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
       title: article.title,
       content: cleanContent,
       thumbnail: article.thumbnail || '',
+      date: parseToInputDateTime(article.date),
       type: article.type
     });
     setIsFormOpen(true);
@@ -191,21 +225,37 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
         </div>
 
         <form onSubmit={formik.handleSubmit} className="space-y-6 bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-          <div>
-            <label className="block text-lg font-medium text-gray-700 mb-2">Tiêu đề bài viết</label>
-            <input
-              type="text"
-              name="title"
-              className={`w-full p-3 border rounded outline-none focus:ring-hepco-green focus:border-hepco-green ${formik.touched.title && formik.errors.title ? 'border-red-500' : 'border-gray-300'
-                }`}
-              placeholder="Nhập tiêu đề..."
-              value={formik.values.title}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-            />
-            {formik.touched.title && formik.errors.title ? (
-              <div className="text-red-500 text-sm mt-1">{formik.errors.title}</div>
-            ) : null}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-lg font-medium text-gray-700 mb-2">Tiêu đề bài viết</label>
+              <input
+                type="text"
+                name="title"
+                className={`w-full p-3 border rounded outline-none focus:ring-hepco-green focus:border-hepco-green ${formik.touched.title && formik.errors.title ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                placeholder="Nhập tiêu đề..."
+                value={formik.values.title}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+              />
+              {formik.touched.title && formik.errors.title ? (
+                <div className="text-red-500 text-sm mt-1">{formik.errors.title}</div>
+              ) : null}
+            </div>
+
+            <div>
+              <label className="block text-lg font-medium text-gray-700 mb-2">
+                Ngày giờ đăng bài <span className="text-xs text-gray-400 font-normal">(để trống sẽ lấy ngày giờ hiện tại)</span>
+              </label>
+              <input
+                type="datetime-local"
+                name="date"
+                className="w-full p-3 border border-gray-300 rounded outline-none focus:ring-hepco-green focus:border-hepco-green text-gray-700"
+                value={formik.values.date}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+              />
+            </div>
           </div>
 
 
