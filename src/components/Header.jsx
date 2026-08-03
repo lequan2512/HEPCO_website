@@ -59,7 +59,7 @@ const Header = () => {
               <Phone className="w-4 h-4 md:w-4.5 md:h-4.5 shrink-0" />
               <div className="flex flex-col">
                 <span className="text-[9px] md:text-[10px] font-bold leading-none tracking-wide text-gray-500 uppercase">Hotline</span>
-                <a href="tel:02343997799" className="text-xs md:text-xs font-extrabold leading-tight text-hepco-orange hover:underline whitespace-nowrap">(0234) 3997799</a>
+                <a href="tel:1900969669" className="text-xs md:text-xs font-extrabold leading-tight text-hepco-orange hover:underline whitespace-nowrap">1900 969669</a>
               </div>
             </div>
           </div>
@@ -67,9 +67,9 @@ const Header = () => {
           {/* Mobile Quick Call Button & Menu Toggle */}
           <div className="flex items-center gap-1 sm:gap-2 mr-3 lg:mr-0 z-50">
             <a
-              href="tel:02343997799"
+              href="tel:1900969669"
               className="sm:hidden flex items-center justify-center w-9 h-9 rounded-full bg-white/20 text-yellow-300 hover:bg-white/30 transition-colors shadow-xs"
-              title="Gọi hotline (0234) 3997799"
+              title="Gọi hotline 1900 969669"
             >
               <Phone className="w-4.5 h-4.5" />
             </a>
@@ -122,7 +122,7 @@ const Header = () => {
             <Phone className="w-5 h-5" />
             <div className="flex flex-col">
               <span className="text-xs font-bold leading-tight text-white">Hotline</span>
-              <a href="tel:02343997799" className="text-sm font-bold leading-tight hover:underline">(0234) 3997799</a>
+              <a href="tel:1900969669" className="text-sm font-bold leading-tight hover:underline">1900 969669</a>
             </div>
           </div>
         </nav>

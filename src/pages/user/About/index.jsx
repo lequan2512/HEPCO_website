@@ -3,13 +3,14 @@ import { useLocation } from 'react-router-dom';
 import { Award, Leaf, Building2, Users, CheckCircle2, ZoomIn, X, MoveHorizontal } from 'lucide-react';
 import PageBanner from '../../../components/PageBanner';
 import SubNav from '../../../components/SubNav';
+import PdfFlipbook from '../../../components/PdfFlipbook';
 
 const About = () => {
   const location = useLocation();
   const [userSelectedTab, setUserSelectedTab] = useState(null);
   const [prevLocationKey, setPrevLocationKey] = useState(location.key);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-  const subNavItems = ['Về Hepco', 'Chức năng - Giấy phép', 'Sơ đồ tổ chức', 'Thành tựu đạt được', 'Hồ sơ năng lực', 'Thư viện ảnh'];
+  const subNavItems = ['Về Hepco', 'Chức năng - Giấy phép', 'Sơ đồ tổ chức', 'Thành tựu đạt được', 'Hồ sơ năng lực'];
 
   if (location.key !== prevLocationKey) {
     setPrevLocationKey(location.key);
@@ -105,7 +106,7 @@ const About = () => {
                 <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto bg-green-50 rounded-full flex items-center justify-center mb-2 sm:mb-4 group-hover:bg-hepco-green transition-colors">
                   <CheckCircle2 className="w-6 h-6 sm:w-8 sm:h-8 text-hepco-green group-hover:text-white transition-colors" />
                 </div>
-                <h4 className="text-xl sm:text-3xl font-extrabold text-gray-900 mb-1 sm:mb-2">Top 1</h4>
+                <h4 className="text-xl sm:text-3xl font-extrabold text-gray-900 mb-1 sm:mb-2">Hàng Đầu</h4>
                 <p className="text-xs sm:text-sm text-gray-500 font-medium">Khu vực Miền Trung</p>
               </div>
             </div>
@@ -184,8 +185,27 @@ const About = () => {
           </div>
         )}
 
+        {/* Tab 4: Hồ sơ năng lực (3D Book PDF Reader) */}
+        {activeTab === 4 && (
+          <div className="space-y-4">
+            <div className="bg-white rounded-2xl md:rounded-3xl shadow-xl border border-gray-100 p-2.5 sm:p-4 md:p-5">
+              <div className="text-center mb-4 sm:mb-5">
+                <h2 className="text-xl sm:text-3xl font-extrabold text-green-900 uppercase relative inline-block pb-2">
+                  HỒ SƠ NĂNG LỰC HEPCO
+                  <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-20 sm:w-24 h-1 bg-hepco-orange rounded-full"></div>
+                </h2>
+              </div>
+
+              <PdfFlipbook
+                pdfUrl="/pdf/HoSoNangLuc2026.pdf"
+                fileName="Hồ_Sơ_Năng_Lực_HEPCO_2026.pdf"
+              />
+            </div>
+          </div>
+        )}
+
         {/* Fallback for other tabs */}
-        {activeTab !== 0 && activeTab !== 2 && (
+        {activeTab !== 0 && activeTab !== 2 && activeTab !== 4 && (
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center min-h-[400px] flex flex-col items-center justify-center">
             <Building2 className="w-16 h-16 text-gray-300 mb-4" />
             <h3 className="text-2xl font-bold text-gray-800 mb-2">Nội dung đang được cập nhật</h3>
