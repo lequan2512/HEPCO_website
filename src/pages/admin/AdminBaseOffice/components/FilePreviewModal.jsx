@@ -128,7 +128,7 @@ const FilePreviewModal = ({ isOpen, onClose, dispatch }) => {
               {/* Document Text Content Body */}
               <div className="space-y-4 text-sm leading-relaxed text-gray-800 font-serif pt-2">
                 <p className="indent-6">
-                  Căn cứ theo kế hoạch chỉ đạo bảo vệ môi trường và quản lý chất thải đô thị trên địa bàn tỉnh quý III/2026;
+                  Căn cứ theo kế hoạch chỉ đạo bảo vệ môi trường và quản lý chất thải đô thị trên địa bàn thành phố quý III/2026;
                 </p>
                 <p className="indent-6">
                   {dispatch.description || 'Đề nghị đơn vị khẩn trương phối hợp kiểm tra, triển khai các phương án thu gom rác thải, bố trí lực lượng phương tiện đảm bảo an toàn vệ sinh môi trường đúng quy định.'}

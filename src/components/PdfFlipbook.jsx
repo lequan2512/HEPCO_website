@@ -110,9 +110,8 @@ const PdfFlipbook = ({ pdfUrl = '/pdf/HoSoNangLuc2026.pdf', fileName = 'HoSoNang
   return (
     <div
       ref={containerRef}
-      className={`bg-gray-950 text-white rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl flex flex-col ${
-        isFullscreen ? 'fixed inset-0 z-50 rounded-none' : 'w-full h-[500px] md:h-[600px] lg:h-[700px]'
-      }`}
+      className={`bg-white text-white rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl flex flex-col ${isFullscreen ? 'fixed inset-0 z-50 rounded-none' : 'w-full h-[500px] md:h-[600px] lg:h-[700px]'
+        }`}
     >
       {/* Top Toolbar */}
       <div className="bg-gray-900/90 backdrop-blur-md px-3 py-2 sm:px-4 sm:py-2.5 border-b border-gray-800 flex flex-wrap items-center justify-between gap-2.5 shrink-0">

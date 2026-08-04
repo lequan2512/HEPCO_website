@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Award, Leaf, Building2, Users, CheckCircle2, ZoomIn, X, MoveHorizontal } from 'lucide-react';
+import { Award, Leaf, Building2, Users, CheckCircle2, ZoomIn, X, MoveHorizontal, FileCheck, Download } from 'lucide-react';
 import PageBanner from '../../../components/PageBanner';
 import SubNav from '../../../components/SubNav';
 import PdfFlipbook from '../../../components/PdfFlipbook';
@@ -10,6 +10,7 @@ const About = () => {
   const [userSelectedTab, setUserSelectedTab] = useState(null);
   const [prevLocationKey, setPrevLocationKey] = useState(location.key);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [pdfModal, setPdfModal] = useState(null); // { url, fileName, title, subtitle }
   const subNavItems = ['Về Hepco', 'Chức năng - Giấy phép', 'Sơ đồ tổ chức', 'Hồ sơ năng lực'];
 
   if (location.key !== prevLocationKey) {
@@ -25,7 +26,7 @@ const About = () => {
     <div className="bg-gray-50 pb-20 min-h-screen">
       <PageBanner
         title="Giới thiệu"
-        description="Tiền thân là phòng quản lý đô thị và nhà đất được ra đời năm 1975, trải qua quá trình hình thành và phát triển với nhiều cột mốc thay đổi, năm 2015 Công ty trách nhiệm hữu hạn nhà nước Môi trường và Công trình Đô thị Huế trở thành Công ty Cổ phần Môi trường và Công trình đô thị Huế cho đến nay. Là doanh nghiệp nhà nước chi phối 51% cổ phần với bộ máy tổ chức gồm 05 phòng nghiệp vụ và 13 đơn vị xí nghiệp trực thuộc. Hepco là đơn vị uy tín hàng đầu miền Trung hoạt động trong lĩnh vực vệ sinh môi trường và công trình đô thị với gần 500 khách hàng, đối tác trên địa bàn toàn tỉnh Thừa Thiên Huế."
+        description="Tiền thân là phòng quản lý đô thị và nhà đất được ra đời năm 1975, trải qua quá trình hình thành và phát triển với nhiều cột mốc thay đổi, năm 2015 Công ty trách nhiệm hữu hạn nhà nước Môi trường và Công trình Đô thị Huế trở thành Công ty Cổ phần Môi trường và Công trình đô thị Huế cho đến nay. Là doanh nghiệp nhà nước chi phối 51% cổ phần với bộ máy tổ chức gồm 05 phòng nghiệp vụ và 13 đơn vị xí nghiệp trực thuộc. Hepco là đơn vị uy tín hàng đầu miền Trung hoạt động trong lĩnh vực vệ sinh môi trường và công trình đô thị với gần 500 khách hàng, đối tác trên địa bàn toàn thành phố Huế."
       />
       <SubNav items={subNavItems} activeIndex={activeTab} onSelect={setActiveTab} />
 
@@ -56,18 +57,18 @@ const About = () => {
                 <div className="absolute top-0 right-0 w-32 h-32 bg-green-50 rounded-bl-full -z-0 opacity-50"></div>
 
                 <div className="relative z-10">
-                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-green-900 mb-4 sm:mb-6 inline-block relative pb-2 sm:pb-3 uppercase">
-                    Thư ngỏ
-                    <div className="absolute bottom-0 left-0 w-16 sm:w-24 h-1 bg-hepco-orange rounded-full"></div>
+                  <h2 className="text-xl sm:text-3xl font-extrabold text-green-900 uppercase relative inline-block pb-3">
+                    Thư Ngỏ
+                    <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-20 sm:w-24 h-1 bg-hepco-orange rounded-full"></div>
                   </h2>
 
                   <div className="prose prose-sm sm:prose-base md:prose-lg text-gray-700 space-y-4 sm:space-y-6 text-justify">
-                    <p className="italic font-bold text-hepco-green text-lg sm:text-xl">Kính gửi Quý khách hàng,</p>
+                    <p className="italic font-bold text-hepco-green text-lg sm:text-xl mt-4 mb-3">Kính gửi Quý khách hàng,</p>
                     <p className="leading-relaxed">
                       Chúng tôi trân trọng gửi lời chào và sự biết ơn sâu sắc đến Quý khách hàng đã tin tưởng và ủng hộ <strong className="text-green-800">Công ty Cổ Phần Môi trường và Công trình đô thị Huế (HEPCO)</strong> trong suốt thời gian qua. Với bề dày gần <span className="bg-yellow-100 px-1 font-bold text-orange-600 rounded">50 năm kinh nghiệm</span>, cùng với đội ngũ nhân sự luôn tận tụy và hệ thống phương tiện thiết bị tiên tiến, chúng tôi khẳng định hoàn toàn đáp ứng mọi yêu cầu của Quý khách hàng trong lĩnh vực vệ sinh môi trường và công trình đô thị.
                     </p>
                     <p className="leading-relaxed">
-                      Trên suốt chặng đường hình thành và phát triển, HEPCO không chỉ là một đối tác được chính quyền đô thị địa phương tín nhiệm giao nhiệm vụ, đặt hàng và thực hiện đấu thầu mà còn là đối tác đáng tin cậy của các tổ chức, doanh nghiệp và cá nhân trong lĩnh vực thu gom, vận chuyển, và xử lý chất thải trên địa bàn tỉnh Thừa Thiên Huế.
+                      Trên suốt chặng đường hình thành và phát triển, HEPCO không chỉ là một đối tác được chính quyền đô thị địa phương tín nhiệm giao nhiệm vụ, đặt hàng và thực hiện đấu thầu mà còn là đối tác đáng tin cậy của các tổ chức, doanh nghiệp và cá nhân trong lĩnh vực thu gom, vận chuyển, và xử lý chất thải trên địa bàn thành phố Huế.
                     </p>
                     <div className="bg-green-50 p-4 sm:p-6 rounded-xl border-l-4 border-hepco-green my-4 sm:my-6 shadow-sm">
                       <p className="font-semibold text-green-900 mb-0">
@@ -113,7 +114,122 @@ const About = () => {
           </div>
         )}
 
-        {/* Tab 2: Sơ đồ tổ chức */}
+        {/* Tab 2: Chức năng - Giấy phép */}
+        {activeTab === 1 && (
+          <div className="space-y-6 sm:space-y-8">
+            {/* Section Header */}
+            <div className="bg-white rounded-2xl md:rounded-3xl shadow-xl border border-gray-100 p-5 sm:p-6 md:p-10">
+              <div className="text-center mb-6 sm:mb-8">
+                <h2 className="text-xl sm:text-3xl font-extrabold text-green-900 uppercase relative inline-block pb-3">
+                  Chức năng - Giấy phép hoạt động
+                  <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-20 sm:w-24 h-1 bg-hepco-orange rounded-full"></div>
+                </h2>
+                <p className="text-gray-600 mt-3 max-w-3xl mx-auto text-xs sm:text-sm md:text-base px-2">
+                  Công ty Cổ phần Môi trường và Công trình Đô thị Huế (HEPCO) được cấp đầy đủ các giấy phép môi trường theo quy định của pháp luật, đảm bảo hoạt động hợp pháp và tuân thủ nghiêm ngặt các tiêu chuẩn về bảo vệ môi trường.
+                </p>
+              </div>
+
+              {/* Permit Cards Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6">
+                {/* Card 1: GPMT 317 */}
+                <div
+                  onClick={() => setPdfModal({ url: '/pdf/7. 317-GP-BTNMT_Signed.pdf', fileName: '317-GPMT-BTNMT.pdf', title: 'Giấy phép Môi trường số 317/GPMT-BTNMT', subtitle: 'Bộ Tài nguyên và Môi trường' })}
+                  className="group bg-gradient-to-br from-emerald-50 to-green-50 rounded-2xl p-4 sm:p-6 border border-emerald-100 hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 cursor-pointer"
+                >
+                  <div className="flex items-start gap-3 sm:gap-4">
+                    <div className="shrink-0 w-12 h-12 sm:w-14 sm:h-14 bg-white rounded-xl shadow-sm flex items-center justify-center border border-emerald-200 group-hover:bg-hepco-green group-hover:border-hepco-green transition-colors duration-300">
+                      <FileCheck className="w-6 h-6 sm:w-7 sm:h-7 text-hepco-green group-hover:text-white transition-colors duration-300" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-sm sm:text-base font-extrabold text-green-900 mb-1">Giấy phép Môi trường</h3>
+                      <p className="text-lg sm:text-xl font-black text-hepco-green">Số 317/GPMT-BTNMT</p>
+                      <p className="text-xs sm:text-sm text-gray-600 mt-1.5">Cấp bởi: <span className="font-semibold text-gray-800">Bộ Tài nguyên và Môi trường</span></p>
+                    </div>
+                  </div>
+                  <div className="mt-4 pt-3 border-t border-emerald-200/60 flex items-center gap-4 flex-wrap">
+                    <a
+                      href="/pdf/7. 317-GP-BTNMT_Signed.pdf"
+                      download="317-GPMT-BTNMT.pdf"
+                      onClick={(e) => e.stopPropagation()}
+                      className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-hepco-green hover:text-emerald-700 transition-colors"
+                    >
+                      <Download className="w-4 h-4" />
+                      Tải xuống
+                    </a>
+                  </div>
+                </div>
+
+                {/* Card 2: GPMT 48 */}
+                <div
+                  onClick={() => setPdfModal({ url: '/pdf/7. 48-GP-UBND_Signed (TTH).pdf', fileName: '48-GPMT-UBND.pdf', title: 'Giấy phép Môi trường số 48/GPMT-UBND', subtitle: 'UBND thành phố Huế' })}
+                  className="group bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl p-4 sm:p-6 border border-blue-100 hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 cursor-pointer"
+                >
+                  <div className="flex items-start gap-3 sm:gap-4">
+                    <div className="shrink-0 w-12 h-12 sm:w-14 sm:h-14 bg-white rounded-xl shadow-sm flex items-center justify-center border border-blue-200 group-hover:bg-blue-600 group-hover:border-blue-600 transition-colors duration-300">
+                      <FileCheck className="w-6 h-6 sm:w-7 sm:h-7 text-blue-600 group-hover:text-white transition-colors duration-300" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-sm sm:text-base font-extrabold text-green-900 mb-1">Giấy phép Môi trường</h3>
+                      <p className="text-lg sm:text-xl font-black text-blue-600">Số 48/GPMT-UBND</p>
+                      <p className="text-xs sm:text-sm text-gray-600 mt-1.5">Cấp bởi: <span className="font-semibold text-gray-800">UBND thành phố Huế</span></p>
+                    </div>
+                  </div>
+                  <div className="mt-4 pt-3 border-t border-blue-200/60 flex items-center gap-4 flex-wrap">
+                    <a
+                      href="/pdf/7. 48-GP-UBND_Signed (TTH).pdf"
+                      download="48-GPMT-UBND.pdf"
+                      onClick={(e) => e.stopPropagation()}
+                      className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors"
+                    >
+                      <Download className="w-4 h-4" />
+                      Tải xuống
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* PDF Preview Modal */}
+            {pdfModal && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-2 sm:p-4" onClick={() => setPdfModal(null)}>
+                <div className="relative w-full max-w-6xl bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
+                  {/* Modal Header */}
+                  <div className="flex justify-between items-center px-4 sm:px-6 py-3 border-b border-gray-200 bg-gray-50 shrink-0">
+                    <div>
+                      <h3 className="font-extrabold text-green-900 text-sm sm:text-lg uppercase">{pdfModal.title}</h3>
+                      <p className="text-xs sm:text-sm text-gray-500">{pdfModal.subtitle}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <a
+                        href={pdfModal.url}
+                        download={pdfModal.fileName}
+                        className="hidden sm:inline-flex items-center gap-1.5 text-xs font-bold text-hepco-green hover:text-emerald-700 transition-colors bg-green-50 px-3 py-1.5 rounded-lg border border-green-200"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        Tải xuống
+                      </a>
+                      <button
+                        onClick={() => setPdfModal(null)}
+                        className="p-1.5 rounded-full hover:bg-gray-200 text-gray-500 hover:text-gray-800 transition-colors cursor-pointer"
+                      >
+                        <X className="w-5 h-5 sm:w-6 sm:h-6" />
+                      </button>
+                    </div>
+                  </div>
+                  {/* Modal Body - PDF Viewer */}
+                  <div className="flex-1 overflow-hidden p-2 sm:pt-2 sm:px-2">
+                    <PdfFlipbook
+                      pdfUrl={pdfModal.url}
+                      fileName={pdfModal.fileName}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Tab 3: Sơ đồ tổ chức */}
         {activeTab === 2 && (
           <div className="bg-white rounded-2xl md:rounded-3xl shadow-xl border border-gray-100 p-3 sm:p-5 md:p-8">
             <div className="text-center mb-4 sm:mb-8">
@@ -190,7 +306,7 @@ const About = () => {
           <div className="space-y-4">
             <div className="bg-white rounded-2xl md:rounded-3xl shadow-xl border border-gray-100 p-2.5 sm:p-4 md:p-5">
               <div className="text-center mb-4 sm:mb-5">
-                <h2 className="text-xl sm:text-3xl font-extrabold text-green-900 uppercase relative inline-block pb-2">
+                <h2 className="text-xl sm:text-3xl font-extrabold text-green-900 uppercase relative inline-block pb-3">
                   HỒ SƠ NĂNG LỰC HEPCO
                   <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-20 sm:w-24 h-1 bg-hepco-orange rounded-full"></div>
                 </h2>
@@ -205,7 +321,7 @@ const About = () => {
         )}
 
         {/* Fallback for other tabs */}
-        {activeTab !== 0 && activeTab !== 2 && activeTab !== 3 && (
+        {activeTab !== 0 && activeTab !== 1 && activeTab !== 2 && activeTab !== 3 && (
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center min-h-[400px] flex flex-col items-center justify-center">
             <Building2 className="w-16 h-16 text-gray-300 mb-4" />
             <h3 className="text-2xl font-bold text-gray-800 mb-2">Nội dung đang được cập nhật</h3>
