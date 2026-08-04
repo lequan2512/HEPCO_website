@@ -103,9 +103,9 @@ const NewsPartnersAwards = () => {
     const step = () => {
       if (!isDraggingPartner && !isHoveredPartner && el) {
         el.scrollLeft += 0.8;
-        const halfWidth = el.scrollWidth / 2;
-        if (halfWidth > 0 && el.scrollLeft >= halfWidth) {
-          el.scrollLeft -= halfWidth;
+        const thirdWidth = el.scrollWidth / 3;
+        if (thirdWidth > 0 && el.scrollLeft >= thirdWidth) {
+          el.scrollLeft -= thirdWidth;
         }
       }
       animId = requestAnimationFrame(step);
@@ -122,9 +122,9 @@ const NewsPartnersAwards = () => {
     const step = () => {
       if (!isDraggingAward && !isHoveredAward && el) {
         el.scrollLeft += 0.6;
-        const halfWidth = el.scrollWidth / 2;
-        if (halfWidth > 0 && el.scrollLeft >= halfWidth) {
-          el.scrollLeft -= halfWidth;
+        const thirdWidth = el.scrollWidth / 3;
+        if (thirdWidth > 0 && el.scrollLeft >= thirdWidth) {
+          el.scrollLeft -= thirdWidth;
         }
       }
       animId = requestAnimationFrame(step);
@@ -269,7 +269,7 @@ const NewsPartnersAwards = () => {
             onMouseEnter={() => setIsHoveredPartner(true)}
             className="flex items-center gap-8 sm:gap-12 overflow-x-auto py-4 px-2 no-scrollbar select-none cursor-grab active:cursor-grabbing"
           >
-            {[...PARTNERS, ...PARTNERS].map((item, idx) => (
+            {Array.from({ length: 6 }, () => PARTNERS).flat().map((item, idx) => (
               <div
                 key={idx}
                 onClick={() => handlePartnerClick(item.url)}
@@ -300,7 +300,7 @@ const NewsPartnersAwards = () => {
             onMouseEnter={() => setIsHoveredAward(true)}
             className="flex items-center gap-6 overflow-x-auto py-4 px-2 no-scrollbar select-none cursor-grab active:cursor-grabbing"
           >
-              {[...AWARDS, ...AWARDS].map((item, idx) => (
+              {Array.from({ length: 8 }, () => AWARDS).flat().map((item, idx) => (
                 <div
                   key={idx}
                   className="w-72 sm:w-80 h-52 sm:h-60 bg-white border-2 border-yellow-400 rounded-xl shadow-md hover:shadow-2xl hover:-translate-y-1 shrink-0 flex items-center justify-center transition-all duration-300 overflow-hidden cursor-pointer"
