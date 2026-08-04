@@ -40,7 +40,7 @@ const FALLBACK_NEWS_DATA = [
           Kết quả sau một buổi sáng làm việc khẩn trương và trách nhiệm, hơn 5 tấn rác thải các loại (chủ yếu là túi nilon, chai nhựa và rác thải sinh hoạt do du khách bỏ lại) đã được thu gom, phân loại và vận chuyển về nhà máy xử lý rác theo đúng quy định.
         </p>
         <p>
-          Thông qua hoạt động lần này, HEPCO mong muốn lan tỏa mạnh mẽ thông điệp bảo vệ môi trường, nâng cao ý thức giữ gìn vệ sinh nơi công cộng của cộng đồng, góp phần xây dựng Thừa Thiên Huế trở thành đô thị di sản trực thuộc Trung ương theo hướng xanh, sạch, bền vững.
+          Thông qua hoạt động lần này, HEPCO mong muốn lan tỏa mạnh mẽ thông điệp bảo vệ môi trường, nâng cao ý thức giữ gìn vệ sinh nơi công cộng của cộng đồng, góp phần xây dựng Huế trở thành đô thị di sản trực thuộc Trung ương theo hướng xanh, sạch, bền vững.
         </p>
       </>
     )
@@ -80,7 +80,7 @@ const FALLBACK_NEWS_DATA = [
     content: (
       <>
         <p className="mb-4">
-          Thực hiện chỉ đạo của Ủy ban Nhân dân tỉnh về việc chỉnh trang đô thị, Đội Công viên Cây xanh thuộc HEPCO đã đồng loạt ra quân triển khai dự án cải tạo cảnh quan, trồng mới hơn 1.000 cây xanh đô thị và hàng vạn khóm hoa trang trí tại các khu vực trọng điểm quanh Kinh thành Huế.
+          Thực hiện chỉ đạo của Ủy ban Nhân dân thành phố về việc chỉnh trang đô thị, Đội Công viên Cây xanh thuộc HEPCO đã đồng loạt ra quân triển khai dự án cải tạo cảnh quan, trồng mới hơn 1.000 cây xanh đô thị và hàng vạn khóm hoa trang trí tại các khu vực trọng điểm quanh Kinh thành Huế.
         </p>
         <p className="mb-4">
           Các loại cây được chọn trồng đợt này chủ yếu là cây bản địa có hoa đẹp, tán rộng như Phượng vàng, Ngô đồng, Muồng hoàng yến và Bằng lăng nước. Đây là các loại cây vừa có khả năng thích nghi tốt với thời tiết khắc nghiệt của Huế, vừa giữ gìn nét đặc trưng văn hóa lịch sử của vùng đất cố đô.

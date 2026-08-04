@@ -58,7 +58,7 @@ const Footer = () => {
                 <div className="bg-white/10 p-1.5 rounded-md group-hover:bg-hepco-orange transition-colors">
                   <Phone className="w-4 h-4 text-white" />
                 </div>
-                <p>Hotline: (0234) 3823896<br/>Đường dây nóng: (0234) 3997799</p>
+                <p>Hotline / Đường dây nóng: <a href="tel:1900969669" className="font-bold text-white hover:underline">1900 969669</a></p>
               </div>
             </div>
           </div>

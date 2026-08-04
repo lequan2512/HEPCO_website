@@ -59,7 +59,7 @@ const Header = () => {
               <Phone className="w-4 h-4 md:w-4.5 md:h-4.5 shrink-0" />
               <div className="flex flex-col">
                 <span className="text-[9px] md:text-[10px] font-bold leading-none tracking-wide text-gray-500 uppercase">Hotline</span>
-                <a href="tel:02343997799" className="text-xs md:text-xs font-extrabold leading-tight text-hepco-orange hover:underline whitespace-nowrap">(0234) 3997799</a>
+                <a href="tel:1900969669" className="text-xs md:text-xs font-extrabold leading-tight text-hepco-orange hover:underline whitespace-nowrap">1900 969669</a>
               </div>
             </div>
           </div>
@@ -67,9 +67,9 @@ const Header = () => {
           {/* Mobile Quick Call Button & Menu Toggle */}
           <div className="flex items-center gap-1 sm:gap-2 mr-3 lg:mr-0 z-50">
             <a
-              href="tel:02343997799"
+              href="tel:1900969669"
               className="sm:hidden flex items-center justify-center w-9 h-9 rounded-full bg-white/20 text-yellow-300 hover:bg-white/30 transition-colors shadow-xs"
-              title="Gọi hotline (0234) 3997799"
+              title="Gọi hotline 1900 969669"
             >
               <Phone className="w-4.5 h-4.5" />
             </a>
@@ -85,9 +85,17 @@ const Header = () => {
         </div>
       </div>
 
+      {/* Mobile Overlay */}
+      {isMenuOpen && (
+        <div
+          className="lg:hidden fixed inset-0 top-20 bg-black/50 backdrop-blur-sm z-40"
+          onClick={() => setIsMenuOpen(false)}
+        />
+      )}
+
       {/* Mobile Navigation Menu */}
       <div
-        className={`lg:hidden absolute top-20 left-0 w-full bg-hepco-green shadow-xl transition-all duration-300 ease-in-out origin-top ${isMenuOpen ? 'opacity-100 scale-y-100' : 'opacity-0 scale-y-0 pointer-events-none'
+        className={`lg:hidden absolute top-20 left-0 w-full bg-hepco-green shadow-xl transition-all duration-300 ease-in-out origin-top z-50 ${isMenuOpen ? 'opacity-100 scale-y-100' : 'opacity-0 scale-y-0 pointer-events-none'
           }`}
       >
         <nav className="flex flex-col px-6 py-4 space-y-4 font-semibold tracking-wide">
@@ -122,7 +130,7 @@ const Header = () => {
             <Phone className="w-5 h-5" />
             <div className="flex flex-col">
               <span className="text-xs font-bold leading-tight text-white">Hotline</span>
-              <a href="tel:02343997799" className="text-sm font-bold leading-tight hover:underline">(0234) 3997799</a>
+              <a href="tel:1900969669" className="text-sm font-bold leading-tight hover:underline">1900 969669</a>
             </div>
           </div>
         </nav>
