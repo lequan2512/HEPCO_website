@@ -66,21 +66,40 @@ const AdminBaseOffice = () => {
 
   const { refetch: refetchHealth } = useGetBaseHealth();
 
-  const dispatches = dispatchesRes?.data || [];
-  const dispatchesMeta = dispatchesRes?.meta || (dispatchesRes?.total ? {
-    page,
-    limit: 20,
-    total: dispatchesRes.total,
-    totalPages: Math.ceil(dispatchesRes.total / 20) || 1
-  } : null);
+  // Helper to normalize data list and compute meta using total for Pagination component
+  const getPaginatedData = (res, currentPage, limit = 20) => {
+    const rawList = Array.isArray(res)
+      ? res
+      : (res?.data || []);
 
-  const tasks = tasksRes?.data || [];
-  const tasksMeta = tasksRes?.meta || (tasksRes?.total ? {
-    page,
-    limit: 20,
-    total: tasksRes.total,
-    totalPages: Math.ceil(tasksRes.total / 20) || 1
-  } : null);
+    const total = Number(
+      res?.meta?.total
+      ?? res?.total
+      ?? res?.pagination?.total
+      ?? rawList.length
+    ) || 0;
+
+    const totalPages = res?.meta?.totalPages
+      ?? res?.pagination?.totalPages
+      ?? (Math.ceil(total / limit) || 1);
+
+    const meta = {
+      page: currentPage,
+      limit,
+      total,
+      totalPages
+    };
+
+    const isBackendPaginated = !!(res?.meta || res?.pagination);
+    const displayData = isBackendPaginated
+      ? rawList
+      : rawList.slice((currentPage - 1) * limit, currentPage * limit);
+
+    return { data: displayData, meta };
+  };
+
+  const { data: dispatches, meta: dispatchesMeta } = getPaginatedData(dispatchesRes, page, 20);
+  const { data: tasks, meta: tasksMeta } = getPaginatedData(tasksRes, page, 20);
 
   const handleRefresh = () => {
     if (activeTab === 'dispatches') refetchDispatches();
@@ -374,3 +393,5 @@ const AdminBaseOffice = () => {
 };
 
 export default AdminBaseOffice;
+
+

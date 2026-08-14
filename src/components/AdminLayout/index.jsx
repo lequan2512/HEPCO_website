@@ -114,7 +114,7 @@ const AdminLayout = () => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed lg:static inset-y-0 left-0 bg-hepco-green text-white flex flex-col shadow-2xl z-50 transition-all duration-300 ease-in-out w-64 ${
+        className={`fixed lg:static inset-y-0 left-0 bg-hepco-green text-white flex flex-col shadow-2xl z-50 transition-all duration-300 ease-in-out w-64 overflow-x-hidden ${
           isCollapsed ? 'lg:w-20' : 'lg:w-64'
         } ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
       >
@@ -155,7 +155,7 @@ const AdminLayout = () => {
         </div>
 
         {/* Sidebar Navigation */}
-        <nav className="flex-1 p-3 space-y-1 overflow-y-auto custom-scrollbar">
+        <nav className="flex-1 p-3 space-y-1 overflow-y-auto overflow-x-hidden custom-scrollbar">
 
           {/* Group 1: Home Management */}
           <SectionHeader label="Quản lý trang chủ" isCollapsed={isCollapsed} />
