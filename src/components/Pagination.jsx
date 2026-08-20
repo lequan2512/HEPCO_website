@@ -1,7 +1,8 @@
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 
-const Pagination = ({ meta, onPageChange, hideTotal = false, size = 'md' }) => {
-  if (!meta || meta.totalPages <= 1) return null;
+const Pagination = ({ meta, onPageChange, hideTotal = false, size = 'md', showSinglePage = true }) => {
+  if (!meta || meta.total === 0) return null;
+  if (meta.totalPages <= 1 && !showSinglePage) return null;
 
   const { page, totalPages, total } = meta;
 

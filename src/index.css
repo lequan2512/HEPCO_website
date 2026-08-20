@@ -79,8 +79,13 @@ body {
 }
 
 /* Custom Sidebar Scrollbar */
+.custom-scrollbar {
+  overflow-x: hidden;
+  scrollbar-width: thin;
+}
 .custom-scrollbar::-webkit-scrollbar {
   width: 5px;
+  height: 0px;
 }
 .custom-scrollbar::-webkit-scrollbar-track {
   background: rgba(0, 0, 0, 0.08);
