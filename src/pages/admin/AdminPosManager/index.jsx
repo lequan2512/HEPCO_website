@@ -20,7 +20,8 @@ import Pagination from '../../../components/Pagination';
 import {
   useGetPosDevices, useAddPosDevice, useUpdatePosDevice,
   useDeletePosDevice, useAssignPosDevice, useUnassignPosDevice,
-  useBorrowPosDevice, useReturnBorrowPosDevice, useGetPosHistory
+  useBorrowPosDevice, useReturnBorrowPosDevice, useGetPosHistory,
+  useUpdatePosAssignment
 } from '../../../apis/pos';
 import { useGetEmployees } from '../../../apis/employee';
 import { useGetDepartments } from '../../../apis/department';
@@ -31,6 +32,24 @@ import { DEPARTMENT_TYPE } from '../../../constants/department';
 const ENTERPRISE_LABELS = {
   BSH: { label: 'Bắc Sông Hương (BSH)', badge: 'bg-emerald-600 text-white' },
   NSH: { label: 'Nam Sông Hương (NSH)', badge: 'bg-indigo-600 text-white' }
+};
+
+const formatDateForInput = (dateStr) => {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return '';
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const getTodayDateString = () => {
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 };
 
 const AdminPosManager = () => {
@@ -58,6 +77,8 @@ const AdminPosManager = () => {
   const [editingDevice, setEditingDevice] = useState(null);
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [assigningDevice, setAssigningDevice] = useState(null);
+  const [isEditAssignModalOpen, setIsEditAssignModalOpen] = useState(false);
+  const [editingAssignment, setEditingAssignment] = useState(null);
   const [isBorrowModalOpen, setIsBorrowModalOpen] = useState(false);
   const [borrowingDevice, setBorrowingDevice] = useState(null);
   const [historyPosId, setHistoryPosId] = useState(null);
@@ -79,6 +100,18 @@ const AdminPosManager = () => {
   const [assignValues, setAssignValues] = useState({
     employee_id: '',
     employee_name: '',
+    region: '',
+    assigned_date: getTodayDateString(),
+    assigned_by: 'Admin',
+    note: ''
+  });
+
+  const [editAssignValues, setEditAssignValues] = useState({
+    id: null,
+    employee_id: '',
+    employee_name: '',
+    assigned_date: getTodayDateString(),
+    returned_date: '',
     region: '',
     assigned_by: 'Admin',
     note: ''
@@ -127,6 +160,7 @@ const AdminPosManager = () => {
   const deletePosMutation = useDeletePosDevice();
   const assignPosMutation = useAssignPosDevice();
   const unassignPosMutation = useUnassignPosDevice();
+  const updatePosAssignmentMutation = useUpdatePosAssignment();
   const borrowPosMutation = useBorrowPosDevice();
   const returnBorrowPosMutation = useReturnBorrowPosDevice();
 
@@ -216,6 +250,7 @@ const AdminPosManager = () => {
       employee_id: activeAss?.employee_id || '',
       employee_name: activeAss?.employee_name || '',
       region: device.region || '',
+      assigned_date: getTodayDateString(),
       assigned_by: 'Admin',
       note: ''
     });
@@ -228,7 +263,10 @@ const AdminPosManager = () => {
       toast.error('Vui lòng chọn nhân viên thu tiền từ danh sách');
       return;
     }
-
+    if (!assignValues.assigned_date) {
+      toast.error('Vui lòng chọn ngày cấp phát');
+      return;
+    }
 
     try {
       await assignPosMutation.mutateAsync({
@@ -240,6 +278,52 @@ const AdminPosManager = () => {
       queryClient.invalidateQueries(['posDevices']);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Có lỗi xảy ra khi cấp phát');
+    }
+  };
+
+  // Edit Assignment Handler
+  const handleOpenEditAssignModal = (assignment, device = null) => {
+    setEditingAssignment({
+      ...assignment,
+      deviceSerialNumber: device?.serial_number || assignment?.pos?.serial_number
+    });
+    setEditAssignValues({
+      id: assignment.id,
+      employee_id: assignment.employee_id || '',
+      employee_name: assignment.employee_name || '',
+      assigned_date: formatDateForInput(assignment.assigned_date) || getTodayDateString(),
+      returned_date: formatDateForInput(assignment.returned_date) || '',
+      region: assignment.region || device?.region || '',
+      assigned_by: assignment.assigned_by || 'Admin',
+      note: assignment.note || ''
+    });
+    setIsEditAssignModalOpen(true);
+  };
+
+  const handleEditAssignSubmit = async (e) => {
+    e.preventDefault();
+    if (!editAssignValues.employee_id) {
+      toast.error('Vui lòng chọn nhân viên thu tiền từ danh sách');
+      return;
+    }
+    if (!editAssignValues.assigned_date) {
+      toast.error('Vui lòng chọn ngày cấp phát');
+      return;
+    }
+
+    try {
+      await updatePosAssignmentMutation.mutateAsync({
+        id: editAssignValues.id,
+        ...editAssignValues
+      });
+      toast.success('Cập nhật thông tin cấp phát thành công!');
+      setIsEditAssignModalOpen(false);
+      queryClient.invalidateQueries(['posDevices']);
+      if (historyPosId) {
+        queryClient.invalidateQueries(['posHistory', historyPosId]);
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Có lỗi xảy ra khi cập nhật cấp phát');
     }
   };
 
@@ -798,13 +882,28 @@ const AdminPosManager = () => {
                             )}
 
                             {device.status === POS_STATUS.IN_USE && (
-                              <button
-                                onClick={(e) => { e.stopPropagation(); setOpenDropdownId(null); handleUnassign(device); }}
-                                className="w-full px-4 py-2.5 text-xs font-medium text-amber-700 hover:bg-amber-50 flex items-center gap-2"
-                              >
-                                <RotateCcw className="w-4 h-4 text-amber-600" />
-                                Thu hồi về Kho
-                              </button>
+                              <>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setOpenDropdownId(null);
+                                    if (device.assignments?.[0]) {
+                                      handleOpenEditAssignModal(device.assignments[0], device);
+                                    }
+                                  }}
+                                  className="w-full px-4 py-2.5 text-xs font-medium text-blue-700 hover:bg-blue-50 flex items-center gap-2"
+                                >
+                                  <Edit2 className="w-4 h-4 text-blue-600" />
+                                  Chỉnh sửa cấp phát
+                                </button>
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); setOpenDropdownId(null); handleUnassign(device); }}
+                                  className="w-full px-4 py-2.5 text-xs font-medium text-amber-700 hover:bg-amber-50 flex items-center gap-2"
+                                >
+                                  <RotateCcw className="w-4 h-4 text-amber-600" />
+                                  Thu hồi về Kho
+                                </button>
+                              </>
                             )}
 
                             {device.status === POS_STATUS.BORROWED && (
@@ -1056,6 +1155,17 @@ const AdminPosManager = () => {
 
 
               <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Ngày cấp phát <span className="text-red-500">*</span></label>
+                <input
+                  type="date"
+                  required
+                  value={assignValues.assigned_date}
+                  onChange={(e) => setAssignValues({ ...assignValues, assigned_date: e.target.value })}
+                  className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-hepco-green/50 text-sm"
+                />
+              </div>
+
+              <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">Địa Bàn Giao Cấp Phát</label>
                 <input
                   type="text"
@@ -1065,7 +1175,6 @@ const AdminPosManager = () => {
                   className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-hepco-green"
                 />
               </div>
-
 
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">Ghi Chú Cấp Phát</label>
@@ -1088,9 +1197,130 @@ const AdminPosManager = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-green-700 text-white hover:bg-green-800 rounded-lg text-sm font-medium"
+                  disabled={assignPosMutation.isPending}
+                  className="px-4 py-2 bg-green-700 text-white hover:bg-green-800 rounded-lg text-sm font-medium disabled:opacity-50"
                 >
-                  Xác Nhận Cấp Phát
+                  {assignPosMutation.isPending ? 'Đang Cấp Phát...' : 'Xác Nhận Cấp Phát'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Edit Assignment */}
+      {isEditAssignModalOpen && editingAssignment && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden">
+            <div className="p-5 bg-blue-700 text-white flex items-center justify-between">
+              <h3 className="font-bold text-lg flex items-center gap-2">
+                <Edit2 className="w-5 h-5" />
+                Chỉnh Sửa Thông Tin Cấp Phát {editingAssignment.deviceSerialNumber ? `(${editingAssignment.deviceSerialNumber})` : ''}
+              </h3>
+              <button onClick={() => setIsEditAssignModalOpen(false)} className="text-white/80 hover:text-white">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <form onSubmit={handleEditAssignSubmit} className="p-6 space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">Nhân Viên Thu Phí *</label>
+                <Select
+                  options={(employees || []).map(emp => ({
+                    value: emp.id,
+                    label: `${emp.full_name} (${emp.employee_code || 'NV'}) - ${emp.department?.name || 'Thu phí'}`,
+                    empName: emp.full_name
+                  }))}
+                  value={(employees || [])
+                    .map(emp => ({ value: emp.id, label: `${emp.full_name} (${emp.employee_code || 'NV'}) - ${emp.department?.name || 'Thu phí'}`, empName: emp.full_name }))
+                    .find(o => String(o.value) === String(editAssignValues.employee_id)) || null
+                  }
+                  onChange={(option) => {
+                    setEditAssignValues({
+                      ...editAssignValues,
+                      employee_id: option ? option.value : '',
+                      employee_name: option ? option.empName : ''
+                    });
+                  }}
+                  placeholder="-- Gõ để tìm kiếm và chọn nhân viên thu phí --"
+                  isSearchable
+                  isClearable
+                  noOptionsMessage={() => "Không tìm thấy nhân viên Thu phí nào"}
+                  styles={{
+                    control: (base) => ({
+                      ...base,
+                      borderColor: '#D1D5DB',
+                      borderRadius: '0.5rem',
+                      padding: '2px',
+                      outline: 'none',
+                      boxShadow: 'none',
+                      '&:hover': { borderColor: '#2563EB' }
+                    })
+                  }}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Ngày cấp phát <span className="text-red-500">*</span></label>
+                  <input
+                    type="date"
+                    required
+                    value={editAssignValues.assigned_date}
+                    onChange={(e) => setEditAssignValues({ ...editAssignValues, assigned_date: e.target.value })}
+                    className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/50 text-sm"
+                  />
+                </div>
+
+                {editingAssignment.returned_date && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Ngày Thu Hồi</label>
+                    <input
+                      type="date"
+                      value={editAssignValues.returned_date}
+                      onChange={(e) => setEditAssignValues({ ...editAssignValues, returned_date: e.target.value })}
+                      className="w-full p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/50 text-sm"
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">Địa Bàn Giao Cấp Phát</label>
+                <input
+                  type="text"
+                  placeholder="Địa bàn nhân viên thu tiền phụ trách..."
+                  value={editAssignValues.region}
+                  onChange={(e) => setEditAssignValues({ ...editAssignValues, region: e.target.value })}
+                  className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-blue-600"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">Ghi Chú Cấp Phát</label>
+                <textarea
+                  rows="2"
+                  placeholder="Ghi chú thêm khi bàn giao máy POS..."
+                  value={editAssignValues.note}
+                  onChange={(e) => setEditAssignValues({ ...editAssignValues, note: e.target.value })}
+                  className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-blue-600"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
+                <button
+                  type="button"
+                  onClick={() => setIsEditAssignModalOpen(false)}
+                  className="px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg text-sm font-medium"
+                >
+                  Hủy Bỏ
+                </button>
+                <button
+                  type="submit"
+                  disabled={updatePosAssignmentMutation.isPending}
+                  className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg text-sm font-medium disabled:opacity-50"
+                >
+                  {updatePosAssignmentMutation.isPending ? 'Đang Lưu...' : 'Lưu Thay Đổi'}
                 </button>
               </div>
             </form>
@@ -1205,13 +1435,23 @@ const AdminPosManager = () => {
                     {historyData?.assignments?.length > 0 ? (
                       <div className="space-y-2">
                         {historyData.assignments.map(ass => (
-                          <div key={ass.id} className="p-3 bg-green-50/50 border border-green-100 rounded-lg text-xs space-y-1">
-                            <div className="flex justify-between font-semibold text-green-900">
+                          <div key={ass.id} className="p-3 bg-green-50/50 border border-green-100 rounded-lg text-xs space-y-1 relative group">
+                            <div className="flex justify-between items-start font-semibold text-green-900">
                               <span>Nhân viên: {ass.employee_name || 'N/A'}</span>
-                              <span className="text-gray-500">
-                                {new Date(ass.assigned_date).toLocaleDateString('vi-VN')}
-                                {ass.returned_date ? ` - ${new Date(ass.returned_date).toLocaleDateString('vi-VN')} (Đã thu hồi)` : ' (Đang dùng)'}
-                              </span>
+                              <div className="flex items-center gap-2">
+                                <span className="text-gray-500 font-normal">
+                                  {new Date(ass.assigned_date).toLocaleDateString('vi-VN')}
+                                  {ass.returned_date ? ` - ${new Date(ass.returned_date).toLocaleDateString('vi-VN')} (Đã thu hồi)` : ' (Đang dùng)'}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenEditAssignModal(ass)}
+                                  className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                                  title="Chỉnh sửa ngày/thông tin cấp phát"
+                                >
+                                  <Edit2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
                             </div>
                             <div className="text-gray-600">Địa bàn: {ass.region || 'N/A'}</div>
                             {ass.note && <div className="text-gray-500 italic">Ghi chú: {ass.note}</div>}
