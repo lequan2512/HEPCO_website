@@ -96,3 +96,22 @@ export const useGetPosHistory = (id) => {
     enabled: !!id,
   });
 };
+
+export const useUpdatePosAssignment = () => {
+  return useMutation({
+    mutationFn: async ({ id, ...data }) => {
+      const response = await axiosInstance.put(`/api/pos/assignments/${id}`, data);
+      return response.data;
+    },
+  });
+};
+
+export const useDeletePosAssignment = () => {
+  return useMutation({
+    mutationFn: async (id) => {
+      const response = await axiosInstance.delete(`/api/pos/assignments/${id}`);
+      return response.data;
+    },
+  });
+};
+
