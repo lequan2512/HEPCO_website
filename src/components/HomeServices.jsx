@@ -1,65 +1,131 @@
 import { useGetNews } from '../apis/news';
 import { API_BASE_URL } from '../constants/api';
 import { Link } from 'react-router-dom';
+import { ArrowRight, CheckCircle2 } from 'lucide-react';
+import { ROUTES } from '../constants/routes';
+
+const FALLBACK_SERVICES = [
+  {
+    id: 1,
+    title: 'Thu Gom & Vận Chuyển Rác Thải Sinh Hoạt',
+    summary: 'Thu gom rác sinh hoạt tận nơi tại các phường, xã, khu dân cư và tuyến phố với phương tiện cuốn ép hiện đại.',
+    thumbnail: '/images/news_trucks.png',
+    tag: 'Dịch vụ chính',
+  },
+  {
+    id: 2,
+    title: 'Xử Lý Chất Thải Công Nghiệp & Bùn Thải',
+    summary: 'Giải pháp thu gom, phân loại và xử lý chất thải công nghiệp thông thường, bùn vi sinh cho nhà máy, xí nghiệp.',
+    thumbnail: '/images/news_cleanup.png',
+    tag: 'Doanh nghiệp',
+  },
+  {
+    id: 3,
+    title: 'Chăm Sóc Công Viên, Cây Xanh & Hoa Cảnh',
+    summary: 'Cắt tỉa, tạo hình cành nhánh chống bão, duy tu hệ thống thảm cỏ và bồn hoa cảnh quan di sản Cố đô.',
+    thumbnail: '/images/news_planting.png',
+    tag: 'Cảnh quan đô thị',
+  },
+  {
+    id: 4,
+    title: 'Vận Hành & Bảo Trì Chiếu Sáng Đô Thị',
+    summary: 'Quản lý, lắp đặt và duy tu hệ thống đèn chiếu sáng công cộng, đèn trang trí mỹ thuật chiếu sáng đường phố.',
+    thumbnail: '/images/cover.png',
+    tag: 'Hạ tầng kỹ thuật',
+  },
+];
 
 const HomeServices = () => {
   const { data: servicesResponse = {} } = useGetNews({ type: 'service', limit: 4 });
   const rawServices = servicesResponse.data || [];
-
-  const apiServices = [...rawServices];
+  const displayServices = rawServices.length > 0 ? rawServices : FALLBACK_SERVICES;
 
   return (
-    <section className="py-20 bg-gray-50 relative">
-      <div className="container mx-auto px-4 max-w-8xl">
+    <section className="py-20 md:py-28 bg-white border-b border-gray-200/80">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+        {/* Section Header (Oakdale Editorial Style) */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-14 md:mb-16 gap-6">
+          <div className="max-w-2xl">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#10243b] tracking-tight leading-tight">
+              Giải Pháp Môi Trường &amp; Hạ Tầng Đô Thị
+            </h2>
+            <p className="mt-4 text-base sm:text-lg text-gray-600 leading-relaxed font-normal">
+              Đáp ứng trọn gói nhu cầu của người dân, cơ quan, doanh nghiệp và các sự kiện lớn trên địa bàn tỉnh Thừa Thiên Huế.
+            </p>
+          </div>
 
-        <div className="text-center mb-16 relative">
-          <h2 className="text-4xl font-extrabold text-green-900 inline-block relative pb-4">
-            DỊCH VỤ CỦA CHÚNG TÔI
-            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-20 h-1 bg-hepco-orange rounded-full"></div>
-          </h2>
+          <Link
+            to={ROUTES.SERVICES}
+            className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-gray-100 hover:bg-[#10243b] text-[#10243b] hover:text-white font-bold text-sm transition-all duration-300 shadow-2xs group self-start md:self-auto"
+          >
+            <span>Tất Cả Dịch Vụ</span>
+            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+          </Link>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-8">
-          <div className="lg:w-1/3 relative mt-16 lg:mt-0">
-            <div className="absolute -top-16 left-1/2 transform -translate-x-1/2 w-4/5 h-48 bg-gray-300 rounded-t-2xl z-10 border-4 border-white shadow-xl overflow-hidden flex items-end justify-center group">
-              <img src="/images/news_trucks.png" alt="Dịch vụ HEPCO" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-              <div className="w-16 h-16 bg-gradient-to-br from-hepco-green to-green-600 rounded-full border-4 border-white mb-2 absolute -bottom-8 z-20 flex items-center justify-center shadow-lg group-hover:shadow-green-500/50 transition-shadow">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
-              </div>
-            </div>
+        {/* Services Showcase Cards (Oakdale Style High-Impact Grid) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10">
+          {displayServices.map((service, index) => {
+            const imageSrc = service.thumbnail
+              ? service.thumbnail.startsWith('http')
+                ? service.thumbnail
+                : `${API_BASE_URL}${service.thumbnail}`
+              : FALLBACK_SERVICES[index % FALLBACK_SERVICES.length].thumbnail;
 
-            <div className="bg-gradient-to-br from-green-600 via-hepco-green to-green-900 rounded-2xl p-8 pt-40 text-white shadow-2xl h-full relative transition-transform duration-500 hover:-translate-y-2">
-              <span className="text-6xl text-yellow-400 font-serif absolute top-32 left-8">"</span>
-              <p className="text-lg leading-relaxed mt-4 text-justify relative z-10">
-                HEPCO với kinh nghiệm gần 50 năm kinh nghiệm trong lĩnh vực vệ sinh môi trường và công trình đô thị sẽ cung cấp đến quý khách hàng các dịch vụ với chất lượng tốt nhất, uy tín nhất. Cam kết luôn đồng hành cùng quý khách hàng trong hành trình bảo vệ môi trường và phát triển bền vững.
-              </p>
-            </div>
-          </div>
+            return (
+              <Link
+                key={service.id || index}
+                to={ROUTES.SERVICES}
+                state={{ serviceId: service.id }}
+                className="group flex flex-col rounded-3xl overflow-hidden bg-[#fafafa] border border-gray-200/90 hover:border-emerald-600/60 shadow-xs hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
+              >
+                {/* Image Container */}
+                <div className="relative h-64 sm:h-72 w-full overflow-hidden bg-gray-200">
+                  <img
+                    src={imageSrc}
+                    alt={service.title}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-108"
+                    onError={(e) => {
+                      e.target.src = FALLBACK_SERVICES[index % FALLBACK_SERVICES.length].thumbnail;
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
 
-          <div className="lg:w-2/3">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {apiServices.map((service, index) => (
-                <Link key={service.id || index} to="/dich-vu" state={{ serviceId: service.id }} className="group relative h-64 rounded-2xl overflow-hidden shadow-md hover:shadow-2xl cursor-pointer block transition-all duration-500 hover:-translate-y-2">
-                  {service.thumbnail ? (
-                    <img
-                      src={service.thumbnail.startsWith('http') ? service.thumbnail : `${API_BASE_URL}${service.thumbnail}`}
-                      alt={service.title}
-                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    />
-                  ) : (
-                    <img src={['/images/news_cleanup.png', '/images/news_planting.png', '/images/news_meeting.png'][index % 3]} alt={service.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-80 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  {/* Category Pill Tag */}
+                  <div className="absolute top-4 left-4 z-10">
+                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/95 backdrop-blur-md text-[#10243b] shadow-sm border border-white/80">
+                      {service.tag || `Hạng mục ${index + 1}`}
+                    </span>
+                  </div>
+                </div>
 
-                  <div className="absolute bottom-0 left-0 w-full p-6 text-center transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
-                    <h3 className="text-white font-extrabold text-lg drop-shadow-lg transition-colors group-hover:text-yellow-400">
+                {/* Content Details */}
+                <div className="p-7 sm:p-8 flex flex-col justify-between flex-grow bg-white">
+                  <div>
+                    <h3 className="text-xl sm:text-2xl font-black text-[#10243b] group-hover:text-emerald-700 transition-colors mb-3 line-clamp-2">
                       {service.title}
                     </h3>
+                    <p className="text-sm sm:text-base text-gray-600 leading-relaxed font-normal mb-6 line-clamp-3">
+                      {service.summary ||
+                        'Dịch vụ chuyên nghiệp với quy trình chuẩn hóa, đội ngũ nhân sự tận tâm và cam kết bảo vệ môi trường cao nhất.'}
+                    </p>
                   </div>
-                </Link>
-              ))}
-            </div>
-          </div>
+
+                  <div className="pt-4 border-t border-gray-100 flex items-center justify-between text-sm font-bold text-[#10243b] group-hover:text-emerald-700 transition-colors">
+                    <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                      <span>Đảm bảo an toàn &amp; vệ sinh</span>
+                    </div>
+
+                    <div className="inline-flex items-center gap-1.5 font-bold group-hover:translate-x-1 transition-transform">
+                      <span>Chi tiết</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </div>
     </section>
