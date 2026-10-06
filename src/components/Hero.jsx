@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ArrowRight, Phone, Play, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ROUTES } from '../constants/routes';
+import bgImg from '../assets/images/bg-img.avif';
 
 const Hero = () => {
   const [showVideo, setShowVideo] = useState(false);
@@ -10,7 +11,7 @@ const Hero = () => {
     <section
       className="relative overflow-hidden bg-cover bg-center bg-no-repeat pt-10 pb-16 md:pt-16 md:pb-24 border-b border-gray-200/70"
       style={{
-        backgroundImage: "linear-gradient(to bottom, rgba(255, 255, 255, 0.20) 10%, rgba(255, 255, 255, 0.45) 55%, rgba(255, 255, 255, 0.96) 100%), url('https://framerusercontent.com/images/dWIanwqrruPAZIUZc9mqUYjd6k.png?width=1536&height=1024')",
+        backgroundImage: `linear-gradient(to bottom, rgba(255, 255, 255, 0.20) 10%, rgba(255, 255, 255, 0.45) 55%, rgba(255, 255, 255, 0.96) 100%), url(${bgImg})`,
       }}
     >
 

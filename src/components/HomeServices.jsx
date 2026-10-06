@@ -90,13 +90,6 @@ const HomeServices = () => {
                     }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
-
-                  {/* Category Pill Tag */}
-                  <div className="absolute top-4 left-4 z-10">
-                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/95 backdrop-blur-md text-[#10243b] shadow-sm border border-white/80">
-                      {service.tag || `Hạng mục ${index + 1}`}
-                    </span>
-                  </div>
                 </div>
 
                 {/* Content Details */}
