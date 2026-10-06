@@ -55,7 +55,7 @@ const Hero = () => {
         <div className="relative mt-4 md:mt-8">
           <div className="relative rounded-3xl overflow-hidden border border-gray-200/90 shadow-2xl bg-white">
             {/* Main Visual Image */}
-            <div className="relative h-[280px] sm:h-[420px] lg:h-[520px] w-full overflow-hidden group">
+            <div className="relative h-[220px] sm:h-[340px] lg:h-[420px] w-full overflow-hidden group">
               <img
                 src="/images/cover.png"
                 alt="HEPCO - Vì Môi Trường Huế Xanh Sạch Sáng"
