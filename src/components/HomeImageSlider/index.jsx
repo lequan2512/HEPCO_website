@@ -85,11 +85,15 @@ const HomeImageSlider = () => {
   }
 
   return (
-    <section className="py-12 md:py-16 bg-gray-50">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-8 md:mb-10">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-green-800 mb-3 uppercase">Hình Ảnh Hoạt Động</h2>
-          <div className="w-24 h-1 bg-green-500 mx-auto rounded-full"></div>
+    <section className="py-16 md:py-24 bg-white border-b border-gray-200/80">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+        <div className="max-w-2xl mb-12 md:mb-14">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#10243b] tracking-tight leading-tight">
+            Hình Ảnh Hoạt Động
+          </h2>
+          <p className="mt-4 text-base sm:text-lg text-gray-600 leading-relaxed font-normal">
+            Những khoảnh khắc ghi lại các hoạt động nổi bật và phong trào tiêu biểu của HEPCO.
+          </p>
         </div>
 
         <div
@@ -97,7 +101,7 @@ const HomeImageSlider = () => {
           onMouseUp={handleTouchEnd}
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
-          className="relative w-full h-[250px] sm:h-[350px] md:h-[500px] lg:h-[600px] flex items-center justify-center overflow-hidden group rounded-2xl shadow-xl perspective-1500 bg-gray-900 cursor-grab active:cursor-grabbing select-none"
+          className="relative w-full h-[250px] sm:h-[350px] md:h-[500px] lg:h-[600px] flex items-center justify-center overflow-hidden group rounded-3xl shadow-2xl border border-gray-200/90 perspective-1500 bg-gray-900 cursor-grab active:cursor-grabbing select-none"
         >
           {/* Slider Images with 3D Page Flip */}
           {banners.map((url, index) => {

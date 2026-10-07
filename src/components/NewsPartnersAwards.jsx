@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar } from 'lucide-react';
+import { Calendar, ArrowRight } from 'lucide-react';
 import { ROUTES } from '../constants/routes';
 import { useGetNews } from '../apis/news';
 import { API_BASE_URL } from '../constants/api';
@@ -66,36 +66,29 @@ const parseNewsDate = (dStr) => {
 
 const NewsPartnersAwards = () => {
   const navigate = useNavigate();
-  const { data: newsResponse = {} } = useGetNews({
-    type: 'news,shareholders',
-    limit: 8,
-    sort: 'date_desc',
-    sortBy: 'date',
-    order: 'desc'
-  });
+  const { data: newsResponse } = useGetNews({ type: 'news', limit: 8 });
 
-  const rawNews = newsResponse.data || [];
+  const rawNews = Array.isArray(newsResponse?.data) ? newsResponse.data : [];
   const news = [...rawNews].sort((a, b) => {
-    const timeA = parseNewsDate(a.date || a.published_at || a.created_at);
-    const timeB = parseNewsDate(b.date || b.published_at || b.created_at);
+    const timeA = parseNewsDate(a.date || a.created_at);
+    const timeB = parseNewsDate(b.date || b.created_at);
     return timeB - timeA;
-  });
+  }).slice(0, 4);
 
   const partnerScrollRef = useRef(null);
   const awardScrollRef = useRef(null);
 
   const [isDraggingPartner, setIsDraggingPartner] = useState(false);
-  const [isHoveredPartner, setIsHoveredPartner] = useState(false);
   const [startXPartner, setStartXPartner] = useState(0);
   const [scrollLeftPartner, setScrollLeftPartner] = useState(0);
+  const [isHoveredPartner, setIsHoveredPartner] = useState(false);
   const [hasDraggedPartner, setHasDraggedPartner] = useState(false);
 
   const [isDraggingAward, setIsDraggingAward] = useState(false);
-  const [isHoveredAward, setIsHoveredAward] = useState(false);
   const [startXAward, setStartXAward] = useState(0);
   const [scrollLeftAward, setScrollLeftAward] = useState(0);
+  const [isHoveredAward, setIsHoveredAward] = useState(false);
 
-  // Auto-scroll Partner loop
   useEffect(() => {
     const el = partnerScrollRef.current;
     if (!el) return;
@@ -114,7 +107,6 @@ const NewsPartnersAwards = () => {
     return () => cancelAnimationFrame(animId);
   }, [isDraggingPartner, isHoveredPartner]);
 
-  // Auto-scroll Award loop
   useEffect(() => {
     const el = awardScrollRef.current;
     if (!el) return;
@@ -166,82 +158,88 @@ const NewsPartnersAwards = () => {
   };
 
   const handlePartnerClick = (url) => {
-    if (!hasDraggedPartner && url) {
+    if (hasDraggedPartner) return;
+    if (url) {
       window.open(url, '_blank', 'noopener,noreferrer');
     }
   };
 
   return (
-    <section className="py-20 relative bg-white overflow-hidden">
-      {/* Background shape */}
-      <div className="absolute inset-0 z-0">
-        <svg className="absolute w-full h-[150%] top-[-20%] right-[-30%] opacity-10 text-hepco-green" viewBox="0 0 100 100" preserveAspectRatio="none" fill="currentColor">
-          <path d="M0,50 Q25,20 50,50 T100,50 L100,100 L0,100 Z" />
-        </svg>
-      </div>
-
-      <div className="container mx-auto px-4 max-w-8xl relative z-10">
+    <section className="py-20 md:py-28 relative bg-white overflow-hidden border-b border-gray-200/80">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl relative z-10">
         {/* News Section */}
         {news.length > 0 && (
           <div className="mb-24">
-            <div className="text-center mb-16 relative">
-              <h2 className="text-4xl font-extrabold text-green-900 inline-block relative pb-4">
-                TIN TỨC NỔI BẬT
-                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-hepco-orange rounded-full"></div>
-              </h2>
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-14 md:mb-16 gap-6">
+              <div className="max-w-2xl">
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#10243b] tracking-tight leading-tight">
+                  Tin Tức &amp; Sự Kiện Mới Nhất
+                </h2>
+                <p className="mt-4 text-base sm:text-lg text-gray-600 leading-relaxed font-normal">
+                  Cập nhật các hoạt động sản xuất kinh doanh, phong trào thi đua và thông báo chính thức từ HEPCO.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => navigate(ROUTES.NEWS)}
+                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-gray-100 hover:bg-[#10243b] text-[#10243b] hover:text-white font-bold text-sm transition-all duration-300 shadow-2xs group self-start md:self-auto cursor-pointer"
+              >
+                <span>Xem Tất Cả Tin Tức</span>
+                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+              </button>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
               {news.map((item, i) => {
                 const displayDate = item.date || formatDate(item.created_at);
                 const categoryLabel = item.category || (item.type === 'shareholders' ? 'Quan hệ cổ đông' : item.type === 'service' ? 'Dịch vụ' : 'Tin tức');
                 return (
                   <div
                     key={i}
-                    className="bg-white rounded-2xl shadow-lg hover:shadow-2xl overflow-hidden border border-gray-100 flex flex-col group cursor-pointer transition-all duration-500 hover:-translate-y-2"
+                    className="bg-white rounded-3xl overflow-hidden border border-gray-200/90 hover:border-emerald-600/60 shadow-xs hover:shadow-xl flex flex-col group cursor-pointer transition-all duration-500 hover:-translate-y-2"
                     onClick={() => navigate(ROUTES.ARTICLE_DETAIL.replace(':id', item.id))}
                   >
-                    <div className="h-48 bg-gray-100 relative overflow-hidden">
+                    <div className="h-52 bg-gray-100 relative overflow-hidden">
                       {item.thumbnail ? (
                         <img
                           src={item.thumbnail?.startsWith('http') ? item.thumbnail : `${API_BASE_URL}${item.thumbnail}`}
                           alt={item.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                         />
                       ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center font-bold text-hepco-green">
+                        <div className="w-full h-full bg-gradient-to-br from-emerald-50 to-green-100 flex items-center justify-center font-black text-emerald-800 text-lg">
                           HEPCO News
                         </div>
                       )}
-                      <div className="absolute inset-0 bg-black/5 group-hover:scale-105 transition-transform duration-500"></div>
-                      {/* Category Badge on Home Page */}
-                      <span className={`absolute top-3 right-3 backdrop-blur-sm font-bold text-xs px-3 py-1 rounded-full shadow-md z-10 border border-white/20 ${item.type === 'shareholders'
-                        ? 'bg-hepco-orange text-white'
-                        : 'bg-white/95 text-hepco-green'
-                        }`}>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60 group-hover:opacity-30 transition-opacity" />
+
+                      <span className="absolute top-3.5 right-3.5 backdrop-blur-md font-bold text-[11px] px-3 py-1 rounded-full shadow-xs z-10 bg-white/90 text-[#10243b]">
                         {categoryLabel}
                       </span>
                     </div>
+
                     <div className="p-6 flex-grow flex flex-col justify-between">
                       <div>
-                        {/* Metadata */}
-                        <div className="flex items-center gap-4 text-gray-400 text-xs mb-3">
-                          {displayDate && (
-                            <div className="flex items-center gap-1">
-                              <Calendar className="w-3.5 h-3.5 text-hepco-green" />
-                              <span>{displayDate}</span>
-                            </div>
-                          )}
-                        </div>
+                        {displayDate && (
+                          <div className="flex items-center gap-1.5 text-gray-400 text-xs font-semibold mb-2.5">
+                            <Calendar className="w-3.5 h-3.5 text-emerald-600" />
+                            <span>{displayDate}</span>
+                          </div>
+                        )}
 
-                        {/* Title */}
-                        <h3 className="text-hepco-green font-extrabold text-base mb-2 line-clamp-2 leading-snug group-hover:text-hepco-orange transition-colors">
+                        <h3 className="text-base sm:text-lg font-black text-[#10243b] group-hover:text-emerald-700 transition-colors mb-2.5 line-clamp-2 leading-snug">
                           {item.title}
                         </h3>
 
-                        {/* Description */}
-                        <p className="text-gray-500 text-sm line-clamp-2 leading-relaxed">
+                        <p className="text-gray-500 text-xs sm:text-sm line-clamp-2 leading-relaxed font-normal">
                           {typeof item.content === 'string' ? stripHtml(item.content) : 'Click vào để xem chi tiết bài viết...'}
                         </p>
+                      </div>
+
+                      <div className="pt-4 mt-4 border-t border-gray-100 flex items-center justify-between text-xs font-bold text-[#10243b] group-hover:text-emerald-700">
+                        <span>Đọc tiếp</span>
+                        <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                       </div>
                     </div>
                   </div>
@@ -252,11 +250,10 @@ const NewsPartnersAwards = () => {
         )}
 
         {/* Partners Section */}
-        <div className="mb-20 relative">
-          <div className="text-center mb-10 relative">
-            <h2 className="text-2xl sm:text-4xl font-extrabold text-green-900 inline-block relative pb-4 uppercase">
-              Đối tác & Khách hàng
-              <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-hepco-orange rounded-full"></div>
+        <div className="mb-20 pt-10 border-t border-gray-100">
+          <div className="max-w-2xl mx-auto text-center mb-10">
+            <h2 className="text-2xl sm:text-3xl font-black text-[#10243b] tracking-tight">
+              Đồng Hành &amp; Phát Triển
             </h2>
           </div>
 
@@ -267,27 +264,30 @@ const NewsPartnersAwards = () => {
             onMouseUp={() => setIsDraggingPartner(false)}
             onMouseMove={handleMouseMovePartner}
             onMouseEnter={() => setIsHoveredPartner(true)}
-            className="flex items-center gap-8 sm:gap-12 overflow-x-auto py-4 px-2 no-scrollbar select-none cursor-grab active:cursor-grabbing"
+            className="flex items-center gap-6 sm:gap-10 overflow-x-auto py-4 px-2 no-scrollbar select-none cursor-grab active:cursor-grabbing"
           >
             {Array.from({ length: 6 }, () => PARTNERS).flat().map((item, idx) => (
               <div
                 key={idx}
                 onClick={() => handlePartnerClick(item.url)}
                 title={`Ghé thăm website ${item.alt}`}
-                className={`${item.round ? 'w-24 h-24 sm:w-28 sm:h-28 rounded-full' : 'w-32 sm:w-40 h-16 sm:h-20 rounded-xl'} bg-white flex items-center justify-center shadow-md hover:shadow-xl hover:-translate-y-1 transition-all border border-gray-100 overflow-hidden shrink-0 cursor-pointer group/item`}
+                className={`${item.round ? 'w-24 h-24 sm:w-28 sm:h-28 rounded-full' : 'w-36 sm:w-44 h-20 rounded-2xl'} bg-white flex items-center justify-center shadow-xs hover:shadow-lg hover:-translate-y-1 transition-all border border-gray-200/90 overflow-hidden shrink-0 cursor-pointer group/item p-4`}
               >
-                <img src={item.img} alt={item.alt} className="w-full h-full object-contain p-2 pointer-events-none transition-transform duration-300 group-hover/item:scale-105" />
+                <img
+                  src={item.img}
+                  alt={item.alt}
+                  className="w-full h-full object-contain pointer-events-none transition-transform duration-300 group-hover/item:scale-105"
+                />
               </div>
             ))}
           </div>
         </div>
 
         {/* Awards Section */}
-        <div className="relative">
-          <div className="text-center mb-10 relative">
-            <h2 className="text-2xl sm:text-4xl font-extrabold text-green-900 inline-block relative pb-4 uppercase">
-              Thành tích & Khen thưởng
-              <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-hepco-orange rounded-full"></div>
+        <div className="pt-10 border-t border-gray-100">
+          <div className="max-w-2xl mx-auto text-center mb-10">
+            <h2 className="text-2xl sm:text-3xl font-black text-[#10243b] tracking-tight">
+              Thành Tích &amp; Khen Thưởng
             </h2>
           </div>
 
@@ -300,18 +300,22 @@ const NewsPartnersAwards = () => {
             onMouseEnter={() => setIsHoveredAward(true)}
             className="flex items-center gap-6 overflow-x-auto py-4 px-2 no-scrollbar select-none cursor-grab active:cursor-grabbing"
           >
-              {Array.from({ length: 8 }, () => AWARDS).flat().map((item, idx) => (
-                <div
-                  key={idx}
-                  className="w-72 sm:w-80 h-52 sm:h-60 bg-white border-2 border-yellow-400 rounded-xl shadow-md hover:shadow-2xl hover:-translate-y-1 shrink-0 flex items-center justify-center transition-all duration-300 overflow-hidden cursor-pointer"
-                >
-                  <img src={item.img} alt={item.alt} className="w-full h-full object-cover p-2 pointer-events-none" />
-                </div>
-              ))}
-            </div>
+            {Array.from({ length: 8 }, () => AWARDS).flat().map((item, idx) => (
+              <div
+                key={idx}
+                className="w-72 sm:w-80 h-52 sm:h-60 bg-white border border-gray-200 rounded-3xl shadow-xs hover:shadow-xl hover:-translate-y-1 shrink-0 flex items-center justify-center transition-all duration-300 overflow-hidden cursor-pointer p-3"
+              >
+                <img
+                  src={item.img}
+                  alt={item.alt}
+                  className="w-full h-full object-cover rounded-2xl pointer-events-none"
+                />
+              </div>
+            ))}
           </div>
         </div>
-      </section>
+      </div>
+    </section>
   );
 };
 
