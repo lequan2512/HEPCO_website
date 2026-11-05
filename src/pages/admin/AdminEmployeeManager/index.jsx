@@ -17,6 +17,7 @@ const AdminEmployeeManager = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [departmentIdFilter, setDepartmentIdFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState(String(EMPLOYEE_STATUS.ACTIVE));
   const [sortOption, setSortOption] = useState('created_at_desc');
   const [page, setPage] = useState(1);
   const [openDropdownId, setOpenDropdownId] = useState(null);
@@ -44,6 +45,7 @@ const AdminEmployeeManager = () => {
     dept_type: DEPARTMENT_TYPE.OFFICE,
     employee_type: EMPLOYEE_TYPE.OFFICE_STAFF,
     department_id: departmentIdFilter || undefined,
+    status: statusFilter !== '' ? Number(statusFilter) : undefined,
     sort: sortOption,
     page,
     limit: 20
@@ -124,12 +126,12 @@ const AdminEmployeeManager = () => {
   const handleDelete = (id) => {
     setConfirmConfig({
       isOpen: true,
-      title: 'Vô hiệu hóa Nhân Viên',
-      message: 'Bạn có chắc chắn muốn vô hiệu hóa nhân viên này?',
+      title: 'Xóa / Vô hiệu hóa Nhân Viên',
+      message: 'Bạn có chắc chắn muốn xóa nhân viên này? Nếu nhân viên có dữ liệu lịch sử, hệ thống sẽ chuyển sang trạng thái đã nghỉ việc.',
       onConfirm: async () => {
         try {
-          await deleteEmployeeMutation.mutateAsync(id);
-          toast.success('Đã vô hiệu hóa nhân viên thành công');
+          const res = await deleteEmployeeMutation.mutateAsync(id);
+          toast.success(res?.message || 'Đã xóa nhân viên thành công');
           queryClient.invalidateQueries({ queryKey: ['employees'] });
         } catch (error) {
           handleError(error);
@@ -187,11 +189,19 @@ const AdminEmployeeManager = () => {
             ))}
           </select>
 
+          <select
+            value={statusFilter}
+            onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
+            className="w-full sm:w-auto px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-700 focus:outline-none focus:bg-white"
+          >
+            <option value={String(EMPLOYEE_STATUS.ACTIVE)}>Đang hoạt động</option>
+            <option value={String(EMPLOYEE_STATUS.INACTIVE)}>Đã nghỉ việc</option>
+            <option value="">Tất cả trạng thái</option>
+          </select>
 
-
-          {(searchQuery || departmentIdFilter || sortOption !== 'created_at_desc') && (
+          {(searchQuery || departmentIdFilter || statusFilter !== String(EMPLOYEE_STATUS.ACTIVE) || sortOption !== 'created_at_desc') && (
             <button
-              onClick={() => { setSearchQuery(''); setDepartmentIdFilter(''); setSortOption('created_at_desc'); setPage(1); }}
+              onClick={() => { setSearchQuery(''); setDepartmentIdFilter(''); setStatusFilter(String(EMPLOYEE_STATUS.ACTIVE)); setSortOption('created_at_desc'); setPage(1); }}
               className="self-end sm:self-center p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
               title="Xóa bộ lọc"
             >

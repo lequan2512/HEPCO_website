@@ -4,12 +4,13 @@ import { UserCheck, Plus, Trash2, Edit2, X, Search, Building2, Phone, Mail, More
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import toast from 'react-hot-toast';
+import { getErrorMessage } from '../../../utils/errorMapper';
 import ConfirmModal from '../../../components/ConfirmModal';
 import Pagination from '../../../components/Pagination';
 import { useGetEmployees, useAddEmployee, useUpdateEmployee, useDeleteEmployee } from '../../../apis/employee';
 import { useGetDepartments } from '../../../apis/department';
 import { DEPARTMENT_TYPE } from '../../../constants/department';
-import { EMPLOYEE_TYPE } from '../../../constants/employee';
+import { EMPLOYEE_TYPE, EMPLOYEE_STATUS, EMPLOYEE_STATUS_LABELS } from '../../../constants/employee';
 
 const AdminPosEmployeeManager = () => {
   const [activeTab, setActiveTab] = useState('management'); // 'management' (Ban BQL Xí nghiệp - NV VP) | 'fee_collector' (NV Thu phí)
@@ -18,6 +19,7 @@ const AdminPosEmployeeManager = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [departmentIdFilter, setDepartmentIdFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState(String(EMPLOYEE_STATUS.ACTIVE));
   const [sortOption, setSortOption] = useState('created_at_desc');
   const [openDropdownId, setOpenDropdownId] = useState(null);
   const [confirmConfig, setConfirmConfig] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
@@ -47,6 +49,7 @@ const AdminPosEmployeeManager = () => {
     dept_type: DEPARTMENT_TYPE.ENTERPRISE,
     employee_type: employeeTypeFilter,
     department_id: departmentIdFilter || undefined,
+    status: statusFilter !== '' ? Number(statusFilter) : undefined,
     sort: sortOption,
     page,
     limit: 20
@@ -73,7 +76,8 @@ const AdminPosEmployeeManager = () => {
   };
 
   const handleError = (error) => {
-    toast.error(error?.response?.data?.message || 'Có lỗi xảy ra khi lưu thông tin nhân viên xí nghiệp');
+    const errorCode = error?.response?.data?.errorCode;
+    toast.error(errorCode ? getErrorMessage(errorCode) : (error?.response?.data?.message || 'Có lỗi xảy ra khi lưu thông tin nhân viên xí nghiệp'));
   };
 
   const formik = useFormik({
@@ -133,11 +137,11 @@ const AdminPosEmployeeManager = () => {
     setConfirmConfig({
       isOpen: true,
       title: 'Xóa Nhân Viên',
-      message: 'Bạn có chắc chắn muốn xóa nhân viên này khỏi hệ thống?',
+      message: 'Bạn có chắc chắn muốn xóa nhân viên này khỏi hệ thống? Nếu nhân viên đã có lịch sử bàn giao/cấp phát, hệ thống sẽ chuyển sang trạng thái đã nghỉ việc.',
       onConfirm: async () => {
         try {
-          await deleteMutation.mutateAsync(id);
-          toast.success('Đã xóa nhân viên');
+          const res = await deleteMutation.mutateAsync(id);
+          toast.success(res?.message || 'Đã xóa nhân viên');
           queryClient.invalidateQueries({ queryKey: ['employees'] });
         } catch (error) {
           handleError(error);
@@ -219,11 +223,19 @@ const AdminPosEmployeeManager = () => {
             ))}
           </select>
 
+          <select
+            value={statusFilter}
+            onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
+            className="w-full sm:w-auto px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-700 focus:outline-none focus:bg-white"
+          >
+            <option value={String(EMPLOYEE_STATUS.ACTIVE)}>Đang hoạt động</option>
+            <option value={String(EMPLOYEE_STATUS.INACTIVE)}>Đã nghỉ việc</option>
+            <option value="">Tất cả trạng thái</option>
+          </select>
 
-
-          {(searchQuery || departmentIdFilter || sortOption !== 'created_at_desc') && (
+          {(searchQuery || departmentIdFilter || statusFilter !== String(EMPLOYEE_STATUS.ACTIVE) || sortOption !== 'created_at_desc') && (
             <button
-              onClick={() => { setSearchQuery(''); setDepartmentIdFilter(''); setSortOption('created_at_desc'); setPage(1); }}
+              onClick={() => { setSearchQuery(''); setDepartmentIdFilter(''); setStatusFilter(String(EMPLOYEE_STATUS.ACTIVE)); setSortOption('created_at_desc'); setPage(1); }}
               className="self-end sm:self-center p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
               title="Xóa bộ lọc"
             >
@@ -303,6 +315,11 @@ const AdminPosEmployeeManager = () => {
                     <td className="px-6 py-4 font-mono font-bold text-gray-900">{emp.employee_code}</td>
                     <td className="px-6 py-4 font-semibold text-gray-800">
                       {emp.full_name}
+                      {emp.status === EMPLOYEE_STATUS.INACTIVE && (
+                        <span className={`ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${EMPLOYEE_STATUS_LABELS[EMPLOYEE_STATUS.INACTIVE]?.bg || 'bg-red-100 text-red-800 border-red-200'}`}>
+                          {EMPLOYEE_STATUS_LABELS[EMPLOYEE_STATUS.INACTIVE]?.label || 'Đã nghỉ việc'}
+                        </span>
+                      )}
                     </td>
                     <td className="px-6 py-4">
                       <span className="inline-flex items-center gap-1 bg-purple-50 text-purple-800 px-3 py-1 rounded-full text-xs font-semibold border border-purple-100">
