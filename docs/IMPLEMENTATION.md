@@ -51,3 +51,7 @@ Work on a `codex/` branch; build and lint before pushing. Deploy a Vercel previe
 - Added a skip link, visible keyboard focus, reduced-motion support and a native video dialog that loads its iframe only when opened.
 - Validation: lint, production build and Git whitespace checks passed. The large-bundle warning remains open for Phase 5.
 - Visual QA remains pending: Windows browser automation was stopped because URL policy enforcement is unsupported for the active browser. No responsive or browser-interaction pass is claimed.
+
+## UI rollback — 2026-11-06
+
+At the user's request, all tracked application source under `src/` was restored to baseline commit `a0c9fd8`. This restores the original home-page composition and shared interface, and removes the newly introduced home/contact components. Earlier implementation entries are historical and do not describe the restored interface. The professional README and deployment upload exclusions are retained. Re-run application validation and verify the replacement production deployment before marking the rollback complete.

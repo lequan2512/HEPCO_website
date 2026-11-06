@@ -427,20 +427,3 @@ body {
   backface-visibility: hidden;
   will-change: transform, box-shadow, border-radius;
 }
-
-/* Keep keyboard navigation visible across public and administrative screens. */
-@layer base {
-  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
-    outline: 3px solid #d97706;
-    outline-offset: 4px;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    html, body { scroll-behavior: auto; }
-    *, *::before, *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-    }
-  }
-}

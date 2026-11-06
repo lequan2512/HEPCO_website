@@ -50,6 +50,8 @@ The backend, database and file-storage implementation are not included in this c
 
 Snapshot: **2026-11-06**. Historical results below are not live deployment indicators.
 
+**UI rollback:** At the user's request, application source under `src/` has been restored to baseline `a0c9fd8`. The UI implementation checkboxes below describe historical work, not the current restored interface. The roadmap remains available for future planning.
+
 - [x] Local source matched GitHub HEAD at baseline intake.
 - [x] Git remote points to the intended repository.
 - [x] Vercel CLI confirmed the repository is already connected to project `hepco`.
