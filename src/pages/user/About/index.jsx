@@ -12,18 +12,22 @@ import {
   FileCheck,
   Download,
   History,
-  Briefcase
+  Briefcase,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import PageBanner from '../../../components/PageBanner';
 import SubNav from '../../../components/SubNav';
 import PdfFlipbook from '../../../components/PdfFlipbook';
 import { getAboutPages } from '../../../services/news.service';
+import { sanitizeLegacyHtml } from '../../../utils/assetUrl';
 
 const About = () => {
   const location = useLocation();
   const [userSelectedTab, setUserSelectedTab] = useState(null);
   const [prevLocationKey, setPrevLocationKey] = useState(location.key);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [isHistoryExpanded, setIsHistoryExpanded] = useState(false);
   const [pdfModal, setPdfModal] = useState(null); // { url, fileName, title, subtitle }
   const subNavItems = ['Về Hepco', 'Chức năng - Giấy phép', 'Sơ đồ tổ chức', 'Hồ sơ năng lực'];
 
@@ -147,9 +151,37 @@ const About = () => {
                   </div>
                 </div>
                 <div
-                  className="prose prose-sm sm:prose-base md:prose-lg max-w-none text-gray-700 leading-relaxed"
-                  dangerouslySetInnerHTML={{ __html: historyPage.content }}
-                />
+                  className={`relative overflow-hidden transition-all duration-300 ${
+                    isHistoryExpanded ? 'max-h-none' : 'max-h-[420px]'
+                  }`}
+                >
+                  <div
+                    className="prose prose-sm sm:prose-base md:prose-lg max-w-none text-gray-700 leading-relaxed prose-img:rounded-2xl prose-img:shadow-md prose-img:mx-auto"
+                    dangerouslySetInnerHTML={{ __html: sanitizeLegacyHtml(historyPage.content) }}
+                  />
+                  {!isHistoryExpanded && (
+                    <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-white via-white/90 to-transparent pointer-events-none" />
+                  )}
+                </div>
+                <div className="mt-4 pt-3 border-t border-gray-100 text-center">
+                  <button
+                    type="button"
+                    onClick={() => setIsHistoryExpanded((prev) => !prev)}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-hepco-green hover:text-white bg-emerald-50 hover:bg-hepco-green border border-emerald-200 transition-all cursor-pointer shadow-2xs"
+                  >
+                    {isHistoryExpanded ? (
+                      <>
+                        <ChevronUp className="w-4 h-4" />
+                        <span>Thu gọn nội dung Lịch sử hình thành</span>
+                      </>
+                    ) : (
+                      <>
+                        <ChevronDown className="w-4 h-4" />
+                        <span>Xem đầy đủ Lịch sử hình thành &amp; Danh sách các đơn vị trực thuộc</span>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -241,8 +273,8 @@ const About = () => {
                     </h3>
                   </div>
                   <div
-                    className="prose prose-sm sm:prose-base max-w-none text-gray-700 leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: functionsPage.content }}
+                    className="prose prose-sm sm:prose-base max-w-none text-gray-700 leading-relaxed prose-img:rounded-2xl prose-img:shadow-md prose-img:mx-auto"
+                    dangerouslySetInnerHTML={{ __html: sanitizeLegacyHtml(functionsPage.content) }}
                   />
                 </div>
               )}

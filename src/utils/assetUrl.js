@@ -25,3 +25,13 @@ export const formatFileSize = (bytes) => {
   if (num < 1024 * 1024) return `${(num / 1024).toFixed(1)} KB`;
   return `${(num / (1024 * 1024)).toFixed(2)} MB`;
 };
+
+export const sanitizeLegacyHtml = (html) => {
+  if (!html || typeof html !== 'string') return '';
+  return html
+    .replace(/&nbsp;|\u00a0/g, ' ')
+    .replace(/(https?:\/\/[^\s"'<>]+)?(https:\/\/res\.cloudinary\.com\/[^\s"'<>]+)/g, '$2')
+    .replace(/font-family\s*:[^;"']+(;)?/gi, '')
+    .replace(/font-size\s*:[^;"']+(;)?/gi, '')
+    .replace(/line-height\s*:[^;"']+(;)?/gi, '');
+};

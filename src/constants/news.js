@@ -178,6 +178,73 @@ export const SHAREHOLDER_DOC_TYPE_LABELS = {
 
 export const SHAREHOLDER_DOC_TYPE_OPTIONS = Object.values(SHAREHOLDER_DOC_TYPE_LABELS);
 
+// High-level grouped categories for Shareholder Documents to keep filter UI clean and intuitive
+export const SHAREHOLDER_DOC_GROUP = {
+  ALL: 'all',
+  REPORTS: 'group_reports',
+  AGM_BOARD: 'group_agm_board',
+  DIVIDEND_STOCK: 'group_dividend_stock',
+  DISCLOSURE_OTHER: 'group_disclosure_other'
+};
+
+export const SHAREHOLDER_DOC_GROUP_LABELS = {
+  [SHAREHOLDER_DOC_GROUP.ALL]: {
+    value: SHAREHOLDER_DOC_GROUP.ALL,
+    label: 'Tất cả tài liệu',
+    shortLabel: 'Tất cả',
+    bg: 'bg-gray-100 text-gray-800 border-gray-200',
+    types: []
+  },
+  [SHAREHOLDER_DOC_GROUP.REPORTS]: {
+    value: SHAREHOLDER_DOC_GROUP.REPORTS,
+    label: 'Báo cáo định kỳ & Tài chính',
+    shortLabel: 'Báo cáo & Tài chính',
+    bg: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    types: [
+      SHAREHOLDER_DOC_TYPE.AUDITED_FINANCIAL_REPORT,
+      SHAREHOLDER_DOC_TYPE.FINANCIAL_REPORT,
+      SHAREHOLDER_DOC_TYPE.ANNUAL_REPORT,
+      SHAREHOLDER_DOC_TYPE.GOVERNANCE_REPORT,
+      SHAREHOLDER_DOC_TYPE.FINANCIAL_SUPERVISION_REPORT
+    ]
+  },
+  [SHAREHOLDER_DOC_GROUP.AGM_BOARD]: {
+    value: SHAREHOLDER_DOC_GROUP.AGM_BOARD,
+    label: 'Đại hội cổ đông & HĐQT',
+    shortLabel: 'ĐHĐCĐ & HĐQT',
+    bg: 'bg-amber-50 text-amber-700 border-amber-200',
+    types: [
+      SHAREHOLDER_DOC_TYPE.AGM_NOTICE,
+      SHAREHOLDER_DOC_TYPE.AGM_RESOLUTION_MINUTES,
+      SHAREHOLDER_DOC_TYPE.BOARD_RESOLUTION
+    ]
+  },
+  [SHAREHOLDER_DOC_GROUP.DIVIDEND_STOCK]: {
+    value: SHAREHOLDER_DOC_GROUP.DIVIDEND_STOCK,
+    label: 'Cổ tức & Giao dịch cổ phiếu',
+    shortLabel: 'Cổ tức & Cổ phiếu',
+    bg: 'bg-blue-50 text-blue-700 border-blue-200',
+    types: [
+      SHAREHOLDER_DOC_TYPE.DIVIDEND_NOTICE,
+      SHAREHOLDER_DOC_TYPE.STOCK_TRADING_NOTICE
+    ]
+  },
+  [SHAREHOLDER_DOC_GROUP.DISCLOSURE_OTHER]: {
+    value: SHAREHOLDER_DOC_GROUP.DISCLOSURE_OTHER,
+    label: 'Nhân sự & Công bố thông tin khác',
+    shortLabel: 'Công bố & Khác',
+    bg: 'bg-purple-50 text-purple-700 border-purple-200',
+    types: [
+      SHAREHOLDER_DOC_TYPE.PERSONNEL_CHANGE,
+      SHAREHOLDER_DOC_TYPE.EXTRAORDINARY_DISCLOSURE,
+      SHAREHOLDER_DOC_TYPE.REGULATORY_DOCUMENT,
+      SHAREHOLDER_DOC_TYPE.OTHER_DOCUMENT
+    ]
+  }
+};
+
+export const SHAREHOLDER_DOC_GROUP_OPTIONS = Object.values(SHAREHOLDER_DOC_GROUP_LABELS);
+
 export const GALLERY_CATEGORY = {
   ALL: 'all',
   COMPANY: 'company',

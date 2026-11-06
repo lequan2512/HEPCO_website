@@ -14,7 +14,9 @@ import {
   ExternalLink,
   X,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Loading from '../../../components/Loading';
@@ -25,13 +27,15 @@ import {
   NEWS_CATEGORY_LABELS,
   SHAREHOLDER_DOC_TYPE_LABELS
 } from '../../../constants/news';
-import { resolveAssetUrl, formatFileSize } from '../../../utils/assetUrl';
+import { resolveAssetUrl, formatFileSize, sanitizeLegacyHtml } from '../../../utils/assetUrl';
 
 const ArticleDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
   const [activePdfUrl, setActivePdfUrl] = useState(null);
+  const [isPdfClosed, setIsPdfClosed] = useState(false);
+  const [showAllAttachments, setShowAllAttachments] = useState(false);
   const [lightboxImgIdx, setLightboxImgIdx] = useState(null);
 
   const { data: article, isLoading: loading, error: queryError } = useGetArticleById(id);
@@ -41,6 +45,8 @@ const ArticleDetail = () => {
   if (id !== prevId) {
     setPrevId(id);
     setActivePdfUrl(null);
+    setIsPdfClosed(false);
+    setShowAllAttachments(false);
     setLightboxImgIdx(null);
   }
 
@@ -51,9 +57,11 @@ const ArticleDetail = () => {
   // Automatically select first PDF attachment for Shareholder documents for instant inline reading
   const attachments = article?.attachments || [];
   const pdfAttachments = attachments.filter((a) => (a.ext || '').toLowerCase() === 'pdf');
-  const effectivePdf =
-    activePdfUrl ||
-    (article?.type === 'shareholders' && pdfAttachments.length > 0 ? pdfAttachments[0] : null);
+  const effectivePdf = isPdfClosed
+    ? null
+    : activePdfUrl ||
+      (article?.type === 'shareholders' && pdfAttachments.length > 0 ? pdfAttachments[0] : null);
+  const visibleAttachments = showAllAttachments ? attachments : attachments.slice(0, 3);
 
   const handleShareFacebook = () => {
     const shareUrl = encodeURIComponent(window.location.href);
@@ -295,7 +303,7 @@ const ArticleDetail = () => {
               </div>
 
               <div className="grid grid-cols-1 gap-3">
-                {attachments.map((att) => {
+                {visibleAttachments.map((att) => {
                   const isPdf = (att.ext || '').toLowerCase() === 'pdf';
                   const resolvedUrl = resolveAssetUrl(att.fileUrl);
                   const isSelected = effectivePdf && effectivePdf.id === att.id;
@@ -332,11 +340,15 @@ const ArticleDetail = () => {
                         {isPdf && (
                           <button
                             type="button"
-                            onClick={() =>
-                              setActivePdfUrl(
-                                isSelected && activePdfUrl ? null : att
-                              )
-                            }
+                            onClick={() => {
+                              if (isSelected) {
+                                setIsPdfClosed(true);
+                                setActivePdfUrl(null);
+                              } else {
+                                setIsPdfClosed(false);
+                                setActivePdfUrl(att);
+                              }
+                            }}
                             className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
                               isSelected
                                 ? 'bg-[#10243b] text-white border-[#10243b]'
@@ -344,7 +356,7 @@ const ArticleDetail = () => {
                             }`}
                           >
                             <Eye className="w-4 h-4" />
-                            <span>{isSelected ? 'Đang xem bên dưới' : 'Xem trực tiếp'}</span>
+                            <span>{isSelected ? 'Ẩn khung xem' : 'Xem trực tiếp'}</span>
                           </button>
                         )}
 
@@ -372,6 +384,28 @@ const ArticleDetail = () => {
                   );
                 })}
               </div>
+
+              {attachments.length > 3 && (
+                <div className="mt-3 text-center">
+                  <button
+                    type="button"
+                    onClick={() => setShowAllAttachments((prev) => !prev)}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-hepco-green hover:text-emerald-800 bg-white hover:bg-emerald-50 border border-emerald-200 shadow-2xs transition-all cursor-pointer"
+                  >
+                    {showAllAttachments ? (
+                      <>
+                        <ChevronUp className="w-4 h-4" />
+                        <span>Thu gọn danh sách tệp đính kèm</span>
+                      </>
+                    ) : (
+                      <>
+                        <ChevronDown className="w-4 h-4" />
+                        <span>Xem tất cả {attachments.length} tệp đính kèm (+{attachments.length - 3} tệp khác)</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
 
               {/* Inline PDF Viewer when a PDF attachment is selected */}
               {effectivePdf && (
@@ -402,12 +436,7 @@ const ArticleDetail = () => {
                     prose-ul:list-disc prose-ol:list-decimal prose-li:mb-2
                     prose-blockquote:border-l-4 prose-blockquote:border-hepco-green prose-blockquote:pl-6 prose-blockquote:italic prose-blockquote:my-8 prose-blockquote:text-gray-600 prose-blockquote:bg-gray-50 prose-blockquote:py-4 prose-blockquote:rounded-r-lg"
                   dangerouslySetInnerHTML={{
-                    __html: article.content
-                      .replace(/&nbsp;|\u00a0/g, ' ')
-                      .replace(
-                        /(https?:\/\/[^\s"'<>]+)?(https:\/\/res\.cloudinary\.com\/[^\s"'<>]+)/g,
-                        '$2'
-                      )
+                    __html: sanitizeLegacyHtml(article.content)
                   }}
                 />
               ) : (

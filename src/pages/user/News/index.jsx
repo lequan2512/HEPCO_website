@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import {
   Search,
@@ -17,6 +17,11 @@ import {
   List,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
+  Check,
+  ArrowUpDown,
+  RotateCcw,
   ZoomIn,
   ZoomOut,
   ExternalLink
@@ -32,7 +37,9 @@ import {
   NEWS_CATEGORY_OPTIONS,
   SHAREHOLDER_DOC_TYPE,
   SHAREHOLDER_DOC_TYPE_LABELS,
-  SHAREHOLDER_DOC_TYPE_OPTIONS,
+  SHAREHOLDER_DOC_GROUP,
+  SHAREHOLDER_DOC_GROUP_LABELS,
+  SHAREHOLDER_DOC_GROUP_OPTIONS,
   GALLERY_CATEGORY,
   GALLERY_CATEGORY_LABELS,
   GALLERY_CATEGORY_OPTIONS
@@ -56,20 +63,38 @@ const stripHtml = (html) => {
   return (tmp.textContent || tmp.innerText || '').replace(/\s+/g, ' ').trim();
 };
 
+const SORT_OPTIONS = [
+  { value: 'created_at_desc', label: 'Mới nhất trước' },
+  { value: 'created_at_asc', label: 'Cũ nhất trước' },
+  { value: 'title_asc', label: 'Tiêu đề (A → Z)' }
+];
+
 const News = ({ pageType = 'news' }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const initialSubView = searchParams.get('tab') === 'gallery' || location.state?.tab === 'gallery' ? 'gallery' : 'articles';
+  const initialSubView =
+    searchParams.get('tab') === 'gallery' || location.state?.tab === 'gallery'
+      ? 'gallery'
+      : 'articles';
   const [activeSubView, setActiveSubView] = useState(initialSubView);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedYear, setSelectedYear] = useState('all');
+  const [sortOption, setSortOption] = useState('created_at_desc');
   const [page, setPage] = useState(1);
   const [shareholderViewMode, setShareholderViewMode] = useState('list');
+
+  // Searchable Category/Document Type Dropdown Popover state
+  const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
+  const [typeSearchTerm, setTypeSearchTerm] = useState('');
+  const typeDropdownRef = useRef(null);
+
+  // Expanded attachments tracking for Shareholder items with many files
+  const [expandedDocs, setExpandedDocs] = useState({});
 
   // Gallery state
   const [galleryCategory, setGalleryCategory] = useState(GALLERY_CATEGORY.ALL);
@@ -91,7 +116,10 @@ const News = ({ pageType = 'news' }) => {
     setDebouncedSearch('');
     setSelectedCategory('all');
     setSelectedYear('all');
+    setSortOption('created_at_desc');
     setPage(1);
+    setIsTypeDropdownOpen(false);
+    setTypeSearchTerm('');
     setActiveSubView(tabParam === 'gallery' && pageType === 'news' ? 'gallery' : 'articles');
   } else if (tabParam !== prevTabParam) {
     setPrevTabParam(tabParam);
@@ -99,6 +127,18 @@ const News = ({ pageType = 'news' }) => {
       setActiveSubView('gallery');
     }
   }
+
+  // Close custom dropdown when clicking outside
+  useEffect(() => {
+    if (!isTypeDropdownOpen) return undefined;
+    const handleClickOutside = (e) => {
+      if (typeDropdownRef.current && !typeDropdownRef.current.contains(e.target)) {
+        setIsTypeDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isTypeDropdownOpen]);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -117,7 +157,8 @@ const News = ({ pageType = 'news' }) => {
     search: debouncedSearch,
     category: selectedCategory,
     documentType: pageType === 'shareholders' ? selectedCategory : '',
-    year: selectedYear
+    year: selectedYear,
+    sort: sortOption
   });
 
   const articles = useMemo(() => newsResponse?.data || [], [newsResponse]);
@@ -169,8 +210,40 @@ const News = ({ pageType = 'news' }) => {
     setDebouncedSearch('');
     setSelectedCategory('all');
     setSelectedYear('all');
+    setSortOption('created_at_desc');
+    setTypeSearchTerm('');
     setPage(1);
   };
+
+  const hasActiveFilters =
+    selectedCategory !== 'all' ||
+    selectedYear !== 'all' ||
+    Boolean(searchQuery.trim()) ||
+    sortOption !== 'created_at_desc';
+
+  // Helper to get human-readable label for currently selected Category / Group / DocType
+  const currentCategoryLabel = useMemo(() => {
+    if (selectedCategory === 'all') {
+      return pageType === 'shareholders' ? 'Tất cả loại tài liệu' : 'Tất cả chuyên mục';
+    }
+    if (pageType === 'shareholders') {
+      if (SHAREHOLDER_DOC_GROUP_LABELS[selectedCategory]) {
+        return `Nhóm: ${SHAREHOLDER_DOC_GROUP_LABELS[selectedCategory].shortLabel}`;
+      }
+      return SHAREHOLDER_DOC_TYPE_LABELS[selectedCategory]?.label || 'Loại tài liệu';
+    }
+    return NEWS_CATEGORY_LABELS[selectedCategory]?.label || 'Chuyên mục';
+  }, [selectedCategory, pageType]);
+
+  // Determine which top-level group is active (either directly or because one of its child types is selected)
+  const activeShareholderGroup = useMemo(() => {
+    if (selectedCategory === 'all') return SHAREHOLDER_DOC_GROUP.ALL;
+    if (SHAREHOLDER_DOC_GROUP_LABELS[selectedCategory]) return selectedCategory;
+    const foundGroup = SHAREHOLDER_DOC_GROUP_OPTIONS.find(
+      (grp) => grp.types && grp.types.includes(selectedCategory)
+    );
+    return foundGroup ? foundGroup.value : SHAREHOLDER_DOC_GROUP.ALL;
+  }, [selectedCategory]);
 
   // Keyboard navigation for Lightbox
   const handleNextImage = useCallback(() => {
@@ -267,43 +340,70 @@ const News = ({ pageType = 'news' }) => {
           <div>
             {/* Gallery Controls */}
             <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100 mb-8 space-y-4">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                 <div>
-                  <h2 className="text-xl font-bold text-gray-800">Thư viện Hình ảnh Hoạt động</h2>
+                  <div className="flex items-center gap-2.5 flex-wrap">
+                    <h2 className="text-xl font-bold text-gray-800">Thư viện Hình ảnh Hoạt động</h2>
+                    <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      {galleryMeta.total} hình ảnh
+                    </span>
+                  </div>
                   <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
-                    Tổng hợp hình ảnh thực tế về hoạt động công ty, vệ sinh môi trường, phương tiện thiết bị và các công trình dự án của HEPCO.
+                    Hình ảnh thực tế về hoạt động công ty, vệ sinh môi trường, phương tiện thiết bị và các công trình dự án của HEPCO.
                   </p>
                 </div>
 
-                {/* Gallery Search */}
-                <div className="relative w-full md:w-80">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <input
-                    type="text"
-                    placeholder="Tìm kiếm hình ảnh..."
-                    value={gallerySearch}
-                    onChange={(e) => {
-                      setGallerySearch(e.target.value);
-                      setGalleryPage(1);
-                    }}
-                    className="w-full pl-10 pr-10 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:outline-none focus:bg-white focus:ring-2 focus:ring-hepco-green focus:border-transparent transition-all"
-                  />
-                  {gallerySearch && (
-                    <button
-                      onClick={() => {
-                        setGallerySearch('');
+                {/* Unified Gallery Search + Topic Select */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+                  <div className="relative w-full sm:w-72">
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <input
+                      type="text"
+                      placeholder="Tìm kiếm hình ảnh..."
+                      value={gallerySearch}
+                      onChange={(e) => {
+                        setGallerySearch(e.target.value);
                         setGalleryPage(1);
                       }}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5 rounded-full hover:bg-gray-200 transition-colors cursor-pointer"
+                      className="w-full pl-10 pr-9 py-2.5 border border-gray-200 rounded-xl text-sm bg-gray-50/80 focus:outline-none focus:bg-white focus:ring-2 focus:ring-hepco-green focus:border-transparent transition-all"
+                    />
+                    {gallerySearch && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setGallerySearch('');
+                          setGalleryPage(1);
+                        }}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5 rounded-full hover:bg-gray-200 transition-colors cursor-pointer"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="relative">
+                    <Filter className="absolute left-3.5 top-1/2 -translate-y-1/2 text-hepco-green w-4 h-4 pointer-events-none" />
+                    <select
+                      value={galleryCategory}
+                      onChange={(e) => {
+                        setGalleryCategory(e.target.value);
+                        setGalleryPage(1);
+                      }}
+                      className="w-full sm:w-auto pl-9 pr-8 py-2.5 border border-gray-200 rounded-xl text-xs sm:text-sm font-bold text-gray-700 bg-gray-50/80 hover:bg-white focus:outline-none focus:ring-2 focus:ring-hepco-green cursor-pointer appearance-none"
                     >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  )}
+                      {GALLERY_CATEGORY_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  </div>
                 </div>
               </div>
 
-              {/* Gallery Category Filter Pills */}
-              <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-gray-100">
+              {/* Single-line Quick Topic Tabs */}
+              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pt-3 border-t border-gray-100">
                 {GALLERY_CATEGORY_OPTIONS.map((opt) => {
                   const isActive = galleryCategory === opt.value;
                   return (
@@ -314,7 +414,7 @@ const News = ({ pageType = 'news' }) => {
                         setGalleryCategory(opt.value);
                         setGalleryPage(1);
                       }}
-                      className={`px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer border ${
+                      className={`shrink-0 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer border ${
                         isActive
                           ? 'bg-hepco-green text-white border-hepco-green shadow-xs'
                           : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100 hover:text-gray-900'
@@ -426,201 +526,460 @@ const News = ({ pageType = 'news' }) => {
         ) : (
           /* ==================== ARTICLES & SHAREHOLDERS VIEW ==================== */
           <div>
-            {/* Controls Card: Category, Year, Search & View Mode */}
-            <div className="bg-white p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 mb-6 sm:mb-8 space-y-4">
-              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            {/* Compact, Grouped Filter & Search Control Box */}
+            <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100 mb-6 sm:mb-8 space-y-4">
+              {/* Row 1: Title, Result Count & View Mode Switcher */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <h2 className="text-xl font-bold text-gray-800">{bannerInfo.title}</h2>
+                  <div className="flex items-center gap-2.5 flex-wrap">
+                    <h2 className="text-xl font-bold text-[#10243b]">{bannerInfo.title}</h2>
                     <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
                       {meta.total} {pageType === 'shareholders' ? 'tài liệu công bố' : 'bài viết'}
                     </span>
                   </div>
                   {pageType === 'shareholders' && (
                     <p className="text-xs sm:text-sm text-gray-500 mt-1">
-                      Tra cứu, xem trực tuyến và tải xuống các báo cáo tài chính, nghị quyết và văn bản cổ đông theo từng năm và loại tài liệu.
+                      Tra cứu nhanh theo nhóm tài liệu, lọc theo năm hoặc chọn chi tiết loại văn bản trong danh sách thả xuống.
                     </p>
                   )}
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                  {/* Search Box */}
-                  <div className="relative w-full sm:w-80">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                    <input
-                      type="text"
-                      placeholder={
-                        pageType === 'shareholders'
-                          ? 'Tìm theo tên tài liệu, nghị quyết, báo cáo...'
-                          : 'Tìm kiếm bài viết, thông báo...'
-                      }
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full pl-10 pr-10 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:outline-none focus:bg-white focus:ring-2 focus:ring-hepco-green focus:border-transparent transition-all"
-                    />
-                    {searchQuery && (
-                      <button
-                        type="button"
-                        onClick={() => setSearchQuery('')}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5 rounded-full hover:bg-gray-200 transition-colors cursor-pointer"
-                      >
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-                    )}
+                {/* View Mode Toggle for Shareholders */}
+                {pageType === 'shareholders' && (
+                  <div className="inline-flex items-center bg-gray-100 p-1 rounded-xl border border-gray-200 self-start sm:self-auto shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => setShareholderViewMode('list')}
+                      className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+                        shareholderViewMode === 'list'
+                          ? 'bg-white text-hepco-green shadow-2xs'
+                          : 'text-gray-600 hover:text-gray-900'
+                      }`}
+                      title="Hiển thị dạng danh sách tài liệu"
+                    >
+                      <List className="w-3.5 h-3.5" />
+                      <span>Danh sách</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShareholderViewMode('grid')}
+                      className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+                        shareholderViewMode === 'grid'
+                          ? 'bg-white text-hepco-green shadow-2xs'
+                          : 'text-gray-600 hover:text-gray-900'
+                      }`}
+                      title="Hiển thị dạng lưới thẻ"
+                    >
+                      <LayoutGrid className="w-3.5 h-3.5" />
+                      <span>Lưới thẻ</span>
+                    </button>
                   </div>
+                )}
+              </div>
 
-                  {/* View Mode Toggle for Shareholders */}
-                  {pageType === 'shareholders' && (
-                    <div className="inline-flex items-center bg-gray-100 p-1 rounded-lg border border-gray-200 self-start sm:self-auto shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => setShareholderViewMode('list')}
-                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold transition-colors cursor-pointer ${
-                          shareholderViewMode === 'list'
-                            ? 'bg-white text-hepco-green shadow-2xs'
-                            : 'text-gray-600 hover:text-gray-900'
-                        }`}
-                        title="Hiển thị dạng danh sách tài liệu"
-                      >
-                        <List className="w-3.5 h-3.5" />
-                        <span>Danh sách</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setShareholderViewMode('grid')}
-                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold transition-colors cursor-pointer ${
-                          shareholderViewMode === 'grid'
-                            ? 'bg-white text-hepco-green shadow-2xs'
-                            : 'text-gray-600 hover:text-gray-900'
-                        }`}
-                        title="Hiển thị dạng lưới thẻ"
-                      >
-                        <LayoutGrid className="w-3.5 h-3.5" />
-                        <span>Lưới thẻ</span>
-                      </button>
+              {/* Row 2: Unified Single-Line Toolbar: Search Input + Grouped Dropdown + Year Dropdown + Sort Dropdown */}
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-3 pt-1">
+                {/* 1. Keyword Search Input (5 cols on desktop) */}
+                <div className="relative md:col-span-5">
+                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <input
+                    type="text"
+                    placeholder={
+                      pageType === 'shareholders'
+                        ? 'Tìm theo tên văn bản, nghị quyết, báo cáo, cổ tức...'
+                        : 'Tìm kiếm theo tiêu đề hoặc nội dung bài viết...'
+                    }
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-10 pr-9 py-2.5 border border-gray-200 rounded-xl text-sm bg-gray-50/80 focus:outline-none focus:bg-white focus:ring-2 focus:ring-hepco-green focus:border-transparent transition-all"
+                  />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery('')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5 rounded-full hover:bg-gray-200 transition-colors cursor-pointer"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+
+                {/* 2. Searchable Grouped Document Type / Category Dropdown (3 cols on desktop) */}
+                <div className="relative md:col-span-3" ref={typeDropdownRef}>
+                  <button
+                    type="button"
+                    onClick={() => setIsTypeDropdownOpen((prev) => !prev)}
+                    className={`w-full flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-xl border text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+                      selectedCategory !== 'all'
+                        ? 'bg-emerald-50/80 border-emerald-300 text-emerald-900'
+                        : 'bg-gray-50/80 hover:bg-white border-gray-200 text-gray-700'
+                    }`}
+                  >
+                    <span className="flex items-center gap-2 truncate">
+                      <Filter className="w-4 h-4 text-hepco-green shrink-0" />
+                      <span className="truncate">{currentCategoryLabel}</span>
+                    </span>
+                    <ChevronDown
+                      className={`w-4 h-4 text-gray-400 shrink-0 transition-transform ${
+                        isTypeDropdownOpen ? 'rotate-180' : ''
+                      }`}
+                    />
+                  </button>
+
+                  {/* Popover Dropdown Menu with Search & Grouped Options */}
+                  {isTypeDropdownOpen && (
+                    <div className="absolute left-0 right-0 md:w-80 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-200 z-40 overflow-hidden">
+                      {/* Quick Filter Inside Dropdown */}
+                      <div className="p-2.5 border-b border-gray-100 bg-gray-50/70">
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+                          <input
+                            type="text"
+                            placeholder={
+                              pageType === 'shareholders'
+                                ? 'Tìm nhanh loại tài liệu...'
+                                : 'Tìm nhanh chuyên mục...'
+                            }
+                            value={typeSearchTerm}
+                            onChange={(e) => setTypeSearchTerm(e.target.value)}
+                            className="w-full pl-8 pr-7 py-1.5 bg-white border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-hepco-green"
+                          />
+                          {typeSearchTerm && (
+                            <button
+                              type="button"
+                              onClick={() => setTypeSearchTerm('')}
+                              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="max-h-80 overflow-y-auto p-2 space-y-1 custom-scrollbar">
+                        {/* All Option */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedCategory('all');
+                            setPage(1);
+                            setIsTypeDropdownOpen(false);
+                          }}
+                          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
+                            selectedCategory === 'all'
+                              ? 'bg-hepco-green text-white'
+                              : 'text-gray-700 hover:bg-gray-100'
+                          }`}
+                        >
+                          <span>
+                            {pageType === 'shareholders'
+                              ? 'Tất cả loại tài liệu'
+                              : 'Tất cả chuyên mục'}
+                          </span>
+                          <span
+                            className={`text-[11px] px-2 py-0.5 rounded-full ${
+                              selectedCategory === 'all'
+                                ? 'bg-white/20 text-white'
+                                : 'bg-gray-100 text-gray-600'
+                            }`}
+                          >
+                            {pageType === 'shareholders' ? shareholderStats.total : newsStats.total}
+                          </span>
+                        </button>
+
+                        {pageType === 'shareholders' ? (
+                          /* Grouped Shareholder Document Types */
+                          SHAREHOLDER_DOC_GROUP_OPTIONS.filter(
+                            (grp) => grp.value !== SHAREHOLDER_DOC_GROUP.ALL
+                          ).map((grp) => {
+                            const q = typeSearchTerm.trim().toLowerCase();
+                            const matchingTypes = (grp.types || []).filter((tKey) => {
+                              const label = SHAREHOLDER_DOC_TYPE_LABELS[tKey]?.label || '';
+                              return !q || label.toLowerCase().includes(q) || grp.label.toLowerCase().includes(q);
+                            });
+                            if (matchingTypes.length === 0) return null;
+                            const grpCount = shareholderStats.countsByGroup?.[grp.value] || 0;
+                            const isGrpSelected = selectedCategory === grp.value;
+
+                            return (
+                              <div key={grp.value} className="pt-2 first:pt-1">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedCategory(grp.value);
+                                    setPage(1);
+                                    setIsTypeDropdownOpen(false);
+                                  }}
+                                  className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-[11px] font-extrabold uppercase tracking-wider transition-colors cursor-pointer ${
+                                    isGrpSelected
+                                      ? 'bg-emerald-100 text-emerald-900'
+                                      : 'text-emerald-800 bg-emerald-50/60 hover:bg-emerald-100/70'
+                                  }`}
+                                >
+                                  <span>{grp.label}</span>
+                                  <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-white text-emerald-700 border border-emerald-200">
+                                    {grpCount}
+                                  </span>
+                                </button>
+
+                                <div className="mt-1 pl-2 space-y-0.5 border-l-2 border-emerald-100 ml-2">
+                                  {matchingTypes.map((tKey) => {
+                                    const opt = SHAREHOLDER_DOC_TYPE_LABELS[tKey];
+                                    const count = shareholderStats.countsByType?.[tKey] || 0;
+                                    if (!opt || count === 0) return null;
+                                    const isSelected = selectedCategory === opt.value;
+                                    return (
+                                      <button
+                                        key={opt.value}
+                                        type="button"
+                                        onClick={() => {
+                                          setSelectedCategory(opt.value);
+                                          setPage(1);
+                                          setIsTypeDropdownOpen(false);
+                                        }}
+                                        className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                                          isSelected
+                                            ? 'bg-hepco-green text-white font-bold'
+                                            : 'text-gray-700 hover:bg-gray-100'
+                                        }`}
+                                      >
+                                        <span className="truncate text-left flex items-center gap-1.5">
+                                          {isSelected && <Check className="w-3.5 h-3.5 shrink-0" />}
+                                          <span className="truncate">{opt.label}</span>
+                                        </span>
+                                        <span
+                                          className={`text-[10px] font-bold px-1.5 py-0.2 rounded-full shrink-0 ${
+                                            isSelected
+                                              ? 'bg-white/20 text-white'
+                                              : 'bg-gray-100 text-gray-600'
+                                          }`}
+                                        >
+                                          {count}
+                                        </span>
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            );
+                          })
+                        ) : (
+                          /* News Categories inside Dropdown */
+                          NEWS_CATEGORY_OPTIONS.filter(
+                            (opt) =>
+                              opt.value !== NEWS_CATEGORY.ALL &&
+                              (!typeSearchTerm.trim() ||
+                                opt.label
+                                  .toLowerCase()
+                                  .includes(typeSearchTerm.trim().toLowerCase()))
+                          ).map((opt) => {
+                            const count = newsStats.countsByCategory?.[opt.value] || 0;
+                            const isSelected = selectedCategory === opt.value;
+                            return (
+                              <button
+                                key={opt.value}
+                                type="button"
+                                onClick={() => {
+                                  setSelectedCategory(opt.value);
+                                  setPage(1);
+                                  setIsTypeDropdownOpen(false);
+                                }}
+                                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
+                                  isSelected
+                                    ? 'bg-hepco-green text-white font-bold'
+                                    : 'text-gray-700 hover:bg-gray-100'
+                                }`}
+                              >
+                                <span className="flex items-center gap-1.5 truncate">
+                                  {isSelected && <Check className="w-3.5 h-3.5 shrink-0" />}
+                                  <span className="truncate">{opt.label}</span>
+                                </span>
+                                <span
+                                  className={`text-[11px] px-2 py-0.5 rounded-full ${
+                                    isSelected
+                                      ? 'bg-white/20 text-white'
+                                      : 'bg-gray-100 text-gray-600'
+                                  }`}
+                                >
+                                  {count}
+                                </span>
+                              </button>
+                            );
+                          })
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>
+
+                {/* 3. Year Select Dropdown (2 cols on desktop) */}
+                <div className="relative md:col-span-2">
+                  <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 text-hepco-green w-4 h-4 pointer-events-none" />
+                  <select
+                    value={selectedYear}
+                    onChange={(e) => {
+                      setSelectedYear(e.target.value);
+                      setPage(1);
+                    }}
+                    className={`w-full pl-9 pr-8 py-2.5 border rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer appearance-none focus:outline-none focus:ring-2 focus:ring-hepco-green ${
+                      selectedYear !== 'all'
+                        ? 'bg-emerald-50/80 border-emerald-300 text-emerald-900'
+                        : 'bg-gray-50/80 hover:bg-white border-gray-200 text-gray-700'
+                    }`}
+                  >
+                    <option value="all">
+                      Tất cả các năm ({pageType === 'shareholders' ? shareholderStats.total : newsStats.total})
+                    </option>
+                    {(pageType === 'shareholders' ? shareholderStats.years : newsStats.years || []).map(
+                      (yr) => {
+                        const yrCount =
+                          pageType === 'shareholders'
+                            ? shareholderStats.countsByYear?.[yr] || 0
+                            : newsStats.countsByYear?.[yr] || 0;
+                        return (
+                          <option key={yr} value={String(yr)}>
+                            Năm {yr} ({yrCount})
+                          </option>
+                        );
+                      }
+                    )}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                </div>
+
+                {/* 4. Sort Select Dropdown (2 cols on desktop) */}
+                <div className="relative md:col-span-2">
+                  <ArrowUpDown className="absolute left-3.5 top-1/2 -translate-y-1/2 text-hepco-green w-4 h-4 pointer-events-none" />
+                  <select
+                    value={sortOption}
+                    onChange={(e) => {
+                      setSortOption(e.target.value);
+                      setPage(1);
+                    }}
+                    className="w-full pl-9 pr-8 py-2.5 border border-gray-200 rounded-xl text-xs sm:text-sm font-bold text-gray-700 bg-gray-50/80 hover:bg-white focus:outline-none focus:ring-2 focus:ring-hepco-green cursor-pointer appearance-none transition-all"
+                  >
+                    {SORT_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                </div>
               </div>
 
-              {/* Filter Bar for News Categories */}
-              {pageType === 'news' && (
-                <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-gray-100">
-                  {NEWS_CATEGORY_OPTIONS.map((opt) => {
-                    const isActive = selectedCategory === opt.value;
-                    const count =
-                      opt.value === NEWS_CATEGORY.ALL
-                        ? newsStats.total
-                        : newsStats.countsByCategory[opt.value] || 0;
-                    return (
-                      <button
-                        key={opt.value}
-                        type="button"
-                        onClick={() => {
-                          setSelectedCategory(opt.value);
-                          setPage(1);
-                        }}
-                        className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer border ${
-                          isActive
-                            ? 'bg-hepco-green text-white border-hepco-green shadow-xs'
-                            : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100 hover:text-gray-900'
-                        }`}
-                      >
-                        <span>{opt.label}</span>
-                        <span
-                          className={`text-[11px] px-1.5 py-0.2 rounded-full ${
-                            isActive ? 'bg-white/20 text-white' : 'bg-gray-200/70 text-gray-600'
-                          }`}
-                        >
-                          {count}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* Filter Bar for Shareholders: Year Pills + Document Type Selector */}
-              {pageType === 'shareholders' && (
-                <div className="pt-3 border-t border-gray-100 space-y-3">
-                  {/* Year Filter Row */}
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1 mr-1">
-                      <Calendar className="w-3.5 h-3.5 text-hepco-green" /> Năm công bố:
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSelectedYear('all');
-                        setPage(1);
-                      }}
-                      className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer border ${
-                        selectedYear === 'all'
-                          ? 'bg-[#10243b] text-white border-[#10243b]'
-                          : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
-                      }`}
-                    >
-                      Tất cả ({shareholderStats.total})
-                    </button>
-                    {shareholderStats.years.map((yr) => (
-                      <button
-                        key={yr}
-                        type="button"
-                        onClick={() => {
-                          setSelectedYear(String(yr));
-                          setPage(1);
-                        }}
-                        className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer border ${
-                          String(selectedYear) === String(yr)
-                            ? 'bg-hepco-green text-white border-hepco-green shadow-2xs'
-                            : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
-                        }`}
-                      >
-                        Năm {yr}
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* Document Type Pills Row */}
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    <span className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1 mr-1">
-                      <Filter className="w-3.5 h-3.5 text-hepco-green" /> Loại tài liệu:
-                    </span>
-                    {SHAREHOLDER_DOC_TYPE_OPTIONS.map((opt) => {
-                      const count =
-                        opt.value === SHAREHOLDER_DOC_TYPE.ALL
-                          ? shareholderStats.total
-                          : shareholderStats.countsByType[opt.value] || 0;
-                      if (opt.value !== SHAREHOLDER_DOC_TYPE.ALL && count === 0) return null;
-                      const isActive = selectedCategory === opt.value;
-                      return (
-                        <button
-                          key={opt.value}
-                          type="button"
-                          onClick={() => {
-                            setSelectedCategory(opt.value);
-                            setPage(1);
-                          }}
-                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
-                            isActive
-                              ? 'bg-hepco-green text-white border-hepco-green shadow-2xs'
-                              : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100 hover:text-gray-900'
-                          }`}
-                        >
-                          <span>{opt.label}</span>
-                          <span
-                            className={`text-[10px] px-1.5 py-0.2 rounded-full ${
-                              isActive ? 'bg-white/20 text-white' : 'bg-gray-200/80 text-gray-600'
+              {/* Row 3: Clean Single-Row Quick Group Tabs (5 Main Groups for Shareholders, Categories for News) */}
+              <div className="pt-3 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 sm:pb-0">
+                  {pageType === 'shareholders'
+                    ? SHAREHOLDER_DOC_GROUP_OPTIONS.map((grp) => {
+                        const isActive = activeShareholderGroup === grp.value;
+                        const count = shareholderStats.countsByGroup?.[grp.value] || 0;
+                        return (
+                          <button
+                            key={grp.value}
+                            type="button"
+                            onClick={() => {
+                              setSelectedCategory(grp.value);
+                              setPage(1);
+                            }}
+                            className={`shrink-0 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer border ${
+                              isActive
+                                ? 'bg-hepco-green text-white border-hepco-green shadow-xs'
+                                : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100 hover:text-gray-900'
                             }`}
                           >
-                            {count}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
+                            <span>{grp.shortLabel}</span>
+                            <span
+                              className={`text-[11px] px-1.5 py-0.2 rounded-full ${
+                                isActive ? 'bg-white/20 text-white' : 'bg-gray-200/80 text-gray-600'
+                              }`}
+                            >
+                              {count}
+                            </span>
+                          </button>
+                        );
+                      })
+                    : NEWS_CATEGORY_OPTIONS.map((opt) => {
+                        const isActive = selectedCategory === opt.value;
+                        const count =
+                          opt.value === NEWS_CATEGORY.ALL
+                            ? newsStats.total
+                            : newsStats.countsByCategory?.[opt.value] || 0;
+                        return (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => {
+                              setSelectedCategory(opt.value);
+                              setPage(1);
+                            }}
+                            className={`shrink-0 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer border ${
+                              isActive
+                                ? 'bg-hepco-green text-white border-hepco-green shadow-xs'
+                                : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100 hover:text-gray-900'
+                            }`}
+                          >
+                            <span>{opt.label}</span>
+                            <span
+                              className={`text-[11px] px-1.5 py-0.2 rounded-full ${
+                                isActive ? 'bg-white/20 text-white' : 'bg-gray-200/70 text-gray-600'
+                              }`}
+                            >
+                              {count}
+                            </span>
+                          </button>
+                        );
+                      })}
                 </div>
-              )}
+
+                {/* Active Filter Chips & Quick Reset */}
+                {hasActiveFilters && (
+                  <div className="flex flex-wrap items-center gap-2 shrink-0">
+                    {selectedCategory !== 'all' &&
+                      !SHAREHOLDER_DOC_GROUP_LABELS[selectedCategory] && (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                          <span>{currentCategoryLabel}</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedCategory('all');
+                              setPage(1);
+                            }}
+                            className="hover:text-red-600 cursor-pointer"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </span>
+                      )}
+
+                    {selectedYear !== 'all' && (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-50 text-blue-800 border border-blue-200">
+                        <span>Năm {selectedYear}</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedYear('all');
+                            setPage(1);
+                          }}
+                          className="hover:text-red-600 cursor-pointer"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </span>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={handleClearFilters}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold text-rose-600 hover:text-white bg-rose-50 hover:bg-rose-600 border border-rose-200 transition-colors cursor-pointer"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      <span>Đặt lại bộ lọc</span>
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Content Area: Keep Controls Mounted, Render Loading Inside Container */}
@@ -639,6 +998,11 @@ const News = ({ pageType = 'news' }) => {
                           SHAREHOLDER_DOC_TYPE_LABELS[doc.documentType] ||
                           SHAREHOLDER_DOC_TYPE_LABELS[SHAREHOLDER_DOC_TYPE.OTHER_DOCUMENT];
                         const attachments = doc.attachments || [];
+                        const isExpanded = Boolean(expandedDocs[doc.id]);
+                        const visibleAttachments = isExpanded
+                          ? attachments
+                          : attachments.slice(0, 2);
+                        const hiddenCount = attachments.length - visibleAttachments.length;
 
                         return (
                           <div
@@ -684,10 +1048,10 @@ const News = ({ pageType = 'news' }) => {
                                     {doc.title}
                                   </h3>
 
-                                  {/* Attachments List inside Shareholder Card */}
+                                  {/* Attachments List inside Shareholder Card (Collapsible if > 2 files) */}
                                   {attachments.length > 0 && (
                                     <div className="mt-3 pt-3 border-t border-gray-100 space-y-2">
-                                      {attachments.map((att) => {
+                                      {visibleAttachments.map((att) => {
                                         const isPdf = (att.ext || '').toLowerCase() === 'pdf';
                                         const resolvedUrl = resolveAssetUrl(att.fileUrl);
                                         const sizeText = formatFileSize(att.size);
@@ -747,6 +1111,31 @@ const News = ({ pageType = 'news' }) => {
                                           </div>
                                         );
                                       })}
+
+                                      {attachments.length > 2 && (
+                                        <button
+                                          type="button"
+                                          onClick={() =>
+                                            setExpandedDocs((prev) => ({
+                                              ...prev,
+                                              [doc.id]: !prev[doc.id]
+                                            }))
+                                          }
+                                          className="inline-flex items-center gap-1.5 text-xs font-bold text-hepco-green hover:text-emerald-800 bg-emerald-50/70 hover:bg-emerald-100/80 px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+                                        >
+                                          {isExpanded ? (
+                                            <>
+                                              <ChevronUp className="w-3.5 h-3.5" />
+                                              <span>Thu gọn danh sách tệp</span>
+                                            </>
+                                          ) : (
+                                            <>
+                                              <ChevronDown className="w-3.5 h-3.5" />
+                                              <span>Xem thêm {hiddenCount} tệp tài liệu đính kèm khác</span>
+                                            </>
+                                          )}
+                                        </button>
+                                      )}
                                     </div>
                                   )}
                                 </div>

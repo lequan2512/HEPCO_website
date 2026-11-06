@@ -1,5 +1,6 @@
 import axiosInstance from '../utils/axios';
 import migratedData from '../data/migratedData.json';
+import { SHAREHOLDER_DOC_GROUP_LABELS } from '../constants/news';
 
 const STORAGE_OVERRIDES_KEY = 'hepco_cms_overrides_v1';
 
@@ -145,12 +146,21 @@ export const getNewsList = async (params = {}) => {
   const baseList = getBaseCollectionByType(type);
   let items = mergeWithOverridesAndApi(baseList, apiItems, type);
 
-  // Filter by category / documentType
+  // Filter by category / documentType / documentGroup
   const activeCategory = documentType || category;
   if (activeCategory && activeCategory !== 'all') {
-    items = items.filter(
-      (item) => item.category === activeCategory || item.documentType === activeCategory
-    );
+    const groupDef = SHAREHOLDER_DOC_GROUP_LABELS[activeCategory];
+    if (groupDef && Array.isArray(groupDef.types) && groupDef.types.length > 0) {
+      items = items.filter(
+        (item) =>
+          groupDef.types.includes(item.documentType) ||
+          groupDef.types.includes(item.category)
+      );
+    } else {
+      items = items.filter(
+        (item) => item.category === activeCategory || item.documentType === activeCategory
+      );
+    }
   }
 
   // Filter by publishYear
@@ -279,20 +289,43 @@ export const getArticleById = async (rawId) => {
 export const getShareholderStats = () => {
   const list = mergeWithOverridesAndApi(migratedData.shareholders || [], [], 'shareholders');
   const years = Array.from(new Set(list.map((i) => i.publishYear).filter(Boolean))).sort((a, b) => b - a);
+  const countsByYear = list.reduce((acc, item) => {
+    if (item.publishYear) {
+      acc[item.publishYear] = (acc[item.publishYear] || 0) + 1;
+    }
+    return acc;
+  }, {});
   const countsByType = list.reduce((acc, item) => {
     const key = item.documentType || 'other_document';
     acc[key] = (acc[key] || 0) + 1;
     return acc;
   }, {});
+  const countsByGroup = Object.values(SHAREHOLDER_DOC_GROUP_LABELS).reduce((acc, grp) => {
+    if (grp.value === 'all') {
+      acc[grp.value] = list.length;
+    } else {
+      acc[grp.value] = (grp.types || []).reduce((sum, t) => sum + (countsByType[t] || 0), 0);
+    }
+    return acc;
+  }, {});
   return {
     total: list.length,
     years,
-    countsByType
+    countsByYear,
+    countsByType,
+    countsByGroup
   };
 };
 
 export const getNewsCategoryStats = () => {
   const list = mergeWithOverridesAndApi(migratedData.news || [], [], 'news');
+  const years = Array.from(new Set(list.map((i) => i.publishYear).filter(Boolean))).sort((a, b) => b - a);
+  const countsByYear = list.reduce((acc, item) => {
+    if (item.publishYear) {
+      acc[item.publishYear] = (acc[item.publishYear] || 0) + 1;
+    }
+    return acc;
+  }, {});
   const countsByCategory = list.reduce((acc, item) => {
     const key = item.category || 'company_activity';
     acc[key] = (acc[key] || 0) + 1;
@@ -300,6 +333,8 @@ export const getNewsCategoryStats = () => {
   }, {});
   return {
     total: list.length,
+    years,
+    countsByYear,
     countsByCategory
   };
 };
