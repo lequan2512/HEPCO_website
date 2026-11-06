@@ -41,16 +41,16 @@ const HomeServices = () => {
   const displayServices = rawServices.length > 0 ? rawServices : FALLBACK_SERVICES;
 
   return (
-    <section className="py-20 md:py-28 bg-white border-b border-gray-200/80">
+    <section className="py-12 md:py-16 bg-white border-b border-gray-200/80">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
         {/* Section Header (Oakdale Editorial Style) */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-14 md:mb-16 gap-6">
           <div className="max-w-2xl">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#10243b] tracking-tight leading-tight">
-              Giải Pháp Môi Trường &amp; Hạ Tầng Đô Thị
+            <h2 className="text-2xl md:text-3xl font-semibold text-[#10243b] tracking-tight leading-tight">
+              Lĩnh vực hoạt động
             </h2>
             <p className="mt-4 text-base sm:text-lg text-gray-600 leading-relaxed font-normal">
-              Đáp ứng trọn gói nhu cầu của người dân, cơ quan, doanh nghiệp và các sự kiện lớn trên địa bàn tỉnh Thừa Thiên Huế.
+              Đáp ứng trọn gói nhu cầu của người dân, cơ quan, doanh nghiệp và các sự kiện lớn trên địa bàn thành phố Huế.
             </p>
           </div>
 
@@ -75,13 +75,14 @@ const HomeServices = () => {
                 key={service.id || index}
                 to={ROUTES.SERVICES}
                 state={{ serviceId: service.id }}
-                className="group flex flex-col rounded-3xl overflow-hidden bg-[#fafafa] border border-gray-200/90 hover:border-emerald-600/60 shadow-xs hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
+                className="group flex flex-col rounded-lg overflow-hidden bg-[#fafafa] border border-gray-200/90 hover:border-emerald-600/60 transition-colors"
               >
                 {/* Image Container */}
-                <div className="relative h-64 sm:h-72 w-full overflow-hidden bg-gray-200">
+                <div className="relative h-48 sm:h-56 w-full overflow-hidden bg-gray-200">
                   <img
                     src={imageSrc}
                     alt={service.title}
+                    loading="lazy"
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-108"
                     onError={(e) => {
                       e.target.onerror = null;
@@ -94,7 +95,7 @@ const HomeServices = () => {
                 {/* Content Details */}
                 <div className="p-7 sm:p-8 flex flex-col justify-between flex-grow bg-white">
                   <div>
-                    <h3 className="text-xl sm:text-2xl font-black text-[#10243b] group-hover:text-emerald-700 transition-colors mb-3 line-clamp-2">
+                    <h3 className="text-xl sm:text-2xl font-semibold text-[#10243b] group-hover:text-emerald-700 transition-colors mb-3 line-clamp-2">
                       {service.title}
                     </h3>
                     <p className="text-sm sm:text-base text-gray-600 leading-relaxed font-normal mb-6 line-clamp-3">

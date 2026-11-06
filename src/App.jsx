@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Home from './pages/user/Home';
+import HomeContact from './pages/user/Home/components/HomeContact';
 import About from './pages/user/About';
 import Services from './pages/user/Services';
 import News from './pages/user/News';
@@ -95,6 +96,7 @@ const AppRoutes = () => {
       <main className="flex-grow flex flex-col">
         <Routes>
           <Route path={ROUTES.HOME} element={<Home />} />
+          <Route path="/lien-he" element={<HomeContact />} />
           <Route path={ROUTES.ABOUT} element={<About />} />
           <Route path={ROUTES.SERVICES} element={<Services />} />
           <Route path={ROUTES.NEWS} element={<News pageType="news" />} />

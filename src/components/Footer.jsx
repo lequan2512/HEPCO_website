@@ -1,3 +1,4 @@
+import { COMPANY } from '../constants/company';
 import { Mail, Phone, MapPin, ShieldCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ROUTES } from '../constants/routes';
@@ -44,7 +45,7 @@ const Footer = () => {
             {/* Social Icons */}
             <div className="flex gap-3">
               <a
-                href="https://www.facebook.com/hepco.com.vn"
+                href={COMPANY.facebook}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-hepco-orange transition-all hover:scale-110 shadow-md border border-white/5"
@@ -55,7 +56,7 @@ const Footer = () => {
                 </svg>
               </a>
               <a
-                href="mailto:info@hepco.com.vn"
+                href={`mailto:${COMPANY.email}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-hepco-orange transition-all hover:scale-110 shadow-md border border-white/5"
@@ -80,7 +81,7 @@ const Footer = () => {
                 <div className="bg-white/10 p-1.5 rounded-md group-hover:bg-hepco-orange transition-colors">
                   <MapPin className="w-4 h-4 text-white" />
                 </div>
-                <p>46 Trần Phú, Phường Thuận Hóa, Thành phố Huế</p>
+                <p>{COMPANY.address}</p>
               </div>
               <div className="flex gap-3 items-start group">
                 <div className="bg-white/10 p-1.5 rounded-md group-hover:bg-hepco-orange transition-colors">
@@ -88,7 +89,7 @@ const Footer = () => {
                 </div>
                 <p>
                   Hotline / Đường dây nóng:{' '}
-                  <a href="tel:1900969669" className="font-bold text-white hover:underline">
+                  <a href={COMPANY.phoneHref} className="font-bold text-white hover:underline">
                     1900 969669
                   </a>
                 </p>

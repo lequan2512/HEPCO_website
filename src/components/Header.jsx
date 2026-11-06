@@ -1,3 +1,4 @@
+import { COMPANY } from '../constants/company';
 import { useState, useEffect } from 'react';
 import { Phone, Menu, X, ExternalLink } from 'lucide-react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
@@ -46,11 +47,12 @@ const Header = () => {
     { name: 'Trang Chủ', path: ROUTES.HOME },
     { name: 'Giới Thiệu', path: ROUTES.ABOUT },
     { name: 'Dịch Vụ', path: ROUTES.SERVICES },
-    { name: 'Tin Tức', path: ROUTES.NEWS },
+    { name: 'Tin tức – Thông báo', path: ROUTES.NEWS },
+    { name: 'Liên hệ', path: '/lien-he' },
     { name: 'Quan Hệ Cổ Đông', path: ROUTES.SHAREHOLDERS },
     {
       name: 'Hóa Đơn Điện Tử',
-      href: 'https://hoadondientu.hepco.com.vn/',
+      href: COMPANY.invoiceUrl,
       isExternal: true,
     },
   ];
@@ -130,7 +132,7 @@ const Header = () => {
           <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
             {/* Tablet & Desktop Hotline Pill Button (Hidden on <1024px when drawer is open to avoid duplicate CTA) */}
             <a
-              href="tel:1900969669"
+              href={COMPANY.phoneHref}
               className={`${
                 isMenuOpen ? 'hidden lg:inline-flex' : 'hidden sm:inline-flex'
               } whitespace-nowrap shrink-0 items-center gap-2 xl:gap-2.5 px-3.5 xl:px-4.5 py-2 rounded-full bg-[#10243b] hover:bg-emerald-700 text-white font-bold text-xs xl:text-sm shadow-sm hover:shadow-md active:scale-[0.98] transition-all duration-200 group`}
@@ -141,7 +143,7 @@ const Header = () => {
               </div>
               <div className="flex flex-col text-left leading-none">
                 <span className="hidden xl:block text-[9px] font-bold uppercase tracking-wider text-emerald-400 group-hover:text-emerald-100 leading-none mb-0.5">
-                  Hotline 24/7
+                  Hotline hỗ trợ
                 </span>
                 <span className="text-xs xl:text-sm font-black text-white tracking-wide leading-tight whitespace-nowrap">
                   1900 969669
@@ -152,12 +154,12 @@ const Header = () => {
             {/* Mobile Call Button (< 640px, hidden when drawer is open) */}
             {!isMenuOpen && (
               <a
-                href="tel:1900969669"
+                href={COMPANY.phoneHref}
                 className="sm:hidden whitespace-nowrap shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-[#10243b] text-white font-bold text-[11px] shadow-xs"
                 title="Gọi hotline 1900 969669"
               >
                 <Phone className="w-3 h-3 text-emerald-400 fill-current shrink-0" />
-                <span>1900 969669</span>
+                <span>{COMPANY.phone}</span>
               </a>
             )}
 
@@ -166,6 +168,8 @@ const Header = () => {
               type="button"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="lg:hidden p-2 rounded-xl text-gray-700 hover:text-[#10243b] hover:bg-gray-100 active:scale-95 transition-all focus:outline-hidden shrink-0"
+              aria-expanded={isMenuOpen}
+              aria-controls="mobile-navigation"
               aria-label={isMenuOpen ? 'Đóng danh mục điều hướng' : 'Mở danh mục điều hướng'}
             >
               {isMenuOpen ? <X className="w-6 h-6 text-[#10243b]" /> : <Menu className="w-6 h-6" />}
@@ -184,6 +188,7 @@ const Header = () => {
 
       {/* Mobile & Tablet Navigation Drawer */}
       <div
+        id="mobile-navigation"
         className={`lg:hidden absolute top-full left-0 w-full bg-white border-b border-gray-200 shadow-2xl transition-all duration-250 ease-out origin-top z-50 max-h-[calc(100dvh-64px)] overflow-y-auto ${
           isMenuOpen
             ? 'opacity-100 scale-y-100 visible'
@@ -231,7 +236,7 @@ const Header = () => {
           {/* Mobile & Tablet Hotline Box */}
           <div className="pt-3 mt-2 border-t border-gray-200/80">
             <a
-              href="tel:1900969669"
+              href={COMPANY.phoneHref}
               className="flex items-center justify-center gap-3 w-full py-3 px-4 rounded-xl bg-[#10243b] hover:bg-emerald-700 text-white font-bold text-sm shadow-md transition-colors"
             >
               <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
@@ -239,7 +244,7 @@ const Header = () => {
               </div>
               <div className="flex flex-col text-left">
                 <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider leading-none">
-                  Tổng Đài Trực 24/7
+                  Tổng đài hỗ trợ
                 </span>
                 <span className="text-base font-black text-white leading-tight mt-0.5">
                   1900 969669

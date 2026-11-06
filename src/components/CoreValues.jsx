@@ -1,3 +1,4 @@
+import { COMPANY } from '../constants/company';
 import { Calendar, FileText, AlertTriangle, ClipboardList, ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -9,49 +10,49 @@ const CoreValues = () => {
       subtitle: 'Tra cứu thời gian và tuyến thu gom theo từng Phường, xã',
       buttonText: 'Tra cứu tuyến đường',
       icon: Calendar,
-      internalPath: '/bai-viet/20263',
+      internalPath: COMPANY.collectionSchedule,
       badge: 'Cập nhật 2026',
       badgeColor: 'bg-emerald-50 text-emerald-800 border-emerald-200',
     },
     {
       id: 'invoice',
       title: 'HÓA ĐƠN ĐIỆN TỬ',
-      subtitle: 'Tra cứu, xuất hóa đơn & thanh toán tiền dịch vụ vệ sinh trực tuyến',
-      buttonText: 'Thanh toán online',
+      subtitle: 'Truy cập cổng tra cứu hóa đơn dịch vụ của HEPCO',
+      buttonText: 'Tra cứu hóa đơn',
       icon: FileText,
-      href: 'https://hoadondientu.hepco.com.vn/',
-      badge: 'Cổng thanh toán',
+      href: COMPANY.invoiceUrl,
+      badge: 'Cổng hóa đơn',
       badgeColor: 'bg-blue-50 text-blue-800 border-blue-200',
     },
     {
       id: 'report',
       title: 'BÁO CÁO SỰ CỐ',
-      subtitle: 'Gửi hình ảnh và tọa độ điểm rác thải phát sinh về trung tâm',
-      buttonText: 'Gửi phản ánh 24/7',
+      subtitle: 'Liên hệ trang Facebook HEPCO để phản ánh về vệ sinh môi trường',
+      buttonText: 'Liên hệ qua Facebook',
       icon: AlertTriangle,
-      href: 'https://www.facebook.com/hepco.com.vn',
-      badge: 'Phản ứng nhanh',
+      href: COMPANY.facebook,
+      badge: 'Facebook HEPCO',
       badgeColor: 'bg-amber-50 text-amber-800 border-amber-200',
     },
     {
       id: 'register',
-      title: 'ĐĂNG KÝ DỊCH VỤ',
-      subtitle: 'Đăng ký hút hầm cầu, cắt tỉa cành cây, dọn vệ sinh công trình',
-      buttonText: 'Đăng ký ngay',
+      title: 'YÊU CẦU DỊCH VỤ',
+      subtitle: 'Trao đổi nhu cầu và tìm hiểu thủ tục sử dụng dịch vụ qua Facebook HEPCO',
+      buttonText: 'Tư vấn qua Facebook',
       icon: ClipboardList,
-      href: 'https://www.facebook.com/hepco.com.vn',
+      href: COMPANY.facebook,
       badge: 'Dịch vụ trọn gói',
       badgeColor: 'bg-purple-50 text-purple-800 border-purple-200',
     },
   ];
 
   return (
-    <section className="py-16 md:py-20 bg-[#fafafa] border-b border-gray-200/80">
+    <section className="py-10 md:py-12 bg-[#fafafa] border-b border-gray-200/80">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
           <div className="max-w-2xl">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-[#10243b] tracking-tight">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-[#10243b] tracking-tight">
               Tra Cứu &amp; Dịch Vụ Nhanh
             </h2>
             <p className="mt-3 text-sm sm:text-base text-gray-600 leading-relaxed">
@@ -96,7 +97,7 @@ const CoreValues = () => {
             );
 
             const cardClass =
-              'group relative flex flex-col justify-between p-6 sm:p-7 rounded-3xl bg-white border border-gray-200 hover:border-emerald-600/50 shadow-xs hover:shadow-xl transition-all duration-300 hover:-translate-y-1.5';
+              'group relative flex flex-col justify-between p-6 sm:p-7 rounded-lg bg-white border border-gray-200 hover:border-emerald-600/50 transition-colors';
 
             if (item.internalPath) {
               return (

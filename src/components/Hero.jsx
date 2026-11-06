@@ -1,3 +1,4 @@
+import { COMPANY } from '../constants/company';
 import { useState } from 'react';
 import { ArrowRight, Phone, Play, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -20,8 +21,8 @@ const Hero = () => {
       <div className="container mx-auto px-3.5 sm:px-6 lg:px-8 max-w-7xl">
         {/* Main Display Headline */}
         <div className="flex flex-col items-center text-center max-w-4xl mx-auto mb-8 sm:mb-10 md:mb-12">
-          <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tight text-[#10243b] leading-[1.2] sm:leading-[1.15] mb-4 sm:mb-6 drop-shadow-2xs">
-            {heroConfig.headlinePrefix}{' '}
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight text-[#10243b] leading-[1.2] sm:leading-[1.15] mb-4 sm:mb-6 drop-shadow-2xs">
+            <span className="block text-sm sm:text-base font-medium mb-3">{COMPANY.name}</span>{heroConfig.headlinePrefix}{' '}
             <span className="block sm:inline text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-green-600 to-teal-700">
               {heroConfig.headlineHighlight}
             </span>
@@ -43,18 +44,18 @@ const Hero = () => {
             </Link>
 
             <a
-              href={`tel:${heroConfig.hotlineTel || '02343822052'}`}
+              href={COMPANY.phoneHref}
               className="w-full sm:w-auto whitespace-nowrap inline-flex items-center justify-center gap-2.5 px-6 sm:px-7 py-3.5 sm:py-4 rounded-xl text-gray-800 font-bold text-sm sm:text-base bg-white hover:bg-gray-50 border border-gray-300 shadow-xs hover:border-gray-400 transition-all active:scale-[0.98]"
             >
               <Phone className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>Hotline: {heroConfig.hotlineDisplay || '(0234) 3822 052'}</span>
+              <span>Hotline: {COMPANY.phone}</span>
             </a>
           </div>
         </div>
 
         {/* Hero Showcase Frame - Adaptive aspect ratio so banner graphics are never cropped */}
         <div className="relative mt-2 sm:mt-4 md:mt-6">
-          <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-gray-200/90 shadow-2xl bg-[#0e3b2f]">
+          <div className="relative rounded-lg sm:rounded-lg overflow-hidden border border-gray-200/90 shadow-sm bg-[#0e3b2f]">
             <div className="relative w-full aspect-[16/9] sm:aspect-[21/10] overflow-hidden group flex items-center justify-center">
               <img
                 src={resolveAssetUrl(heroConfig.coverImage || '/images/cover.png')}

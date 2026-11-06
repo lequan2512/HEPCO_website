@@ -1,0 +1,6 @@
+.env*
+.git
+.agents
+node_modules
+dist
+docs
