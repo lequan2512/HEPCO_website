@@ -93,7 +93,7 @@ const AppRoutes = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
       <Header />
-      <main className="flex-grow flex flex-col">
+      <main id="main-content" tabIndex={-1} className="flex-grow flex flex-col">
         <Routes>
           <Route path={ROUTES.HOME} element={<Home />} />
           <Route path="/lien-he" element={<HomeContact />} />

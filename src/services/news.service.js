@@ -10,16 +10,16 @@ import {
 const STORAGE_OVERRIDES_KEY = 'hepco_cms_overrides_v1';
 
 const DEFAULT_HERO_SETTINGS = {
-  headlinePrefix: 'Hạ Tầng Đô Thị & Môi Trường Xanh',
-  headlineHighlight: 'Cho Cố Đô Vững Bền',
+  headlinePrefix: 'Cùng chăm chút',
+  headlineHighlight: 'cho một Huế xanh, sạch, đẹp.',
   subtitle:
-    'Gần 50 năm đồng hành cùng tỉnh Thừa Thiên Huế, HEPCO cung ứng trọn gói dịch vụ thu gom chất thải, vệ sinh môi trường, chăm sóc cây xanh công viên và chiếu sáng công cộng đạt chuẩn chất lượng cao.',
-  primaryCtaText: 'Khám Phá Dịch Vụ',
+    'Tra cứu thông tin, tìm hiểu dịch vụ vệ sinh môi trường và kết nối với HEPCO. Đồng hành cùng người dân, cơ quan và doanh nghiệp tại Huế.',
+  primaryCtaText: 'Tìm hiểu dịch vụ',
   hotlineDisplay: '(0234) 3822 052',
   hotlineTel: '02343822052',
-  coverImage: '/images/cover.png',
+  coverImage: '/images/services/thu-gom-rac-1.jpg',
   videoUrl: 'https://www.youtube.com/embed/P7RZLoytEBI?autoplay=1',
-  videoButtonText: 'Xem Phim Giới Thiệu'
+  videoButtonText: 'Video giới thiệu'
 };
 
 const DEFAULT_ABOUT_SETTINGS = {

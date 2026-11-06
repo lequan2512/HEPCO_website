@@ -56,6 +56,7 @@ Snapshot: **2026-11-06**. Historical results below are not live deployment indic
 - [x] Initial home-page simplification and direct contact route implemented.
 - [x] Facebook actions clarified and selected shared contact details centralized.
 - [x] Initial implementation passed `npm run build` and `npm run lint`.
+- [x] Home UI refinement implemented: compact hero/utilities, responsive header, featured news, service cards and contact hierarchy; lint/build passed. Browser acceptance remains pending.
 - [x] Implementation committed and pushed as `9457499`.
 - [ ] Initial Preview completion and visual review confirmed.
 - [ ] Backend authentication, persistence and publication verified.

@@ -39,3 +39,15 @@ Work on a `codex/` branch; build and lint before pushing. Deploy a Vercel previe
 - Build still reports a large JavaScript chunk (approximately 3.83 MB, 958 KB gzip); optimization remains open.
 - In-app browser could not reach Windows loopback, so local visual QA was unavailable through that route.
 - Company details were consolidated from existing source, not independently approved by HEPCO.
+
+## Home-page UI refinement — 2026-11-06
+
+- Replaced the tall centered hero with a responsive two-column introduction and existing operational photography. Updated default text while preserving CMS overrides.
+- Made quick utilities compact and task-oriented; added explicit external-tab labels and a direct service-contact destination.
+- Rebuilt the shared header with a utility bar, six primary links, a collapsible menu below the desktop breakpoint and Escape-to-close behavior.
+- Added one featured news item with an image and a compact list of additional news items; retained loading/error/empty states.
+- Presented services in a four-column desktop grid with smaller cards and removed decorative assurance text.
+- Improved company/shareholder information and contact hierarchy.
+- Added a skip link, visible keyboard focus, reduced-motion support and a native video dialog that loads its iframe only when opened.
+- Validation: lint, production build and Git whitespace checks passed. The large-bundle warning remains open for Phase 5.
+- Visual QA remains pending: Windows browser automation was stopped because URL policy enforcement is unsupported for the active browser. No responsive or browser-interaction pass is claimed.
