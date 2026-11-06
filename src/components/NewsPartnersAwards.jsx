@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Calendar, ArrowRight } from 'lucide-react';
 import { ROUTES } from '../constants/routes';
 import { useGetNews } from '../apis/news';
-import { API_BASE_URL } from '../constants/api';
+import { resolveAssetUrl } from '../utils/assetUrl';
 
 const stripHtml = (html) => {
   if (typeof html !== 'string') return '';
@@ -193,7 +193,7 @@ const NewsPartnersAwards = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
               {news.map((item, i) => {
                 const displayDate = item.date || formatDate(item.created_at);
-                const categoryLabel = item.category || (item.type === 'shareholders' ? 'Quan hệ cổ đông' : item.type === 'service' ? 'Dịch vụ' : 'Tin tức');
+                const categoryLabel = item.categoryLabel || item.category || (item.type === 'shareholders' ? 'Quan hệ cổ đông' : item.type === 'service' ? 'Dịch vụ' : 'Tin tức');
                 return (
                   <div
                     key={i}
@@ -203,8 +203,12 @@ const NewsPartnersAwards = () => {
                     <div className="h-52 bg-gray-100 relative overflow-hidden">
                       {item.thumbnail ? (
                         <img
-                          src={item.thumbnail?.startsWith('http') ? item.thumbnail : `${API_BASE_URL}${item.thumbnail}`}
+                          src={resolveAssetUrl(item.thumbnail)}
                           alt={item.title}
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = '/images/cover.png';
+                          }}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                         />
                       ) : (
@@ -233,7 +237,7 @@ const NewsPartnersAwards = () => {
                         </h3>
 
                         <p className="text-gray-500 text-xs sm:text-sm line-clamp-2 leading-relaxed font-normal">
-                          {typeof item.content === 'string' ? stripHtml(item.content) : 'Click vào để xem chi tiết bài viết...'}
+                          {item.summary || (typeof item.content === 'string' ? stripHtml(item.content) : 'Click vào để xem chi tiết bài viết...')}
                         </p>
                       </div>
 

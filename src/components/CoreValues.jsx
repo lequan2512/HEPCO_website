@@ -1,4 +1,5 @@
 import { Calendar, FileText, AlertTriangle, ClipboardList, ArrowUpRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const CoreValues = () => {
   const utilities = [
@@ -8,7 +9,7 @@ const CoreValues = () => {
       subtitle: 'Tra cứu thời gian và tuyến thu gom theo từng Phường, xã',
       buttonText: 'Tra cứu tuyến đường',
       icon: Calendar,
-      href: 'https://www.hepco.com.vn/Tintuc/Lich-trinh-thu-gom-rac-tren-ia-ban-Nam-song-Huong_20263',
+      internalPath: '/bai-viet/20263',
       badge: 'Cập nhật 2026',
       badgeColor: 'bg-emerald-50 text-emerald-800 border-emerald-200',
     },
@@ -63,14 +64,8 @@ const CoreValues = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {utilities.map((item) => {
             const IconComponent = item.icon;
-            return (
-              <a
-                key={item.id}
-                href={item.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group relative flex flex-col justify-between p-6 sm:p-7 rounded-3xl bg-white border border-gray-200 hover:border-emerald-600/50 shadow-xs hover:shadow-xl transition-all duration-300 hover:-translate-y-1.5"
-              >
+            const cardInner = (
+              <>
                 <div>
                   <div className="flex items-center justify-between mb-6">
                     <div className="w-12 h-12 rounded-2xl bg-gray-50 group-hover:bg-emerald-50 text-gray-700 group-hover:text-emerald-700 flex items-center justify-center transition-colors border border-gray-100 group-hover:border-emerald-200">
@@ -97,6 +92,29 @@ const CoreValues = () => {
                     <ArrowUpRight className="w-3.5 h-3.5" />
                   </div>
                 </div>
+              </>
+            );
+
+            const cardClass =
+              'group relative flex flex-col justify-between p-6 sm:p-7 rounded-3xl bg-white border border-gray-200 hover:border-emerald-600/50 shadow-xs hover:shadow-xl transition-all duration-300 hover:-translate-y-1.5';
+
+            if (item.internalPath) {
+              return (
+                <Link key={item.id} to={item.internalPath} className={cardClass}>
+                  {cardInner}
+                </Link>
+              );
+            }
+
+            return (
+              <a
+                key={item.id}
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={cardClass}
+              >
+                {cardInner}
               </a>
             );
           })}

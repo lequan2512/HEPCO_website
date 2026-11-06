@@ -4,7 +4,7 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useQueryClient } from '@tanstack/react-query';
 import { Plus, Trash2, Edit2, X, Image as ImageIcon, FileText, Search, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
-import { API_BASE_URL } from '../../../constants/api';
+import { resolveAssetUrl } from '../../../utils/assetUrl';
 import toast from 'react-hot-toast';
 import { getErrorMessage } from '../../../utils/errorMapper';
 import Loading from '../../../components/Loading';
@@ -300,7 +300,7 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
             ) : null}
             {formik.values.thumbnail && (
               <div className="mt-2 relative inline-block">
-                <img src={formik.values.thumbnail.startsWith('http') ? formik.values.thumbnail : `${API_BASE_URL}${formik.values.thumbnail}`} alt="Thumbnail" className="h-32 object-cover rounded shadow" />
+                <img src={resolveAssetUrl(formik.values.thumbnail)} alt="Thumbnail" className="h-32 object-cover rounded shadow" />
                 <button
                   type="button"
                   onClick={() => {
@@ -481,7 +481,7 @@ const AdminNewsManager = ({ type, editOnly = false }) => {
                     <td className="px-6 py-4">
                       {item.thumbnail ? (
                         <img
-                          src={item.thumbnail.startsWith('http') ? item.thumbnail : `${API_BASE_URL}${item.thumbnail}`}
+                          src={resolveAssetUrl(item.thumbnail)}
                           alt="Thumb"
                           className="w-16 h-12 object-cover rounded-md shadow-sm border border-gray-200"
                         />

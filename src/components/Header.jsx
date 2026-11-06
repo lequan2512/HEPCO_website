@@ -9,12 +9,14 @@ const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
 
-  // Tự động đóng menu mobile khi đổi trang
-  useEffect(() => {
+  // Auto close mobile menu on route change
+  const [prevPathname, setPrevPathname] = useState(location.pathname);
+  if (location.pathname !== prevPathname) {
+    setPrevPathname(location.pathname);
     setIsMenuOpen(false);
-  }, [location.pathname]);
+  }
 
-  // Hiệu ứng đổ bóng và viền khi cuộn trang
+  // Shadow and border effect on page scroll
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 20) {
@@ -228,4 +230,3 @@ const Header = () => {
 };
 
 export default Header;
-

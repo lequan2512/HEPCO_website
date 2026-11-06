@@ -9,8 +9,8 @@ export const DEPARTMENT_TYPE = {
 export const DEPARTMENT_TYPE_LABELS = {
   1: { value: 1, label: 'Văn Phòng', bg: 'bg-blue-100 text-blue-800 border-blue-200' },
   2: { value: 2, label: 'Xí Nghiệp', bg: 'bg-purple-100 text-purple-800 border-purple-200' },
-  '1': { value: 1, label: 'Văn Phòng', bg: 'bg-blue-100 text-blue-800 border-blue-200' },
-  '2': { value: 2, label: 'Xí Nghiệp', bg: 'bg-purple-100 text-purple-800 border-purple-200' },
+
+
   'OFFICE': { value: 1, label: 'Văn Phòng', bg: 'bg-blue-100 text-blue-800 border-blue-200' },
   'ENTERPRISE': { value: 2, label: 'Xí Nghiệp', bg: 'bg-purple-100 text-purple-800 border-purple-200' },
   'VAN_PHONG': { value: 1, label: 'Văn Phòng', bg: 'bg-blue-100 text-blue-800 border-blue-200' },

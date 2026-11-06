@@ -49,10 +49,10 @@ const HomeShowcase = () => {
           </div>
 
           <Link
-            to={ROUTES.NEWS}
+            to={`${ROUTES.NEWS}?tab=gallery`}
             className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-gray-100 hover:bg-[#10243b] text-[#10243b] hover:text-white font-bold text-sm transition-all duration-300 shadow-2xs group self-start md:self-auto"
           >
-            <span>Toàn Bộ Tin Tức &amp; Hoạt Động</span>
+            <span>Thư Viện Hình Ảnh &amp; Hoạt Động</span>
             <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
           </Link>
         </div>
@@ -60,8 +60,9 @@ const HomeShowcase = () => {
         {/* Showcase Grid (Oakdale Style Visual Cards) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
           {showcases.map((item, idx) => (
-            <div
+            <Link
               key={idx}
+              to={`${ROUTES.NEWS}?tab=gallery`}
               className="group flex flex-col rounded-3xl overflow-hidden bg-[#fafafa] border border-gray-200/90 hover:border-emerald-600/60 shadow-xs hover:shadow-xl transition-all duration-500 hover:-translate-y-2"
             >
               {/* Image Frame */}
@@ -93,11 +94,11 @@ const HomeShowcase = () => {
                 </div>
 
                 <div className="pt-4 mt-4 border-t border-gray-100 flex items-center justify-between text-xs font-bold text-[#10243b] group-hover:text-emerald-700">
-                  <span>Xem chi tiết</span>
+                  <span>Xem thư viện ảnh</span>
                   <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                 </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>

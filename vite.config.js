@@ -8,4 +8,13 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  server: {
+    proxy: {
+      '/Public/Upload': {
+        target: 'https://www.hepco.com.vn',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
 })

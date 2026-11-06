@@ -1,8 +1,8 @@
 import { useGetNews } from '../apis/news';
-import { API_BASE_URL } from '../constants/api';
 import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle2 } from 'lucide-react';
 import { ROUTES } from '../constants/routes';
+import { resolveAssetUrl } from '../utils/assetUrl';
 
 const FALLBACK_SERVICES = [
   {
@@ -67,9 +67,7 @@ const HomeServices = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10">
           {displayServices.map((service, index) => {
             const imageSrc = service.thumbnail
-              ? service.thumbnail.startsWith('http')
-                ? service.thumbnail
-                : `${API_BASE_URL}${service.thumbnail}`
+              ? resolveAssetUrl(service.thumbnail)
               : FALLBACK_SERVICES[index % FALLBACK_SERVICES.length].thumbnail;
 
             return (
@@ -86,6 +84,7 @@ const HomeServices = () => {
                     alt={service.title}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-108"
                     onError={(e) => {
+                      e.target.onerror = null;
                       e.target.src = FALLBACK_SERVICES[index % FALLBACK_SERVICES.length].thumbnail;
                     }}
                   />

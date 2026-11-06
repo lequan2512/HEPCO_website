@@ -1,14 +1,12 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
 import axiosInstance from '../utils/axios';
+import { getMigratedBanners } from '../services/news.service';
 
-// Lấy danh sách ảnh banner
+// Fetch banner images (with migrated fallback)
 export const useGetBanners = () => {
   return useQuery({
     queryKey: ['banners'],
-    queryFn: async () => {
-      const response = await axiosInstance.get('/api/banner');
-      return response.data;
-    },
+    queryFn: () => getMigratedBanners(),
   });
 };
 
@@ -26,7 +24,7 @@ export const useUploadBanner = () => {
   });
 };
 
-// Xóa banner
+// Delete banner
 export const useDeleteBanner = () => {
   return useMutation({
     mutationFn: async (filename) => {

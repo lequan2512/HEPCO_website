@@ -1,9 +1,23 @@
 import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Award, Leaf, Building2, Users, CheckCircle2, ZoomIn, X, MoveHorizontal, FileCheck, Download } from 'lucide-react';
+import {
+  Award,
+  Leaf,
+  Building2,
+  Users,
+  CheckCircle2,
+  ZoomIn,
+  X,
+  MoveHorizontal,
+  FileCheck,
+  Download,
+  History,
+  Briefcase
+} from 'lucide-react';
 import PageBanner from '../../../components/PageBanner';
 import SubNav from '../../../components/SubNav';
 import PdfFlipbook from '../../../components/PdfFlipbook';
+import { getAboutPages } from '../../../services/news.service';
 
 const About = () => {
   const location = useLocation();
@@ -12,6 +26,10 @@ const About = () => {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [pdfModal, setPdfModal] = useState(null); // { url, fileName, title, subtitle }
   const subNavItems = ['Về Hepco', 'Chức năng - Giấy phép', 'Sơ đồ tổ chức', 'Hồ sơ năng lực'];
+
+  const aboutPages = getAboutPages();
+  const historyPage = aboutPages.find((p) => p.id === 49);
+  const functionsPage = aboutPages.find((p) => p.id === 48);
 
   if (location.key !== prevLocationKey) {
     setPrevLocationKey(location.key);
@@ -33,7 +51,7 @@ const About = () => {
       <div className="container mx-auto px-2.5 sm:px-4 mt-6 sm:mt-8 md:mt-12 max-w-8xl">
 
         {activeTab === 0 && (
-          <div className="space-y-8 sm:space-y-12 md:space-y-20">
+          <div className="space-y-8 sm:space-y-12 md:space-y-16">
             {/* Open Letter Section */}
             <div className="flex flex-col lg:flex-row gap-6 sm:gap-8 lg:gap-12 items-center">
               {/* Left Image */}
@@ -81,7 +99,7 @@ const About = () => {
             </div>
 
             {/* Quick Stats / Highlights */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6 pb-6 sm:pb-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
               <div className="bg-white p-3.5 sm:p-5 md:p-6 rounded-2xl shadow-lg border border-gray-100 text-center hover:-translate-y-1 transition-transform duration-300 group">
                 <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto bg-green-50 rounded-full flex items-center justify-center mb-2 sm:mb-4 group-hover:bg-hepco-green transition-colors">
                   <Award className="w-6 h-6 sm:w-8 sm:h-8 text-hepco-green group-hover:text-white transition-colors" />
@@ -94,7 +112,7 @@ const About = () => {
                   <Users className="w-6 h-6 sm:w-8 sm:h-8 text-hepco-green group-hover:text-white transition-colors" />
                 </div>
                 <h4 className="text-xl sm:text-3xl font-extrabold text-gray-900 mb-1 sm:mb-2">500+</h4>
-                <p className="text-xs sm:text-sm text-gray-500 font-medium">Đối tác & Khách hàng</p>
+                <p className="text-xs sm:text-sm text-gray-500 font-medium">Đối tác &amp; Khách hàng</p>
               </div>
               <div className="bg-white p-3.5 sm:p-5 md:p-6 rounded-2xl shadow-lg border border-gray-100 text-center hover:-translate-y-1 transition-transform duration-300 group">
                 <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto bg-green-50 rounded-full flex items-center justify-center mb-2 sm:mb-4 group-hover:bg-hepco-green transition-colors">
@@ -111,6 +129,29 @@ const About = () => {
                 <p className="text-xs sm:text-sm text-gray-500 font-medium">Khu vực Miền Trung</p>
               </div>
             </div>
+
+            {/* Official History & Company Profile from hepco.com.vn/GioiThieu/Lich-su-hinh-thanh_49 */}
+            {historyPage && (
+              <div className="bg-white rounded-2xl md:rounded-3xl shadow-xl border border-gray-100 p-5 sm:p-8 md:p-10">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-hepco-green">
+                    <History className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-green-900 uppercase">
+                      {historyPage.title}
+                    </h2>
+                    <p className="text-xs sm:text-sm text-gray-500">
+                      Thông tin chính thức về quá trình hình thành, cơ cấu lãnh đạo và quy mô quản lý của HEPCO
+                    </p>
+                  </div>
+                </div>
+                <div
+                  className="prose prose-sm sm:prose-base md:prose-lg max-w-none text-gray-700 leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: historyPage.content }}
+                />
+              </div>
+            )}
           </div>
         )}
 
@@ -187,6 +228,24 @@ const About = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Official Functions & Duties Content from hepco.com.vn/GioiThieu/Chuc-nang-nhiem-vu_48 */}
+              {functionsPage && (
+                <div className="mt-8 pt-8 border-t border-gray-100">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-11 h-11 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-hepco-green">
+                      <Briefcase className="w-5 h-5" />
+                    </div>
+                    <h3 className="text-lg sm:text-2xl font-extrabold text-green-900 uppercase">
+                      {functionsPage.title}
+                    </h3>
+                  </div>
+                  <div
+                    className="prose prose-sm sm:prose-base max-w-none text-gray-700 leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: functionsPage.content }}
+                  />
+                </div>
+              )}
             </div>
 
             {/* PDF Preview Modal */}
@@ -221,6 +280,7 @@ const About = () => {
                     <PdfFlipbook
                       pdfUrl={pdfModal.url}
                       fileName={pdfModal.fileName}
+                      title={pdfModal.title}
                     />
                   </div>
                 </div>
