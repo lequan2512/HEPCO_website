@@ -243,8 +243,18 @@ const mergeWithOverridesAndApi = (baseList, apiItems = [], type = 'news') => {
   for (const item of baseList) {
     const strId = String(item.id);
     if (deletedSet.has(strId)) continue;
+    const overrideData = overrides.updated[strId] ? { ...overrides.updated[strId] } : null;
+    if (
+      overrideData &&
+      item.type === 'service' &&
+      (!overrideData.thumbnail || overrideData.thumbnail === '/images/cover.png') &&
+      item.thumbnail &&
+      item.thumbnail !== '/images/cover.png'
+    ) {
+      delete overrideData.thumbnail;
+    }
     const updatedItem = enrichArticleMetadata(
-      overrides.updated[strId] ? { ...item, ...overrides.updated[strId] } : item
+      overrideData ? { ...item, ...overrideData } : item
     );
     mapById.set(strId, updatedItem);
     seenTitleSet.add(normalizeText(updatedItem.title));
