@@ -79,6 +79,11 @@ body {
     word-break: keep-all !important;
     overflow-wrap: break-word !important;
   }
+  .prose table { display: block; width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  @media (min-width: 768px) { .prose table { display: table; } }
+  .prose-table-fix {
+    max-width: 100%;
+  }
 }
 
 /* Custom Sidebar Scrollbar */

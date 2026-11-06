@@ -284,24 +284,24 @@ const News = ({ pageType = 'news' }) => {
       <div className="container mx-auto px-2.5 sm:px-4 max-w-8xl mt-6 sm:mt-8 md:mt-10">
         {/* Sub-view Switcher for News Page: Articles vs Photo Gallery */}
         {pageType === 'news' && (
-          <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-            <div className="inline-flex bg-white p-1.5 rounded-2xl shadow-xs border border-gray-200/80">
+          <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4 mb-5 sm:mb-6">
+            <div className="inline-flex w-full sm:w-auto bg-white p-1.5 rounded-2xl shadow-xs border border-gray-200/80">
               <button
                 type="button"
                 onClick={() => {
                   setActiveSubView('articles');
                   setSearchParams({});
                 }}
-                className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+                className={`flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
                   activeSubView === 'articles'
                     ? 'bg-hepco-green text-white shadow-sm'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                 }`}
               >
-                <Newspaper className="w-4 h-4" />
-                <span>Tin tức &amp; Thông báo</span>
+                <Newspaper className="w-4 h-4 shrink-0" />
+                <span className="truncate">Tin tức &amp; Thông báo</span>
                 <span
-                  className={`text-[11px] px-2 py-0.5 rounded-full font-extrabold ${
+                  className={`text-[11px] px-1.5 sm:px-2 py-0.5 rounded-full font-extrabold shrink-0 ${
                     activeSubView === 'articles' ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-600'
                   }`}
                 >
@@ -315,16 +315,16 @@ const News = ({ pageType = 'news' }) => {
                   setActiveSubView('gallery');
                   setSearchParams({ tab: 'gallery' });
                 }}
-                className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+                className={`flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
                   activeSubView === 'gallery'
                     ? 'bg-hepco-green text-white shadow-sm'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                 }`}
               >
-                <ImageIcon className="w-4 h-4" />
-                <span>Thư viện Hình ảnh</span>
+                <ImageIcon className="w-4 h-4 shrink-0" />
+                <span className="truncate">Thư viện Hình ảnh</span>
                 <span
-                  className={`text-[11px] px-2 py-0.5 rounded-full font-extrabold ${
+                  className={`text-[11px] px-1.5 sm:px-2 py-0.5 rounded-full font-extrabold shrink-0 ${
                     activeSubView === 'gallery' ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-600'
                   }`}
                 >
@@ -577,10 +577,10 @@ const News = ({ pageType = 'news' }) => {
                 )}
               </div>
 
-              {/* Row 2: Unified Single-Line Toolbar: Search Input + Grouped Dropdown + Year Dropdown + Sort Dropdown */}
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-3 pt-1">
-                {/* 1. Keyword Search Input (5 cols on desktop) */}
-                <div className="relative md:col-span-5">
+              {/* Row 2: Unified Responsive Toolbar: Search Input + Grouped Dropdown + Year Dropdown + Sort Dropdown */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-2.5 sm:gap-3 pt-1">
+                {/* 1. Keyword Search Input (Full width on tablet, 4-5 cols on laptop/desktop) */}
+                <div className="relative sm:col-span-2 lg:col-span-4 xl:col-span-5">
                   <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <input
                     type="text"
@@ -604,8 +604,8 @@ const News = ({ pageType = 'news' }) => {
                   )}
                 </div>
 
-                {/* 2. Searchable Grouped Document Type / Category Dropdown (3 cols on desktop) */}
-                <div className="relative md:col-span-3" ref={typeDropdownRef}>
+                {/* 2. Searchable Grouped Document Type / Category Dropdown (Full width on tablet, 3 cols on laptop/desktop) */}
+                <div className="relative sm:col-span-2 lg:col-span-3" ref={typeDropdownRef}>
                   <button
                     type="button"
                     onClick={() => setIsTypeDropdownOpen((prev) => !prev)}
@@ -628,7 +628,7 @@ const News = ({ pageType = 'news' }) => {
 
                   {/* Popover Dropdown Menu with Search & Grouped Options */}
                   {isTypeDropdownOpen && (
-                    <div className="absolute left-0 right-0 md:w-80 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-200 z-40 overflow-hidden">
+                    <div className="absolute left-0 right-0 sm:w-80 md:w-96 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-200 z-40 overflow-hidden">
                       {/* Quick Filter Inside Dropdown */}
                       <div className="p-2.5 border-b border-gray-100 bg-gray-50/70">
                         <div className="relative">
@@ -812,8 +812,8 @@ const News = ({ pageType = 'news' }) => {
                   )}
                 </div>
 
-                {/* 3. Year Select Dropdown (2 cols on desktop) */}
-                <div className="relative md:col-span-2">
+                {/* 3. Year Select Dropdown (1 col on tablet, 2-3 cols on laptop/desktop) */}
+                <div className="relative sm:col-span-1 lg:col-span-2">
                   <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 text-hepco-green w-4 h-4 pointer-events-none" />
                   <select
                     value={selectedYear}
@@ -847,8 +847,8 @@ const News = ({ pageType = 'news' }) => {
                   <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                 </div>
 
-                {/* 4. Sort Select Dropdown (2 cols on desktop) */}
-                <div className="relative md:col-span-2">
+                {/* 4. Sort Select Dropdown (1 col on tablet, 3 cols on lg, 2 cols on xl) */}
+                <div className="relative sm:col-span-1 lg:col-span-3 xl:col-span-2">
                   <ArrowUpDown className="absolute left-3.5 top-1/2 -translate-y-1/2 text-hepco-green w-4 h-4 pointer-events-none" />
                   <select
                     value={sortOption}
@@ -1078,7 +1078,7 @@ const News = ({ pageType = 'news' }) => {
                                               )}
                                             </div>
 
-                                            <div className="flex items-center gap-2 shrink-0">
+                                            <div className="flex items-center justify-end gap-2 shrink-0 w-full sm:w-auto">
                                               {isPdf && (
                                                 <button
                                                   type="button"
@@ -1090,7 +1090,7 @@ const News = ({ pageType = 'news' }) => {
                                                       subtitle: `Ngày công bố: ${doc.date} • ${doc.documentTypeLabel || 'Quan hệ cổ đông'}`
                                                     })
                                                   }
-                                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-white hover:bg-emerald-600 text-emerald-700 hover:text-white border border-emerald-200 hover:border-emerald-600 transition-all cursor-pointer shadow-2xs"
+                                                  className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-white hover:bg-emerald-600 text-emerald-700 hover:text-white border border-emerald-200 hover:border-emerald-600 transition-all cursor-pointer shadow-2xs"
                                                 >
                                                   <Eye className="w-3.5 h-3.5" />
                                                   <span>Xem PDF</span>
@@ -1102,7 +1102,7 @@ const News = ({ pageType = 'news' }) => {
                                                 download={att.fileName}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-hepco-green hover:bg-emerald-700 text-white transition-all shadow-2xs"
+                                                className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-hepco-green hover:bg-emerald-700 text-white transition-all shadow-2xs"
                                               >
                                                 <Download className="w-3.5 h-3.5" />
                                                 <span>Tải về</span>
@@ -1159,7 +1159,7 @@ const News = ({ pageType = 'news' }) => {
                     </div>
                   ) : (
                     /* STANDARD 3-COLUMN CARD GRID (FOR NEWS AND SHAREHOLDERS GRID MODE) */
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 xl:gap-8">
                       {articles.map((article) => {
                         const catBadge =
                           pageType === 'shareholders'
@@ -1177,7 +1177,7 @@ const News = ({ pageType = 'news' }) => {
                           >
                             {/* Image Section */}
                             <div
-                              className="h-56 bg-gray-100 relative overflow-hidden cursor-pointer"
+                              className="h-48 sm:h-52 lg:h-56 bg-gray-100 relative overflow-hidden cursor-pointer"
                               onClick={() => navigate(ROUTES.ARTICLE_DETAIL.replace(':id', article.id))}
                             >
                               <img
@@ -1209,7 +1209,7 @@ const News = ({ pageType = 'news' }) => {
                             </div>
 
                             {/* Content Section */}
-                            <div className="p-6 flex-grow flex flex-col justify-between">
+                            <div className="p-4 sm:p-6 flex-grow flex flex-col justify-between">
                               <div>
                                 {/* Metadata */}
                                 <div className="flex items-center justify-between gap-2 text-gray-400 text-xs mb-3">

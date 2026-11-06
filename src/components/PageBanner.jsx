@@ -14,7 +14,7 @@ const PageBanner = ({ title, description, bgImage }) => {
 
       <div className="relative z-10 max-w-3xl">
         <h1 className="text-white text-xl sm:text-2xl md:text-3xl font-bold mb-1.5 md:mb-2 drop-shadow-md">{title}</h1>
-        <p className="text-white text-xs sm:text-sm md:text-base leading-relaxed opacity-90 text-justify">
+        <p className="text-white text-xs sm:text-sm md:text-base leading-relaxed opacity-90 text-center max-w-2xl mx-auto">
           {description}
         </p>
       </div>

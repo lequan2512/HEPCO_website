@@ -140,9 +140,9 @@ const ArticleDetail = () => {
   const relatedArticles = article.relatedArticles || [];
 
   return (
-    <div className="bg-gray-50 flex-grow min-h-screen py-10 relative">
-      {/* 24h.com.vn Desktop Floating Share Bar */}
-      <div className="hidden xl:flex flex-col items-center gap-3 fixed left-6 top-1/3 z-30 bg-white p-2.5 rounded-full shadow-xl border border-gray-100 transition-all">
+    <div className="bg-gray-50 flex-grow min-h-screen py-6 sm:py-10 relative">
+      {/* 24h.com.vn Desktop Floating Share Bar (Shown on 2xl+ screens so it never overlaps 1280px laptop content) */}
+      <div className="hidden 2xl:flex flex-col items-center gap-3 fixed left-6 top-1/3 z-30 bg-white p-2.5 rounded-full shadow-xl border border-gray-100 transition-all">
         <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">
           Chia sẻ
         </span>
@@ -210,9 +210,9 @@ const ArticleDetail = () => {
         {/* Article Container */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           {/* Header */}
-          <div className="p-6 sm:p-8 border-b border-gray-100">
+          <div className="p-4 sm:p-6 md:p-8 border-b border-gray-100">
             {/* Category & Year Badges */}
-            <div className="flex flex-wrap items-center gap-2 mb-4">
+            <div className="flex flex-wrap items-center gap-2 mb-3 sm:mb-4">
               {badgeMeta && (
                 <span
                   className={`text-xs font-bold px-3 py-1 rounded-full border ${badgeMeta.bg}`}
@@ -227,7 +227,7 @@ const ArticleDetail = () => {
               )}
             </div>
 
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-900 leading-tight mb-6">
+            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold text-gray-900 leading-tight mb-4 sm:mb-6">
               {article.title}
             </h1>
 
@@ -291,10 +291,10 @@ const ArticleDetail = () => {
 
           {/* Attachments Box (PDF, Word, Excel, RAR) */}
           {attachments.length > 0 && (
-            <div className="p-6 sm:p-8 bg-emerald-50/40 border-b border-gray-100">
-              <div className="flex items-center justify-between mb-4">
+            <div className="p-4 sm:p-6 md:p-8 bg-emerald-50/40 border-b border-gray-100">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 mb-4">
                 <h3 className="text-base sm:text-lg font-extrabold text-[#10243b] flex items-center gap-2">
-                  <Paperclip className="w-5 h-5 text-hepco-green" />
+                  <Paperclip className="w-5 h-5 text-hepco-green shrink-0" />
                   <span>Tài liệu đính kèm ({attachments.length})</span>
                 </h3>
                 <span className="text-xs text-gray-500">
@@ -312,7 +312,7 @@ const ArticleDetail = () => {
                   return (
                     <div
                       key={att.id}
-                      className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl border transition-all ${
+                      className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 sm:p-4 rounded-xl border transition-all ${
                         isSelected
                           ? 'bg-white border-hepco-green shadow-sm ring-1 ring-hepco-green/30'
                           : 'bg-white border-gray-200 hover:border-emerald-300'
@@ -331,12 +331,12 @@ const ArticleDetail = () => {
                               {att.ext || 'PDF'}
                             </span>
                             {sizeLabel && <span>Dung lượng: {sizeLabel}</span>}
-                            <span className="truncate max-w-xs text-gray-400">{att.fileName}</span>
+                            <span className="truncate max-w-[200px] sm:max-w-xs text-gray-400">{att.fileName}</span>
                           </div>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2 shrink-0">
+                      <div className="flex flex-wrap items-center justify-end gap-2 shrink-0 w-full sm:w-auto">
                         {isPdf && (
                           <button
                             type="button"
@@ -349,13 +349,13 @@ const ArticleDetail = () => {
                                 setActivePdfUrl(att);
                               }
                             }}
-                            className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
+                            className={`flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3 sm:px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
                               isSelected
                                 ? 'bg-[#10243b] text-white border-[#10243b]'
                                 : 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100'
                             }`}
                           >
-                            <Eye className="w-4 h-4" />
+                            <Eye className="w-4 h-4 shrink-0" />
                             <span>{isSelected ? 'Ẩn khung xem' : 'Xem trực tiếp'}</span>
                           </button>
                         )}
@@ -364,19 +364,19 @@ const ArticleDetail = () => {
                           href={resolvedUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors"
+                          className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors"
                           title="Mở tệp trong tab mới"
                         >
-                          <ExternalLink className="w-4 h-4" />
+                          <ExternalLink className="w-4 h-4 shrink-0" />
                           <span className="hidden md:inline">Mở tab mới</span>
                         </a>
 
                         <a
                           href={resolvedUrl}
                           download={att.fileName}
-                          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-hepco-green hover:bg-emerald-700 text-white shadow-xs transition-all"
+                          className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold bg-hepco-green hover:bg-emerald-700 text-white shadow-xs transition-all"
                         >
-                          <Download className="w-4 h-4" />
+                          <Download className="w-4 h-4 shrink-0" />
                           <span>Tải về</span>
                         </a>
                       </div>
@@ -421,7 +421,7 @@ const ArticleDetail = () => {
           )}
 
           {/* Content Body */}
-          <div className="p-6 sm:p-8 md:p-12">
+          <div className="p-4 sm:p-6 md:p-10 lg:p-12">
             {/* Main HTML Content */}
             <div className="text-gray-800 text-base md:text-lg leading-relaxed font-normal">
               {typeof article.content === 'string' ? (
@@ -471,7 +471,7 @@ const ArticleDetail = () => {
           </div>
 
           {/* Footer Sharing (24h.com.vn style) */}
-          <div className="px-8 py-6 border-t border-gray-100 bg-gray-50/80 flex flex-wrap items-center justify-between gap-4">
+          <div className="px-4 sm:px-6 md:px-8 py-5 sm:py-6 border-t border-gray-100 bg-gray-50/80 flex flex-wrap items-center justify-between gap-4">
             <div className="flex flex-wrap items-center gap-3">
               <span className="text-sm font-bold text-gray-800 flex items-center gap-2 mr-2">
                 <Share2 className="w-4 h-4 text-hepco-green" /> Chia sẻ bài viết này:
