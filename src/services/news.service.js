@@ -1,32 +1,145 @@
 import axiosInstance from '../utils/axios';
 import migratedData from '../data/migratedData.json';
-import { SHAREHOLDER_DOC_GROUP_LABELS } from '../constants/news';
+import {
+  NEWS_CATEGORY_LABELS,
+  SHAREHOLDER_DOC_TYPE_LABELS,
+  SHAREHOLDER_DOC_GROUP_LABELS,
+  GALLERY_CATEGORY_LABELS
+} from '../constants/news';
 
 const STORAGE_OVERRIDES_KEY = 'hepco_cms_overrides_v1';
 
-const loadLocalOverrides = () => {
-  if (typeof window === 'undefined') return { created: [], updated: {}, deleted: [] };
+const DEFAULT_HERO_SETTINGS = {
+  headlinePrefix: 'Hạ Tầng Đô Thị & Môi Trường Xanh',
+  headlineHighlight: 'Cho Cố Đô Vững Bền',
+  subtitle:
+    'Gần 50 năm đồng hành cùng tỉnh Thừa Thiên Huế, HEPCO cung ứng trọn gói dịch vụ thu gom chất thải, vệ sinh môi trường, chăm sóc cây xanh công viên và chiếu sáng công cộng đạt chuẩn chất lượng cao.',
+  primaryCtaText: 'Khám Phá Dịch Vụ',
+  hotlineDisplay: '(0234) 3822 052',
+  hotlineTel: '02343822052',
+  coverImage: '/images/cover.png',
+  videoUrl: 'https://www.youtube.com/embed/P7RZLoytEBI?autoplay=1',
+  videoButtonText: 'Xem Phim Giới Thiệu'
+};
+
+const DEFAULT_ABOUT_SETTINGS = {
+  bannerTitle: 'Giới thiệu',
+  bannerDescription:
+    'Tiền thân là phòng quản lý đô thị và nhà đất được ra đời năm 1975, trải qua quá trình hình thành và phát triển với nhiều cột mốc thay đổi, năm 2015 Công ty trách nhiệm hữu hạn nhà nước Môi trường và Công trình Đô thị Huế trở thành Công ty Cổ phần Môi trường và Công trình đô thị Huế cho đến nay. Là doanh nghiệp nhà nước chi phối 51% cổ phần với bộ máy tổ chức gồm 05 phòng nghiệp vụ và 13 đơn vị xí nghiệp trực thuộc. Hepco là đơn vị uy tín hàng đầu miền Trung hoạt động trong lĩnh vực vệ sinh môi trường và công trình đô thị với gần 500 khách hàng, đối tác trên địa bàn toàn thành phố Huế.',
+  hqTitle: 'Trụ sở HEPCO',
+  hqAddress: '46 Trần Phú, TP. Huế',
+  hqImage: '/images/cover.png',
+  openLetterTitle: 'Thư Ngỏ',
+  openLetterGreeting: 'Kính gửi Quý khách hàng,',
+  openLetterParagraph1:
+    'Chúng tôi trân trọng gửi lời chào và sự biết ơn sâu sắc đến Quý khách hàng đã tin tưởng và ủng hộ Công ty Cổ Phần Môi trường và Công trình đô thị Huế (HEPCO) trong suốt thời gian qua. Với bề dày gần 50 năm kinh nghiệm, cùng với đội ngũ nhân sự luôn tận tụy và hệ thống phương tiện thiết bị tiên tiến, chúng tôi khẳng định hoàn toàn đáp ứng mọi yêu cầu của Quý khách hàng trong lĩnh vực vệ sinh môi trường và công trình đô thị.',
+  openLetterParagraph2:
+    'Trên suốt chặng đường hình thành và phát triển, HEPCO không chỉ là một đối tác được chính quyền đô thị địa phương tín nhiệm giao nhiệm vụ, đặt hàng và thực hiện đấu thầu mà còn là đối tác đáng tin cậy của các tổ chức, doanh nghiệp và cá nhân trong lĩnh vực thu gom, vận chuyển, và xử lý chất thải trên địa bàn thành phố Huế.',
+  openLetterHighlight:
+    'Ngoài thực hiện các công tác ở lĩnh vực vệ sinh môi trường, chúng tôi còn thực hiện thi công hệ thống điện chiếu sáng đô thị và trang trí đường phố, cũng như các công trình thoát nước, xây dựng hạ tầng, dân dụng và các lĩnh vực kinh doanh đa dạng khác.',
+  stats: [
+    { value: '50+', label: 'Năm kinh nghiệm' },
+    { value: '500+', label: 'Đối tác & Khách hàng' },
+    { value: '100%', label: 'Cam kết xanh' },
+    { value: 'Hàng Đầu', label: 'Khu vực Miền Trung' }
+  ],
+  permits: [
+    {
+      id: 'permit-317',
+      title: 'Giấy phép Môi trường',
+      number: 'Số 317/GPMT-BTNMT',
+      issuer: 'Bộ Tài nguyên và Môi trường',
+      fileUrl: '/pdf/7. 317-GP-BTNMT_Signed.pdf',
+      fileName: '317-GPMT-BTNMT.pdf',
+      theme: 'emerald'
+    },
+    {
+      id: 'permit-48',
+      title: 'Giấy phép Môi trường',
+      number: 'Số 48/GPMT-UBND',
+      issuer: 'UBND thành phố Huế',
+      fileUrl: '/pdf/7. 48-GP-UBND_Signed (TTH).pdf',
+      fileName: '48-GPMT-UBND.pdf',
+      theme: 'blue'
+    }
+  ],
+  orgChartImage: '/images/organizational_chart.png',
+  capabilityPdfUrl: '/pdf/HoSoNangLuc2026.pdf',
+  capabilityPdfName: 'Hồ_Sơ_Năng_Lực_HEPCO_2026.pdf'
+};
+
+const getEmptyOverrides = () => ({
+  created: [],
+  updated: {},
+  deleted: [],
+  galleryCreated: [],
+  galleryUpdated: {},
+  galleryDeleted: [],
+  banners: null,
+  heroSettings: null,
+  aboutSettings: null
+});
+
+export const loadLocalOverrides = () => {
+  if (typeof window === 'undefined') return getEmptyOverrides();
   try {
     const raw = window.localStorage.getItem(STORAGE_OVERRIDES_KEY);
-    if (!raw) return { created: [], updated: {}, deleted: [] };
+    if (!raw) return getEmptyOverrides();
     const parsed = JSON.parse(raw);
     return {
       created: Array.isArray(parsed.created) ? parsed.created : [],
       updated: parsed.updated && typeof parsed.updated === 'object' ? parsed.updated : {},
-      deleted: Array.isArray(parsed.deleted) ? parsed.deleted : []
+      deleted: Array.isArray(parsed.deleted) ? parsed.deleted : [],
+      galleryCreated: Array.isArray(parsed.galleryCreated) ? parsed.galleryCreated : [],
+      galleryUpdated:
+        parsed.galleryUpdated && typeof parsed.galleryUpdated === 'object'
+          ? parsed.galleryUpdated
+          : {},
+      galleryDeleted: Array.isArray(parsed.galleryDeleted) ? parsed.galleryDeleted : [],
+      banners: Array.isArray(parsed.banners) ? parsed.banners : null,
+      heroSettings:
+        parsed.heroSettings && typeof parsed.heroSettings === 'object'
+          ? parsed.heroSettings
+          : null,
+      aboutSettings:
+        parsed.aboutSettings && typeof parsed.aboutSettings === 'object'
+          ? parsed.aboutSettings
+          : null
     };
   } catch {
-    return { created: [], updated: {}, deleted: [] };
+    return getEmptyOverrides();
   }
 };
 
-const saveLocalOverrides = (overrides) => {
+export const saveLocalOverrides = (overrides) => {
   if (typeof window === 'undefined') return;
   try {
     window.localStorage.setItem(STORAGE_OVERRIDES_KEY, JSON.stringify(overrides));
   } catch {
     // Ignore storage quota errors
   }
+};
+
+export const resetLocalOverrides = () => {
+  if (typeof window === 'undefined') return;
+  window.localStorage.removeItem(STORAGE_OVERRIDES_KEY);
+};
+
+export const exportCmsDataJson = () => {
+  const overrides = loadLocalOverrides();
+  return JSON.stringify(overrides, null, 2);
+};
+
+export const importCmsDataJson = (jsonStr) => {
+  const parsed = JSON.parse(jsonStr);
+  if (!parsed || typeof parsed !== 'object') {
+    throw new Error('Invalid CMS JSON format');
+  }
+  saveLocalOverrides({
+    ...getEmptyOverrides(),
+    ...parsed
+  });
+  return true;
 };
 
 const normalizeText = (str) => {
@@ -57,6 +170,12 @@ const parseTimestamp = (dateStr, fallbackTs = 0) => {
   return new Date(cleanStr).getTime() || 0;
 };
 
+const extractYearFromDateString = (dateStr) => {
+  if (!dateStr || typeof dateStr !== 'string') return new Date().getFullYear();
+  const match = dateStr.match(/\b(20\d{2}|19\d{2})\b/);
+  return match ? Number(match[1]) : new Date().getFullYear();
+};
+
 const getBaseCollectionByType = (type) => {
   if (type === 'shareholders') return migratedData.shareholders || [];
   if (type === 'service') return migratedData.services || [];
@@ -72,6 +191,37 @@ const getBaseCollectionByType = (type) => {
   return migratedData.news || [];
 };
 
+const enrichArticleMetadata = (item) => {
+  if (!item) return item;
+  const publishYear = Number(item.publishYear) || extractYearFromDateString(item.date);
+  if (item.type === 'shareholders') {
+    const docType = item.documentType || item.category || 'other_document';
+    const docTypeLabel =
+      SHAREHOLDER_DOC_TYPE_LABELS[docType]?.label ||
+      item.documentTypeLabel ||
+      'Tài liệu & Thông báo khác';
+    return {
+      ...item,
+      publishYear,
+      documentType: docType,
+      documentTypeLabel: docTypeLabel,
+      category: docType,
+      categoryLabel: docTypeLabel,
+      attachments: Array.isArray(item.attachments) ? item.attachments : []
+    };
+  }
+  const cat = item.category || 'company_activity';
+  const catLabel =
+    NEWS_CATEGORY_LABELS[cat]?.label || item.categoryLabel || 'Hoạt động công ty';
+  return {
+    ...item,
+    publishYear,
+    category: cat,
+    categoryLabel: catLabel,
+    attachments: Array.isArray(item.attachments) ? item.attachments : []
+  };
+};
+
 const mergeWithOverridesAndApi = (baseList, apiItems = [], type = 'news') => {
   const overrides = loadLocalOverrides();
   const deletedSet = new Set((overrides.deleted || []).map((id) => String(id)));
@@ -79,20 +229,25 @@ const mergeWithOverridesAndApi = (baseList, apiItems = [], type = 'news') => {
   const mapById = new Map();
   const seenTitleSet = new Set();
 
-  for (const item of baseList) {
-    const strId = String(item.id);
-    if (deletedSet.has(strId)) continue;
-    const updatedItem = overrides.updated[strId] ? { ...item, ...overrides.updated[strId] } : item;
-    mapById.set(strId, updatedItem);
-    seenTitleSet.add(normalizeText(updatedItem.title));
-  }
-
   for (const createdItem of overrides.created) {
     if (type !== 'all' && createdItem.type !== type) continue;
     const strId = String(createdItem.id);
     if (deletedSet.has(strId)) continue;
-    mapById.set(strId, createdItem);
-    seenTitleSet.add(normalizeText(createdItem.title));
+    const enriched = enrichArticleMetadata(
+      overrides.updated[strId] ? { ...createdItem, ...overrides.updated[strId] } : createdItem
+    );
+    mapById.set(strId, enriched);
+    seenTitleSet.add(normalizeText(enriched.title));
+  }
+
+  for (const item of baseList) {
+    const strId = String(item.id);
+    if (deletedSet.has(strId)) continue;
+    const updatedItem = enrichArticleMetadata(
+      overrides.updated[strId] ? { ...item, ...overrides.updated[strId] } : item
+    );
+    mapById.set(strId, updatedItem);
+    seenTitleSet.add(normalizeText(updatedItem.title));
   }
 
   for (const apiItem of apiItems) {
@@ -103,13 +258,13 @@ const mergeWithOverridesAndApi = (baseList, apiItems = [], type = 'news') => {
     const normTitle = normalizeText(apiItem.title);
     if (!mapById.has(strId) && !seenTitleSet.has(normTitle)) {
       const ts = parseTimestamp(apiItem.date || apiItem.created_at);
-      mapById.set(strId, {
-        ...apiItem,
-        timestamp: ts,
-        category: apiItem.category || 'company_activity',
-        categoryLabel: apiItem.categoryLabel || (apiItem.type === 'shareholders' ? 'Tài liệu cổ đông' : 'Hoạt động công ty'),
-        attachments: apiItem.attachments || []
-      });
+      mapById.set(
+        strId,
+        enrichArticleMetadata({
+          ...apiItem,
+          timestamp: ts
+        })
+      );
       seenTitleSet.add(normTitle);
     }
   }
@@ -130,11 +285,10 @@ export const getNewsList = async (params = {}) => {
   } = params;
 
   let apiItems = [];
-  // Only fetch live API if it's a custom server or to merge newly added items
   try {
     const response = await axiosInstance.get('/api/news', {
       params: { type, limit: 50, page: 1 },
-      timeout: 3500
+      timeout: 2500
     });
     if (Array.isArray(response?.data?.data)) {
       apiItems = response.data.data;
@@ -244,9 +398,9 @@ export const getArticleById = async (rawId) => {
 
   if (!found) {
     try {
-      const response = await axiosInstance.get(`/api/news/${rawId}`, { timeout: 3500 });
+      const response = await axiosInstance.get(`/api/news/${rawId}`, { timeout: 2500 });
       if (response?.data) {
-        found = response.data;
+        found = enrichArticleMetadata(response.data);
       }
     } catch {
       // Fall through
@@ -288,7 +442,9 @@ export const getArticleById = async (rawId) => {
 
 export const getShareholderStats = () => {
   const list = mergeWithOverridesAndApi(migratedData.shareholders || [], [], 'shareholders');
-  const years = Array.from(new Set(list.map((i) => i.publishYear).filter(Boolean))).sort((a, b) => b - a);
+  const years = Array.from(new Set(list.map((i) => i.publishYear).filter(Boolean))).sort(
+    (a, b) => b - a
+  );
   const countsByYear = list.reduce((acc, item) => {
     if (item.publishYear) {
       acc[item.publishYear] = (acc[item.publishYear] || 0) + 1;
@@ -319,7 +475,9 @@ export const getShareholderStats = () => {
 
 export const getNewsCategoryStats = () => {
   const list = mergeWithOverridesAndApi(migratedData.news || [], [], 'news');
-  const years = Array.from(new Set(list.map((i) => i.publishYear).filter(Boolean))).sort((a, b) => b - a);
+  const years = Array.from(new Set(list.map((i) => i.publishYear).filter(Boolean))).sort(
+    (a, b) => b - a
+  );
   const countsByYear = list.reduce((acc, item) => {
     if (item.publishYear) {
       acc[item.publishYear] = (acc[item.publishYear] || 0) + 1;
@@ -339,8 +497,46 @@ export const getNewsCategoryStats = () => {
   };
 };
 
+const getMergedGalleryItems = () => {
+  const overrides = loadLocalOverrides();
+  const deletedSet = new Set((overrides.galleryDeleted || []).map((id) => String(id)));
+  const result = [];
+
+  for (const item of overrides.galleryCreated || []) {
+    const strId = String(item.id);
+    if (deletedSet.has(strId)) continue;
+    const merged = overrides.galleryUpdated?.[strId]
+      ? { ...item, ...overrides.galleryUpdated[strId] }
+      : item;
+    result.push({
+      ...merged,
+      categoryLabel:
+        GALLERY_CATEGORY_LABELS[merged.category]?.label ||
+        merged.categoryLabel ||
+        'Hoạt động công ty'
+    });
+  }
+
+  for (const item of migratedData.gallery || []) {
+    const strId = String(item.id);
+    if (deletedSet.has(strId)) continue;
+    const merged = overrides.galleryUpdated?.[strId]
+      ? { ...item, ...overrides.galleryUpdated[strId] }
+      : item;
+    result.push({
+      ...merged,
+      categoryLabel:
+        GALLERY_CATEGORY_LABELS[merged.category]?.label ||
+        merged.categoryLabel ||
+        'Hoạt động công ty'
+    });
+  }
+
+  return result;
+};
+
 export const getGalleryList = ({ category = 'all', search = '', page = 1, limit = 18 } = {}) => {
-  let items = [...(migratedData.gallery || [])];
+  let items = getMergedGalleryItems();
 
   if (category && category !== 'all') {
     items = items.filter((item) => item.category === category);
@@ -351,6 +547,8 @@ export const getGalleryList = ({ category = 'all', search = '', page = 1, limit 
     const normQ = normalizeText(search);
     items = items.filter(
       (item) =>
+        (item.caption || '').toLowerCase().includes(rawQ) ||
+        normalizeText(item.caption).includes(normQ) ||
         (item.title || '').toLowerCase().includes(rawQ) ||
         normalizeText(item.title).includes(normQ) ||
         (item.categoryLabel || '').toLowerCase().includes(rawQ)
@@ -375,14 +573,110 @@ export const getGalleryList = ({ category = 'all', search = '', page = 1, limit 
   };
 };
 
+export const createGalleryItem = async (newItem) => {
+  const overrides = loadLocalOverrides();
+  const cat = newItem.category || 'company';
+  const created = {
+    id: `gal-${Date.now()}`,
+    url: newItem.url,
+    caption: newItem.caption || newItem.title || 'Hình ảnh hoạt động HEPCO',
+    title: newItem.title || newItem.caption || 'Hình ảnh hoạt động HEPCO',
+    category: cat,
+    categoryLabel: GALLERY_CATEGORY_LABELS[cat]?.label || 'Hoạt động công ty',
+    date:
+      newItem.date ||
+      new Date().toLocaleDateString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      }),
+    articleId: newItem.articleId || null
+  };
+  overrides.galleryCreated.unshift(created);
+  saveLocalOverrides(overrides);
+  return created;
+};
+
+export const updateGalleryItem = async ({ id, ...updates }) => {
+  const overrides = loadLocalOverrides();
+  const strId = String(id);
+  const cat = updates.category;
+  overrides.galleryUpdated[strId] = {
+    ...(overrides.galleryUpdated[strId] || {}),
+    ...updates,
+    ...(cat ? { categoryLabel: GALLERY_CATEGORY_LABELS[cat]?.label || 'Hoạt động công ty' } : {})
+  };
+  saveLocalOverrides(overrides);
+  return overrides.galleryUpdated[strId];
+};
+
+export const deleteGalleryItem = async (id) => {
+  const overrides = loadLocalOverrides();
+  const strId = String(id);
+  if (!overrides.galleryDeleted.includes(strId)) {
+    overrides.galleryDeleted.push(strId);
+  }
+  saveLocalOverrides(overrides);
+  return { success: true };
+};
+
 export const getAboutPages = () => {
-  return migratedData.about || [];
+  return mergeWithOverridesAndApi(migratedData.about || [], [], 'about');
+};
+
+export const getHeroSettings = () => {
+  const overrides = loadLocalOverrides();
+  return {
+    ...DEFAULT_HERO_SETTINGS,
+    ...(overrides.heroSettings || {})
+  };
+};
+
+export const updateHeroSettings = (newSettings) => {
+  const overrides = loadLocalOverrides();
+  overrides.heroSettings = {
+    ...getHeroSettings(),
+    ...newSettings
+  };
+  saveLocalOverrides(overrides);
+  return overrides.heroSettings;
+};
+
+export const getAboutSettings = () => {
+  const overrides = loadLocalOverrides();
+  return {
+    ...DEFAULT_ABOUT_SETTINGS,
+    ...(overrides.aboutSettings || {})
+  };
+};
+
+export const updateAboutSettings = (newSettings) => {
+  const overrides = loadLocalOverrides();
+  overrides.aboutSettings = {
+    ...getAboutSettings(),
+    ...newSettings
+  };
+  saveLocalOverrides(overrides);
+  return overrides.aboutSettings;
 };
 
 export const getMigratedBanners = async () => {
+  const overrides = loadLocalOverrides();
+  if (Array.isArray(overrides.banners)) {
+    return {
+      data: overrides.banners,
+      meta: {
+        total: overrides.banners.length,
+        page: 1,
+        limit: overrides.banners.length || 20,
+        totalPages: 1
+      }
+    };
+  }
+
   let apiBanners = [];
   try {
-    const response = await axiosInstance.get('/api/banner', { timeout: 3000 });
+    const response = await axiosInstance.get('/api/banner', { timeout: 2500 });
     if (Array.isArray(response?.data?.data)) {
       apiBanners = response.data.data;
     }
@@ -401,52 +695,122 @@ export const getMigratedBanners = async () => {
   };
 };
 
-export const createNewsItem = async (newPost) => {
-  try {
-    const response = await axiosInstance.post('/api/news', newPost);
-    return response.data;
-  } catch {
-    const overrides = loadLocalOverrides();
-    const createdItem = {
-      id: Date.now(),
-      ...newPost,
-      timestamp: Date.now(),
-      status: 'published'
-    };
-    overrides.created.unshift(createdItem);
-    saveLocalOverrides(overrides);
-    return createdItem;
+export const addBannerItem = async (bannerUrl) => {
+  const current = await getMigratedBanners();
+  const list = [...(current.data || [])];
+  if (!list.includes(bannerUrl)) {
+    list.unshift(bannerUrl);
   }
+  const overrides = loadLocalOverrides();
+  overrides.banners = list;
+  saveLocalOverrides(overrides);
+  return { success: true, data: list };
+};
+
+export const removeBannerItem = async (bannerUrlOrFilename) => {
+  const current = await getMigratedBanners();
+  const list = (current.data || []).filter(
+    (item) => item !== bannerUrlOrFilename && !item.endsWith(`/${bannerUrlOrFilename}`)
+  );
+  const overrides = loadLocalOverrides();
+  overrides.banners = list;
+  saveLocalOverrides(overrides);
+  return { success: true, data: list };
+};
+
+export const reorderBannerItems = async (newBannerList) => {
+  const overrides = loadLocalOverrides();
+  overrides.banners = Array.isArray(newBannerList) ? newBannerList : [];
+  saveLocalOverrides(overrides);
+  return { success: true, data: overrides.banners };
+};
+
+export const createNewsItem = async (newPost) => {
+  const nowStr = new Date().toLocaleDateString('vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  });
+  const formattedPost = enrichArticleMetadata({
+    ...newPost,
+    date: newPost.date || `${nowStr} 08:00`
+  });
+
+  try {
+    const response = await axiosInstance.post('/api/news', formattedPost, { timeout: 2500 });
+    if (response?.data && response.data.id) {
+      return response.data;
+    }
+  } catch {
+    // Save to local CMS overrides
+  }
+
+  const overrides = loadLocalOverrides();
+  const createdItem = {
+    id: Date.now(),
+    ...formattedPost,
+    timestamp: Date.now(),
+    status: 'published'
+  };
+  overrides.created.unshift(createdItem);
+  saveLocalOverrides(overrides);
+  return createdItem;
 };
 
 export const updateNewsItem = async ({ id, ...data }) => {
+  const formattedData = enrichArticleMetadata({ id, ...data });
   try {
-    const response = await axiosInstance.put(`/api/news/${id}`, data);
-    return response.data;
+    await axiosInstance.put(`/api/news/${id}`, formattedData, { timeout: 2500 });
   } catch {
-    const overrides = loadLocalOverrides();
-    const strId = String(id);
-    overrides.updated[strId] = {
-      ...(overrides.updated[strId] || {}),
-      ...data,
-      updatedAt: new Date().toISOString()
-    };
-    saveLocalOverrides(overrides);
-    return { id, ...data };
+    // Always persist in local CMS overrides so changes reflect immediately on static deployments
   }
+  const overrides = loadLocalOverrides();
+  const strId = String(id);
+  overrides.updated[strId] = {
+    ...(overrides.updated[strId] || {}),
+    ...formattedData,
+    updatedAt: new Date().toISOString()
+  };
+  saveLocalOverrides(overrides);
+  return { id, ...formattedData };
 };
 
 export const deleteNewsItem = async (id) => {
   try {
-    const response = await axiosInstance.delete(`/api/news/${id}`);
-    return response.data;
+    await axiosInstance.delete(`/api/news/${id}`, { timeout: 2500 });
   } catch {
-    const overrides = loadLocalOverrides();
-    const strId = String(id);
-    if (!overrides.deleted.includes(strId)) {
-      overrides.deleted.push(strId);
-    }
-    saveLocalOverrides(overrides);
-    return { success: true };
+    // Persist deletion in local CMS overrides
   }
+  const overrides = loadLocalOverrides();
+  const strId = String(id);
+  if (!overrides.deleted.includes(strId)) {
+    overrides.deleted.push(strId);
+  }
+  saveLocalOverrides(overrides);
+  return { success: true };
+};
+
+export const getCmsOverviewCounts = () => {
+  const newsCount = mergeWithOverridesAndApi(migratedData.news || [], [], 'news').length;
+  const shareholdersCount = mergeWithOverridesAndApi(
+    migratedData.shareholders || [],
+    [],
+    'shareholders'
+  ).length;
+  const servicesCount = mergeWithOverridesAndApi(migratedData.services || [], [], 'service').length;
+  const aboutCount = mergeWithOverridesAndApi(migratedData.about || [], [], 'about').length;
+  const galleryCount = getMergedGalleryItems().length;
+  const overrides = loadLocalOverrides();
+  const bannersCount = Array.isArray(overrides.banners)
+    ? overrides.banners.length
+    : (migratedData.banners || []).length;
+
+  return {
+    newsCount,
+    shareholdersCount,
+    servicesCount,
+    aboutCount,
+    galleryCount,
+    bannersCount
+  };
 };

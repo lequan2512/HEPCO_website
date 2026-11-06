@@ -1,35 +1,87 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
 import axiosInstance from '../utils/axios';
-import { getMigratedBanners } from '../services/news.service';
+import {
+  getMigratedBanners,
+  addBannerItem,
+  removeBannerItem
+} from '../services/news.service';
 
-// Fetch banner images (with migrated fallback)
+// Fetch banner images (with migrated fallback & CMS overrides)
 export const useGetBanners = () => {
   return useQuery({
     queryKey: ['banners'],
-    queryFn: () => getMigratedBanners(),
+    queryFn: () => getMigratedBanners()
   });
 };
 
 // Upload banner
 export const useUploadBanner = () => {
   return useMutation({
-    mutationFn: async (formData) => {
-      const response = await axiosInstance.post('/api/banner', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+    mutationFn: async (payload) => {
+      // If payload is a string URL or DataURL directly
+      if (typeof payload === 'string') {
+        return addBannerItem(payload);
+      }
+
+      try {
+        const response = await axiosInstance.post('/api/banner', payload, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          },
+          timeout: 3000
+        });
+        if (response?.data?.url) {
+          await addBannerItem(response.data.url);
+          return response.data;
+        }
+      } catch {
+        // Fallback to local DataURL conversion
+      }
+
+      const file = payload?.get?.('image');
+      if (!file) throw new Error('Missing banner file');
+
+      const dataUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const img = new Image();
+          img.onload = () => {
+            const maxDim = 1440;
+            let { width, height } = img;
+            if (width > maxDim) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            resolve(canvas.toDataURL('image/jpeg', 0.84));
+          };
+          img.onerror = () => resolve(reader.result);
+          img.src = reader.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
       });
-      return response.data;
-    },
+
+      return addBannerItem(dataUrl);
+    }
   });
 };
 
 // Delete banner
 export const useDeleteBanner = () => {
   return useMutation({
-    mutationFn: async (filename) => {
-      const response = await axiosInstance.delete(`/api/banner/${filename}`);
-      return response.data;
-    },
+    mutationFn: async (bannerUrlOrFilename) => {
+      try {
+        const filename = String(bannerUrlOrFilename).split('/').pop();
+        await axiosInstance.delete(`/api/banner/${filename}`, { timeout: 2500 });
+      } catch {
+        // Continue with local CMS removal
+      }
+      return removeBannerItem(bannerUrlOrFilename);
+    }
   });
 };

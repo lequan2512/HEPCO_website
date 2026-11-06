@@ -19,8 +19,8 @@ import {
 import PageBanner from '../../../components/PageBanner';
 import SubNav from '../../../components/SubNav';
 import PdfFlipbook from '../../../components/PdfFlipbook';
-import { getAboutPages } from '../../../services/news.service';
-import { sanitizeLegacyHtml } from '../../../utils/assetUrl';
+import { getAboutPages, getAboutSettings } from '../../../services/news.service';
+import { sanitizeLegacyHtml, resolveAssetUrl } from '../../../utils/assetUrl';
 
 const About = () => {
   const location = useLocation();
@@ -31,9 +31,10 @@ const About = () => {
   const [pdfModal, setPdfModal] = useState(null); // { url, fileName, title, subtitle }
   const subNavItems = ['Về Hepco', 'Chức năng - Giấy phép', 'Sơ đồ tổ chức', 'Hồ sơ năng lực'];
 
+  const aboutConfig = getAboutSettings();
   const aboutPages = getAboutPages();
-  const historyPage = aboutPages.find((p) => p.id === 49);
-  const functionsPage = aboutPages.find((p) => p.id === 48);
+  const historyPage = aboutPages.find((p) => Number(p.id) === 49) || aboutPages[1];
+  const functionsPage = aboutPages.find((p) => Number(p.id) === 48) || aboutPages[0];
 
   if (location.key !== prevLocationKey) {
     setPrevLocationKey(location.key);
@@ -47,8 +48,8 @@ const About = () => {
   return (
     <div className="bg-gray-50 pb-20 min-h-screen">
       <PageBanner
-        title="Giới thiệu"
-        description="Tiền thân là phòng quản lý đô thị và nhà đất được ra đời năm 1975, trải qua quá trình hình thành và phát triển với nhiều cột mốc thay đổi, năm 2015 Công ty trách nhiệm hữu hạn nhà nước Môi trường và Công trình Đô thị Huế trở thành Công ty Cổ phần Môi trường và Công trình đô thị Huế cho đến nay. Là doanh nghiệp nhà nước chi phối 51% cổ phần với bộ máy tổ chức gồm 05 phòng nghiệp vụ và 13 đơn vị xí nghiệp trực thuộc. Hepco là đơn vị uy tín hàng đầu miền Trung hoạt động trong lĩnh vực vệ sinh môi trường và công trình đô thị với gần 500 khách hàng, đối tác trên địa bàn toàn thành phố Huế."
+        title={aboutConfig.bannerTitle || 'Giới thiệu'}
+        description={aboutConfig.bannerDescription}
       />
       <SubNav items={subNavItems} activeIndex={activeTab} onSelect={setActiveTab} />
 
@@ -62,12 +63,21 @@ const About = () => {
               <div className="w-full lg:w-5/12 relative group">
                 <div className="absolute inset-0 bg-hepco-green rounded-2xl transform translate-x-2 sm:translate-x-4 translate-y-2 sm:translate-y-4 group-hover:translate-x-4 group-hover:translate-y-4 transition-transform duration-500"></div>
                 <div className="relative bg-white rounded-2xl overflow-hidden shadow-2xl h-[300px] sm:h-[350px] md:h-[400px] border-4 border-white flex flex-col items-center justify-center">
-                  <div className="w-full h-full bg-[url('/images/cover.png')] bg-cover bg-center">
+                  <div
+                    className="w-full h-full bg-cover bg-center"
+                    style={{
+                      backgroundImage: `url(${resolveAssetUrl(aboutConfig.hqImage || '/images/cover.png')})`
+                    }}
+                  >
                     <div className="absolute inset-0 bg-black/30 flex items-center justify-center backdrop-blur-[2px]">
                       <div className="text-center p-4 sm:p-6 bg-white/90 rounded-xl shadow-lg transform group-hover:scale-105 transition-transform duration-500">
                         <Building2 className="w-10 h-10 sm:w-12 sm:h-12 text-hepco-green mx-auto mb-2" />
-                        <h3 className="text-xl sm:text-2xl font-extrabold text-green-900">Trụ sở HEPCO</h3>
-                        <p className="text-xs sm:text-sm font-semibold text-gray-500 mt-1">46 Trần Phú, TP. Huế</p>
+                        <h3 className="text-xl sm:text-2xl font-extrabold text-green-900">
+                          {aboutConfig.hqTitle || 'Trụ sở HEPCO'}
+                        </h3>
+                        <p className="text-xs sm:text-sm font-semibold text-gray-500 mt-1">
+                          {aboutConfig.hqAddress || '46 Trần Phú, TP. Huế'}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -80,21 +90,19 @@ const About = () => {
 
                 <div className="relative z-10">
                   <h2 className="text-xl sm:text-3xl font-extrabold text-green-900 uppercase relative inline-block pb-3">
-                    Thư Ngỏ
+                    {aboutConfig.openLetterTitle || 'Thư Ngỏ'}
                     <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-20 sm:w-24 h-1 bg-hepco-orange rounded-full"></div>
                   </h2>
 
                   <div className="prose prose-sm sm:prose-base md:prose-lg text-gray-700 space-y-4 sm:space-y-6 text-justify">
-                    <p className="italic font-bold text-hepco-green text-lg sm:text-xl mt-4 mb-3">Kính gửi Quý khách hàng,</p>
-                    <p className="leading-relaxed">
-                      Chúng tôi trân trọng gửi lời chào và sự biết ơn sâu sắc đến Quý khách hàng đã tin tưởng và ủng hộ <strong className="text-green-800">Công ty Cổ Phần Môi trường và Công trình đô thị Huế (HEPCO)</strong> trong suốt thời gian qua. Với bề dày gần <span className="bg-yellow-100 px-1 font-bold text-orange-600 rounded">50 năm kinh nghiệm</span>, cùng với đội ngũ nhân sự luôn tận tụy và hệ thống phương tiện thiết bị tiên tiến, chúng tôi khẳng định hoàn toàn đáp ứng mọi yêu cầu của Quý khách hàng trong lĩnh vực vệ sinh môi trường và công trình đô thị.
+                    <p className="italic font-bold text-hepco-green text-lg sm:text-xl mt-4 mb-3">
+                      {aboutConfig.openLetterGreeting || 'Kính gửi Quý khách hàng,'}
                     </p>
-                    <p className="leading-relaxed">
-                      Trên suốt chặng đường hình thành và phát triển, HEPCO không chỉ là một đối tác được chính quyền đô thị địa phương tín nhiệm giao nhiệm vụ, đặt hàng và thực hiện đấu thầu mà còn là đối tác đáng tin cậy của các tổ chức, doanh nghiệp và cá nhân trong lĩnh vực thu gom, vận chuyển, và xử lý chất thải trên địa bàn thành phố Huế.
-                    </p>
+                    <p className="leading-relaxed">{aboutConfig.openLetterParagraph1}</p>
+                    <p className="leading-relaxed">{aboutConfig.openLetterParagraph2}</p>
                     <div className="bg-green-50 p-4 sm:p-6 rounded-xl border-l-4 border-hepco-green my-4 sm:my-6 shadow-sm">
                       <p className="font-semibold text-green-900 mb-0">
-                        Ngoài thực hiện các công tác ở lĩnh vực vệ sinh môi trường, chúng tôi còn thực hiện thi công hệ thống điện chiếu sáng đô thị và trang trí đường phố, cũng như các công trình thoát nước, xây dựng hạ tầng, dân dụng và các lĩnh vực kinh doanh đa dạng khác.
+                        {aboutConfig.openLetterHighlight}
                       </p>
                     </div>
                   </div>
@@ -354,11 +362,11 @@ const About = () => {
                 onClick={() => setIsImageModalOpen(true)}
                 className="min-w-[750px] md:min-w-0 w-full cursor-zoom-in group relative rounded-lg overflow-hidden"
               >
-                <img
-                  src="/images/organizational_chart.png"
-                  alt="Sơ đồ tổ chức HEPCO"
-                  className="w-full h-auto max-w-5xl mx-auto object-contain shadow-md rounded-xl border border-gray-100 transition-transform duration-300 group-hover:scale-[1.01]"
-                />
+                  <img
+                    src={resolveAssetUrl(aboutConfig.orgChartImage || '/images/organizational_chart.png')}
+                    alt="Sơ đồ tổ chức HEPCO"
+                    className="w-full h-auto max-w-5xl mx-auto object-contain shadow-md rounded-xl border border-gray-100 transition-transform duration-300 group-hover:scale-[1.01]"
+                  />
                 <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
                   <span className="bg-black/75 text-white text-xs font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg">
                     <ZoomIn className="w-4 h-4" /> Nhấn để xem toàn màn hình
@@ -405,8 +413,8 @@ const About = () => {
               </div>
 
               <PdfFlipbook
-                pdfUrl="/pdf/HoSoNangLuc2026.pdf"
-                fileName="Hồ_Sơ_Năng_Lực_HEPCO_2026.pdf"
+                pdfUrl={resolveAssetUrl(aboutConfig.capabilityPdfUrl || '/pdf/HoSoNangLuc2026.pdf')}
+                fileName={aboutConfig.capabilityPdfName || 'Hồ_Sơ_Năng_Lực_HEPCO_2026.pdf'}
               />
             </div>
           </div>

@@ -2,31 +2,34 @@ import { useState } from 'react';
 import { ArrowRight, Phone, Play, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ROUTES } from '../constants/routes';
+import { getHeroSettings } from '../services/news.service';
+import { resolveAssetUrl } from '../utils/assetUrl';
 import bgImg from '../assets/images/bg-img.avif';
 
 const Hero = () => {
   const [showVideo, setShowVideo] = useState(false);
+  const heroConfig = getHeroSettings();
 
   return (
     <section
       className="relative overflow-hidden bg-cover bg-center bg-no-repeat pt-6 pb-10 sm:pt-10 sm:pb-14 md:pt-14 md:pb-20 lg:pt-16 lg:pb-24 border-b border-gray-200/70"
       style={{
-        backgroundImage: `linear-gradient(to bottom, rgba(255, 255, 255, 0.20) 10%, rgba(255, 255, 255, 0.45) 55%, rgba(255, 255, 255, 0.96) 100%), url(${bgImg})`,
+        backgroundImage: `linear-gradient(to bottom, rgba(255, 255, 255, 0.20) 10%, rgba(255, 255, 255, 0.45) 55%, rgba(255, 255, 255, 0.96) 100%), url(${bgImg})`
       }}
     >
       <div className="container mx-auto px-3.5 sm:px-6 lg:px-8 max-w-7xl">
         {/* Main Display Headline */}
         <div className="flex flex-col items-center text-center max-w-4xl mx-auto mb-8 sm:mb-10 md:mb-12">
           <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tight text-[#10243b] leading-[1.2] sm:leading-[1.15] mb-4 sm:mb-6 drop-shadow-2xs">
-            Hạ Tầng Đô Thị &amp; Môi Trường Xanh{' '}
+            {heroConfig.headlinePrefix}{' '}
             <span className="block sm:inline text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-green-600 to-teal-700">
-              Cho Cố Đô Vững Bền
+              {heroConfig.headlineHighlight}
             </span>
           </h1>
 
           {/* Subtitle */}
           <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-800 max-w-3xl leading-relaxed mb-6 sm:mb-8 md:mb-10 font-medium px-1">
-            Gần 50 năm đồng hành cùng tỉnh Thừa Thiên Huế, HEPCO cung ứng trọn gói dịch vụ thu gom chất thải, vệ sinh môi trường, chăm sóc cây xanh công viên và chiếu sáng công cộng đạt chuẩn chất lượng cao.
+            {heroConfig.subtitle}
           </p>
 
           {/* Dual Action Buttons */}
@@ -35,16 +38,16 @@ const Hero = () => {
               to={ROUTES.SERVICES}
               className="w-full sm:w-auto whitespace-nowrap inline-flex items-center justify-center gap-2.5 px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl text-white font-bold text-sm sm:text-base bg-[#10243b] hover:bg-emerald-700 active:scale-[0.98] transition-all duration-200 shadow-md hover:shadow-xl group"
             >
-              <span>Khám Phá Dịch Vụ</span>
+              <span>{heroConfig.primaryCtaText || 'Khám Phá Dịch Vụ'}</span>
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1 shrink-0" />
             </Link>
 
             <a
-              href="tel:02343822052"
+              href={`tel:${heroConfig.hotlineTel || '02343822052'}`}
               className="w-full sm:w-auto whitespace-nowrap inline-flex items-center justify-center gap-2.5 px-6 sm:px-7 py-3.5 sm:py-4 rounded-xl text-gray-800 font-bold text-sm sm:text-base bg-white hover:bg-gray-50 border border-gray-300 shadow-xs hover:border-gray-400 transition-all active:scale-[0.98]"
             >
               <Phone className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>Hotline: (0234) 3822 052</span>
+              <span>Hotline: {heroConfig.hotlineDisplay || '(0234) 3822 052'}</span>
             </a>
           </div>
         </div>
@@ -54,13 +57,17 @@ const Hero = () => {
           <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-gray-200/90 shadow-2xl bg-[#0e3b2f]">
             <div className="relative w-full aspect-[16/9] sm:aspect-[21/10] overflow-hidden group flex items-center justify-center">
               <img
-                src="/images/cover.png"
+                src={resolveAssetUrl(heroConfig.coverImage || '/images/cover.png')}
                 alt="HEPCO - Vì Môi Trường Huế Xanh Sạch Sáng"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = '/images/cover.png';
+                }}
                 className="w-full h-full object-contain sm:object-cover object-center transition-transform duration-1000 group-hover:scale-[1.02]"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#0a1e2e]/55 via-transparent to-transparent pointer-events-none" />
 
-              {/* Video Play Button Overlay - Positioned at bottom-left/right so it never blocks center banner artwork */}
+              {/* Video Play Button Overlay */}
               <div className="absolute bottom-3 right-3 sm:bottom-5 sm:right-6 z-10">
                 <button
                   type="button"
@@ -71,7 +78,9 @@ const Hero = () => {
                   <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-emerald-600 flex items-center justify-center text-white shadow-md group-hover/btn:bg-emerald-700 transition-colors shrink-0">
                     <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-0.5 fill-current" />
                   </div>
-                  <span className="pr-1 whitespace-nowrap">Xem Phim Giới Thiệu</span>
+                  <span className="pr-1 whitespace-nowrap">
+                    {heroConfig.videoButtonText || 'Xem Phim Giới Thiệu'}
+                  </span>
                 </button>
               </div>
             </div>
@@ -99,7 +108,7 @@ const Hero = () => {
             <div className="relative pt-[56.25%]">
               <iframe
                 className="absolute inset-0 w-full h-full"
-                src="https://www.youtube.com/embed/P7RZLoytEBI?autoplay=1"
+                src={heroConfig.videoUrl || 'https://www.youtube.com/embed/P7RZLoytEBI?autoplay=1'}
                 title="Giới thiệu HEPCO"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
