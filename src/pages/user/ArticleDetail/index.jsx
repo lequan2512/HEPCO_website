@@ -227,7 +227,7 @@ const ArticleDetail = () => {
               )}
             </div>
 
-            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold text-gray-900 leading-tight mb-4 sm:mb-6">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#10243b] leading-snug mb-4 sm:mb-6">
               {article.title}
             </h1>
 

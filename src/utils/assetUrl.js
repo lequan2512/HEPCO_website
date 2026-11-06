@@ -31,7 +31,9 @@ export const sanitizeLegacyHtml = (html) => {
   return html
     .replace(/&nbsp;|\u00a0/g, ' ')
     .replace(/(https?:\/\/[^\s"'<>]+)?(https:\/\/res\.cloudinary\.com\/[^\s"'<>]+)/g, '$2')
+    .replace(/\sface=(["'])[^"']*\1/gi, '')
     .replace(/font-family\s*:[^;"']+(;)?/gi, '')
     .replace(/font-size\s*:[^;"']+(;)?/gi, '')
-    .replace(/line-height\s*:[^;"']+(;)?/gi, '');
+    .replace(/line-height\s*:[^;"']+(;)?/gi, '')
+    .replace(/mso-[a-z0-9-]+\s*:[^;"']+(;)?/gi, '');
 };
