@@ -171,8 +171,8 @@ const NewsPartnersAwards = () => {
         {news.length > 0 && (
           <div className="mb-24">
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-14 md:mb-16 gap-6">
-              <div className="max-w-2xl">
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#10243b] tracking-tight leading-tight">
+              <div className="max-w-4xl">
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#10243b] tracking-tight leading-tight text-balance">
                   Tin Tức &amp; Sự Kiện Mới Nhất
                 </h2>
                 <p className="mt-4 text-base sm:text-lg text-gray-600 leading-relaxed font-normal">
@@ -209,7 +209,7 @@ const NewsPartnersAwards = () => {
                             e.target.onerror = null;
                             e.target.src = '/images/cover.png';
                           }}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                          className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
                         />
                       ) : (
                         <div className="w-full h-full bg-gradient-to-br from-emerald-50 to-green-100 flex items-center justify-center font-black text-emerald-800 text-lg">
@@ -232,7 +232,7 @@ const NewsPartnersAwards = () => {
                           </div>
                         )}
 
-                        <h3 className="text-base sm:text-lg font-black text-[#10243b] group-hover:text-emerald-700 transition-colors mb-2.5 line-clamp-2 leading-snug">
+                        <h3 className="text-base sm:text-lg font-bold text-[#10243b] group-hover:text-emerald-700 transition-colors mb-2 line-clamp-2 leading-snug text-balance">
                           {item.title}
                         </h3>
 

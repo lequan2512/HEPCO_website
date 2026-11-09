@@ -9,8 +9,8 @@ const HomeShowcaseView = ({ config, preview = false }) => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-14 md:mb-16 gap-6">
-          <div className="max-w-2xl">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#10243b] tracking-tight leading-tight">
+          <div className="max-w-4xl">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#10243b] tracking-tight leading-tight text-balance">
               {config.title}
             </h2>
             <p className="mt-4 text-base sm:text-lg text-gray-600 leading-relaxed font-normal">
@@ -41,7 +41,7 @@ const HomeShowcaseView = ({ config, preview = false }) => {
                   src={resolveAssetUrl(item.image)}
                   loading="lazy"
                   alt={item.title}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
               </div>
@@ -49,7 +49,7 @@ const HomeShowcaseView = ({ config, preview = false }) => {
               {/* Text Meta */}
               <div className="p-6 flex flex-col justify-between flex-grow bg-white">
                 <div>
-                  <h3 className="text-base sm:text-lg font-black text-[#10243b] group-hover:text-emerald-700 transition-colors mb-3 line-clamp-2">
+                  <h3 className="text-base sm:text-lg font-bold text-[#10243b] group-hover:text-emerald-700 transition-colors mb-2 line-clamp-2 leading-snug text-balance">
                     {item.title}
                   </h3>
                   {item.subtitle && <p className="mb-3 text-sm text-gray-600 whitespace-pre-line">{item.subtitle}</p>}

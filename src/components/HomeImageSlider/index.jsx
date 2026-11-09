@@ -137,8 +137,8 @@ const HomeImageSlider = () => {
     <section className="py-16 md:py-24 bg-white border-b border-gray-200/80">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 md:mb-10">
-          <div className="max-w-2xl">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#10243b] tracking-tight leading-tight">
+          <div className="max-w-4xl">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#10243b] tracking-tight leading-tight text-balance">
               Hình Ảnh Hoạt Động
             </h2>
             <p className="mt-3 text-base sm:text-lg text-gray-600 leading-relaxed font-normal">
@@ -188,7 +188,7 @@ const HomeImageSlider = () => {
                 <img
                   src={imageUrl}
                   alt={slides[index]?.caption || `Slide ${index + 1}`}
-                  className="relative z-10 w-full h-full object-contain object-center select-none pointer-events-none"
+                  className="relative z-10 w-full h-full object-cover object-center select-none pointer-events-none"
                   onError={(e) => { e.target.onerror = null; e.target.src = "/uploads/images/HL-2_a07c11d6.jpg"; }}
                 />
                 {/* Paper curl shadow effect during page flip */}

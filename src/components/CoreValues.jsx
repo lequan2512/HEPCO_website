@@ -67,7 +67,7 @@ const CoreValues = ({ config }) => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
-          <div className="max-w-2xl">
+          <div className="max-w-4xl">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-[#10243b] tracking-tight">
               Tra Cứu &amp; Dịch Vụ Nhanh
             </h2>
