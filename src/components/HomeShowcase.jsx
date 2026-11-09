@@ -1,9 +1,10 @@
 import { useShowcase } from '../apis/showcase';
-import defaults from '../data/homeShowcase.defaults.json';
 import HomeShowcaseView from './HomeShowcaseView';
 
 const HomeShowcase = () => {
   const { data } = useShowcase();
-  return <HomeShowcaseView config={data?.data || defaults} />;
+  if (!data?.data) return null;
+  return <HomeShowcaseView config={data.data} />;
 };
+
 export default HomeShowcase;

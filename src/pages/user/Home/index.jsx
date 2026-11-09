@@ -13,7 +13,6 @@ import FaqContact from '../../../components/FaqContact';
 import ScrollAnimation from '../../../components/ScrollAnimation';
 
 import { useShowcase } from '../../../apis/showcase';
-import homeSections from '../../../data/homeSections.json';
 
 const components = {
   hero: Hero,
@@ -30,7 +29,7 @@ const components = {
   faq: FaqContact,
 };
 
-const defaultSections = homeSections.map(({ id }) => ({ id, visible: true }));
+const defaultSections = Object.keys(components).map((id) => ({ id, visible: true }));
 
 const Home = () => {
   const { data } = useShowcase();
