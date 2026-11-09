@@ -11,6 +11,16 @@ export const useGetNews = (params) => {
   });
 };
 
+export const useGetNewsStats = () => {
+  return useQuery({
+    queryKey: ['newsStats'],
+    queryFn: async () => {
+      const response = await axiosInstance.get('/api/news/stats');
+      return response.data;
+    }
+  });
+};
+
 export const useGetInfiniteNews = (params) => {
   return useInfiniteQuery({
     queryKey: ['infiniteNews', params],
