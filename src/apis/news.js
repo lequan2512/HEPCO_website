@@ -21,6 +21,16 @@ export const useGetNewsStats = () => {
   });
 };
 
+export const useGetGallery = (params) => {
+  return useQuery({
+    queryKey: ['gallery', params],
+    queryFn: async () => {
+      const response = await axiosInstance.get('/api/gallery', { params });
+      return response.data;
+    }
+  });
+};
+
 export const useGetInfiniteNews = (params) => {
   return useInfiniteQuery({
     queryKey: ['infiniteNews', params],

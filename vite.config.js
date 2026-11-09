@@ -10,6 +10,14 @@ export default defineConfig({
   ],
   server: {
     proxy: {
+      '/uploads': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+      },
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+      },
       '/Public/Upload': {
         target: 'https://www.hepco.com.vn',
         changeOrigin: true,

@@ -1,7 +1,5 @@
 import { API_BASE_URL } from '../constants/api';
 
-const LOCAL_STATIC_PREFIXES = ['/uploads/', '/images/', '/pdf/', '/Public/Upload/'];
-
 export const resolveAssetUrl = (url) => {
   if (!url || typeof url !== 'string') return '';
   const trimmed = url.trim();
@@ -9,7 +7,16 @@ export const resolveAssetUrl = (url) => {
   if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('data:')) {
     return trimmed;
   }
-  if (LOCAL_STATIC_PREFIXES.some((prefix) => trimmed.startsWith(prefix))) {
+  // Uploads, media, and pdf files hosted on backend API
+  if (trimmed.startsWith('/uploads/') || trimmed.startsWith('/api/media/') || trimmed.startsWith('/pdf/')) {
+    return `${API_BASE_URL}${trimmed}`;
+  }
+  // Legacy uploads fallback to hepco.com.vn
+  if (trimmed.startsWith('/Public/Upload/')) {
+    return `https://www.hepco.com.vn${trimmed}`;
+  }
+  // Local static assets in frontend /public/images/
+  if (trimmed.startsWith('/images/')) {
     return trimmed;
   }
   if (trimmed.startsWith('/')) {
@@ -31,6 +38,8 @@ export const sanitizeLegacyHtml = (html) => {
   return html
     .replace(/&nbsp;|\u00a0/g, ' ')
     .replace(/(https?:\/\/[^\s"'<>]+)?(https:\/\/res\.cloudinary\.com\/[^\s"'<>]+)/g, '$2')
+    .replace(/src=(["'])\/uploads\//gi, `src=$1${API_BASE_URL}/uploads/`)
+    .replace(/src=(["'])\/Public\/Upload\//gi, `src=$1https://www.hepco.com.vn/Public/Upload/`)
     .replace(/\sface=(["'])[^"']*\1/gi, '')
     .replace(/font-family\s*:[^;"']+(;)?/gi, '')
     .replace(/font-size\s*:[^;"']+(;)?/gi, '')
