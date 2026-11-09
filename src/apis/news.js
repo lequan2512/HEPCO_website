@@ -87,3 +87,30 @@ export const useDeleteNews = () => {
     }
   });
 };
+
+export const useCreateGallery = () => {
+  return useMutation({
+    mutationFn: async (data) => {
+      const response = await axiosInstance.post('/api/gallery', data);
+      return response.data;
+    }
+  });
+};
+
+export const useUpdateGallery = () => {
+  return useMutation({
+    mutationFn: async ({ id, ...data }) => {
+      const response = await axiosInstance.put(`/api/gallery/${id}`, data);
+      return response.data;
+    }
+  });
+};
+
+export const useDeleteGallery = () => {
+  return useMutation({
+    mutationFn: async (id) => {
+      const response = await axiosInstance.delete(`/api/gallery/${id}`);
+      return response.data;
+    }
+  });
+};
