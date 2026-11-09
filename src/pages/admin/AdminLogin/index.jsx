@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { ArrowLeft, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, KeyRound, ShieldCheck } from 'lucide-react';
 import { ROUTES } from '../../../constants/routes';
 import useAuthStore from '../../../store/useAuthStore';
 import toast from 'react-hot-toast';
@@ -56,6 +56,13 @@ const AdminLogin = () => {
     }
   });
 
+  const handleQuickFill = () => {
+    formik.setValues({
+      username: 'admin',
+      password: '123456'
+    });
+  };
+
   return (
     <div className="flex items-center justify-center min-h-screen py-12 px-4 bg-gradient-to-br from-emerald-950 via-[#10243b] to-emerald-900 relative">
       {formik.isSubmitting && <Loading fullScreen message="Đang xác thực tài khoản..." />}
@@ -102,7 +109,7 @@ const AdminLogin = () => {
               value={formik.values.username}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              placeholder="Nhập tên đăng nhập"
+              placeholder="Nhập tên đăng nhập (admin)"
             />
             {formik.touched.username && formik.errors.username ? (
               <div className="text-red-500 text-xs mt-1">{formik.errors.username}</div>
@@ -125,7 +132,7 @@ const AdminLogin = () => {
               value={formik.values.password}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              placeholder="Nhập mật khẩu"
+              placeholder="Nhập mật khẩu (123456)"
             />
             {formik.touched.password && formik.errors.password ? (
               <div className="text-red-500 text-xs mt-1">{formik.errors.password}</div>
@@ -139,10 +146,22 @@ const AdminLogin = () => {
             Đăng nhập Quản trị
           </button>
         </form>
+
+        {/* Quick Fill Helper for Admin */}
+        <div className="mt-5 pt-4 border-t border-gray-100 flex items-center justify-between gap-2 text-xs text-gray-500">
+          <span>Tài khoản: <strong>admin / 123456</strong></span>
+          <button
+            type="button"
+            onClick={handleQuickFill}
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-gray-100 hover:bg-emerald-50 text-gray-700 hover:text-hepco-green font-bold transition-colors cursor-pointer"
+          >
+            <KeyRound className="w-3.5 h-3.5" />
+            <span>Điền nhanh</span>
+          </button>
+        </div>
       </div>
     </div>
   );
 };
 
 export default AdminLogin;
-

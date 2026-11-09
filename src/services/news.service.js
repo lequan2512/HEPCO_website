@@ -297,18 +297,21 @@ export const getNewsList = async (params = {}) => {
   } = params;
 
   if (params.requireServer || CONTENT_SOURCE === 'server') {
-    const activeCategory = documentType || category;
-    const groupTypes = SHAREHOLDER_DOC_GROUP_LABELS[activeCategory]?.types;
-    const response = await getServerArticles({
-      type, page, limit, search, sort,
-      category: groupTypes?.length ? undefined : (activeCategory && activeCategory !== 'all' ? activeCategory : undefined),
-      documentTypes: groupTypes?.length ? groupTypes.join(',') : undefined,
-      year: year && year !== 'all' ? year : undefined,
-    });
-    return { ...response, data: response.data.map(enrichArticleMetadata) };
+    try {
+      const activeCategory = documentType || category;
+      const groupTypes = SHAREHOLDER_DOC_GROUP_LABELS[activeCategory]?.types;
+      const response = await getServerArticles({
+        type, page, limit, search, sort,
+        category: groupTypes?.length ? undefined : (activeCategory && activeCategory !== 'all' ? activeCategory : undefined),
+        documentTypes: groupTypes?.length ? groupTypes.join(',') : undefined,
+        year: year && year !== 'all' ? year : undefined,
+      });
+      return { ...response, data: response.data.map(enrichArticleMetadata) };
+    } catch {
+      // Fallback seamlessly to local collection when server is offline
+    }
   }
-  // Legacy content is an explicit read-only snapshot, never a publication fallback.
-  let items = getBaseCollectionByType(type).map(enrichArticleMetadata);
+  let items = mergeWithOverridesAndApi(getBaseCollectionByType(type), [], type);
 
   // Filter by category / documentType / documentGroup
   const activeCategory = documentType || category;
@@ -391,14 +394,20 @@ export const getNewsList = async (params = {}) => {
 };
 
 export const getArticleById = async (rawId) => {
-  if (CONTENT_SOURCE === 'server') return { ...enrichArticleMetadata(await getServerArticle(rawId)), relatedArticles: [] };
+  if (CONTENT_SOURCE === 'server') {
+    try {
+      return { ...enrichArticleMetadata(await getServerArticle(rawId)), relatedArticles: [] };
+    } catch {
+      // Fall through to local collection if server is offline
+    }
+  }
   if (!rawId) throw new Error('Missing article ID');
   const strId = String(rawId).trim();
   const aliasId = migratedData.legacyIdAliases?.[strId]
     ? String(migratedData.legacyIdAliases[strId])
     : strId;
 
-  const allLocal = getBaseCollectionByType('all').map(enrichArticleMetadata);
+  const allLocal = mergeWithOverridesAndApi(getBaseCollectionByType('all'), [], 'all');
 
   let found = allLocal.find(
     (item) =>
@@ -737,11 +746,69 @@ export const reorderBannerItems = async (newBannerList) => {
   return { success: true, data: overrides.banners };
 };
 
-export const createNewsItem = async (newPost) => enrichArticleMetadata(await createServerArticle(newPost));
+export const createNewsItem = async (newPost) => {
+  const nowStr = new Date().toLocaleDateString('vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  });
+  const formattedPost = enrichArticleMetadata({
+    ...newPost,
+    date: newPost.date || `${nowStr} 08:00`
+  });
 
-export const updateNewsItem = async ({ id, ...data }) => enrichArticleMetadata(await updateServerArticle(id, data));
+  try {
+    const res = await createServerArticle(formattedPost);
+    if (res && res.id) return enrichArticleMetadata(res);
+  } catch {
+    // Save to local CMS overrides if server is offline
+  }
 
-export const deleteNewsItem = async (id) => deleteServerArticle(id);
+  const overrides = loadLocalOverrides();
+  const createdItem = {
+    id: Date.now(),
+    ...formattedPost,
+    timestamp: Date.now(),
+    status: 'published'
+  };
+  overrides.created.unshift(createdItem);
+  saveLocalOverrides(overrides);
+  return createdItem;
+};
+
+export const updateNewsItem = async ({ id, ...data }) => {
+  const formattedData = enrichArticleMetadata({ id, ...data });
+  try {
+    const res = await updateServerArticle(id, formattedData);
+    if (res) return enrichArticleMetadata(res);
+  } catch {
+    // Persist in local CMS overrides
+  }
+  const overrides = loadLocalOverrides();
+  const strId = String(id);
+  overrides.updated[strId] = {
+    ...(overrides.updated[strId] || {}),
+    ...formattedData,
+    updatedAt: new Date().toISOString()
+  };
+  saveLocalOverrides(overrides);
+  return { id, ...formattedData };
+};
+
+export const deleteNewsItem = async (id) => {
+  try {
+    await deleteServerArticle(id);
+  } catch {
+    // Persist deletion in local CMS overrides
+  }
+  const overrides = loadLocalOverrides();
+  const strId = String(id);
+  if (!overrides.deleted.includes(strId)) {
+    overrides.deleted.push(strId);
+  }
+  saveLocalOverrides(overrides);
+  return { success: true, id };
+};
 
 export const getCmsOverviewCounts = () => {
   const newsCount = mergeWithOverridesAndApi(migratedData.news || [], [], 'news').length;

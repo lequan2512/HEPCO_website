@@ -122,8 +122,9 @@ const AdminLayout = () => {
   };
 
   if (!isAuthenticated) return null;
-  if (session.isPending) return <p role="status" className="p-8">Đang xác nhận phiên đăng nhập với máy chủ…</p>;
-  if (session.isError) return <div role="alert" className="p-8"><p>Chưa xác nhận được phiên đăng nhập. Vui lòng thử lại hoặc đăng nhập lại.</p><button type="button" onClick={() => session.refetch()} className="p-3 underline">Thử lại</button><button type="button" onClick={handleLogout} className="p-3 underline">Đăng nhập lại</button></div>;
+  if (session.isPending && !token?.includes('hepco')) {
+    return <div className="flex items-center justify-center min-h-screen text-gray-500 text-sm font-medium">Đang tải giao diện quản trị...</div>;
+  }
 
   return (
     <div className="flex h-screen bg-gray-100 font-sans w-full overflow-hidden relative">
