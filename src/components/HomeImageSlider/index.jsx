@@ -126,6 +126,7 @@ const HomeImageSlider = () => {
                   src={imageUrl}
                   alt={`Slide ${index}`}
                   className="w-full h-full object-cover select-none pointer-events-none"
+                  onError={(e) => { e.target.onerror = null; e.target.src = "/images/cover.png"; }}
                 />
                 {/* Paper curl shadow effect during page flip */}
                 {isAnimating && (
