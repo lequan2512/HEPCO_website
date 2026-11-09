@@ -236,7 +236,7 @@ const AdminLayout = () => {
           <NavItem
             to={ROUTES.ADMIN_SHOWCASE}
             icon={ImageIcon}
-            label="Hoạt động & Dự án trọng điểm"
+            label="Quản lý Nội dung Trang chủ"
             isActive={location.pathname === ROUTES.ADMIN_SHOWCASE}
             isCollapsed={isCollapsed}
             onClick={() => setIsSidebarOpen(false)}

@@ -6,9 +6,13 @@ import { getHeroSettings } from '../services/news.service';
 import { resolveAssetUrl } from '../utils/assetUrl';
 import bgImg from '../assets/images/bg-img.avif';
 
-const Hero = () => {
+const Hero = ({ config }) => {
   const [showVideo, setShowVideo] = useState(false);
-  const heroConfig = getHeroSettings();
+  const heroSettings = getHeroSettings();
+  const heroConfig = {
+    ...heroSettings,
+    ...(config || {})
+  };
 
   return (
     <section
@@ -35,7 +39,7 @@ const Hero = () => {
           {/* Dual Action Buttons */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4 w-full sm:w-auto max-w-md sm:max-w-none">
             <Link
-              to={ROUTES.SERVICES}
+              to={heroConfig.primaryCtaLink || ROUTES.SERVICES}
               className="w-full sm:w-auto whitespace-nowrap inline-flex items-center justify-center gap-2.5 px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl text-white font-bold text-sm sm:text-base bg-[#10243b] hover:bg-emerald-700 active:scale-[0.98] transition-all duration-200 shadow-md hover:shadow-xl group"
             >
               <span>{heroConfig.primaryCtaText || 'Khám Phá Dịch Vụ'}</span>
@@ -57,11 +61,11 @@ const Hero = () => {
           <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-gray-200/90 shadow-2xl bg-[#0e3b2f]">
             <div className="relative w-full aspect-[16/9] sm:aspect-[21/10] overflow-hidden group flex items-center justify-center">
               <img
-                src={resolveAssetUrl(heroConfig.coverImage || '/images/cover.png')}
+                src={resolveAssetUrl(heroConfig.coverImage || '/uploads/images/TongQuan_6a06c09d.jpg')}
                 alt="HEPCO - Vì Môi Trường Huế Xanh Sạch Sáng"
                 onError={(e) => {
                   e.target.onerror = null;
-                  e.target.src = '/images/cover.png';
+                  e.target.src = '/uploads/images/TongQuan_6a06c09d.jpg';
                 }}
                 className="w-full h-full object-contain sm:object-cover object-center transition-transform duration-1000 group-hover:scale-[1.02]"
               />

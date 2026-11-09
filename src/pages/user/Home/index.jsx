@@ -33,15 +33,24 @@ const defaultSections = Object.keys(components).map((id) => ({ id, visible: true
 
 const Home = () => {
   const { data } = useShowcase();
-  const sections = data?.data?.sections ?? defaultSections;
+  const homeConfig = data?.data || {};
+  const sections = homeConfig.sections ?? defaultSections;
 
   return (
     <div className="w-full bg-white overflow-hidden">
       {sections.map(({ id, visible }) => {
         const Section = components[id];
         if (!visible || !Section) return null;
-        if (id === 'hero' || id === 'stats') return <Section key={id} />;
-        return <ScrollAnimation key={id} animation="fade-up" duration={700}><Section /></ScrollAnimation>;
+        const sectionProps = {
+          config: id === 'utilities' ? homeConfig.utilities : homeConfig[id],
+          homeConfig
+        };
+        if (id === 'hero' || id === 'stats') return <Section key={id} {...sectionProps} />;
+        return (
+          <ScrollAnimation key={id} animation="fade-up" duration={700}>
+            <Section {...sectionProps} />
+          </ScrollAnimation>
+        );
       })}
     </div>
   );
