@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useGetBanners } from '../../apis/banner';
-import { API_BASE_URL } from '../../constants/api';
+import { resolveAssetUrl } from '../../utils/assetUrl';
 
 const HomeImageSlider = () => {
   const { data: bannersRes, isLoading } = useGetBanners({ limit: 1000 });
@@ -109,7 +109,7 @@ const HomeImageSlider = () => {
             const isAnimating = index === animatingSlide;
             if (!isCurrent && !isAnimating) return null;
 
-            const imageUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
+            const imageUrl = resolveAssetUrl(url);
 
             return (
               <div

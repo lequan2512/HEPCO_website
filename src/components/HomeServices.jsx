@@ -1,37 +1,37 @@
 import { useGetNews } from '../apis/news';
-import { API_BASE_URL } from '../constants/api';
 import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle2 } from 'lucide-react';
 import { ROUTES } from '../constants/routes';
+import { resolveAssetUrl } from '../utils/assetUrl';
 
 const FALLBACK_SERVICES = [
   {
-    id: 1,
-    title: 'Thu Gom & Vận Chuyển Rác Thải Sinh Hoạt',
-    summary: 'Thu gom rác sinh hoạt tận nơi tại các phường, xã, khu dân cư và tuyến phố với phương tiện cuốn ép hiện đại.',
-    thumbnail: '/images/news_trucks.png',
+    id: 127,
+    title: 'Thu gom, vận chuyển và xử lý rác',
+    summary: 'Thu gom rác sinh hoạt, chất thải rắn công nghiệp và chất thải nguy hại trên địa bàn TP. Huế với đội xe cuốn ép hiện đại.',
+    thumbnail: '/images/services/thu-gom-rac-1.jpg',
     tag: 'Dịch vụ chính',
   },
   {
-    id: 2,
-    title: 'Xử Lý Chất Thải Công Nghiệp & Bùn Thải',
-    summary: 'Giải pháp thu gom, phân loại và xử lý chất thải công nghiệp thông thường, bùn vi sinh cho nhà máy, xí nghiệp.',
-    thumbnail: '/images/news_cleanup.png',
-    tag: 'Doanh nghiệp',
+    id: 126,
+    title: 'Tưới nước rửa đường',
+    summary: 'Phun nước rửa đường bằng xe bồn chuyên dụng áp lực cao, giảm bụi và đảm bảo mỹ quan đô thị xanh - sạch - sáng.',
+    thumbnail: '/images/services/tuoi-nuoc-rua-duong-1.jpg',
+    tag: 'Vệ sinh đô thị',
   },
   {
-    id: 3,
-    title: 'Chăm Sóc Công Viên, Cây Xanh & Hoa Cảnh',
-    summary: 'Cắt tỉa, tạo hình cành nhánh chống bão, duy tu hệ thống thảm cỏ và bồn hoa cảnh quan di sản Cố đô.',
-    thumbnail: '/images/news_planting.png',
-    tag: 'Cảnh quan đô thị',
+    id: 47,
+    title: 'Nghĩa trang và dịch vụ đưa tang, mai táng',
+    summary: 'Quản lý, chăm sóc cảnh quan nghĩa trang và cung cấp trọn gói dịch vụ mai táng, cải táng chu đáo, trang nghiêm.',
+    thumbnail: '/images/services/quan-ly-nghia-trang-1.jpg',
+    tag: 'Dịch vụ công ích',
   },
   {
-    id: 4,
-    title: 'Vận Hành & Bảo Trì Chiếu Sáng Đô Thị',
-    summary: 'Quản lý, lắp đặt và duy tu hệ thống đèn chiếu sáng công cộng, đèn trang trí mỹ thuật chiếu sáng đường phố.',
-    thumbnail: '/images/cover.png',
-    tag: 'Hạ tầng kỹ thuật',
+    id: 44,
+    title: 'Hút Hầm Vệ Sinh - Xử Lý Phân Hầm Cầu',
+    summary: 'Dịch vụ hút hầm vệ sinh bằng xe bồn chuyên dụng công nghệ Nhật Bản, thi công nhanh gọn, an toàn và hợp vệ sinh.',
+    thumbnail: '/images/services/hut-ham-ve-sinh-1.jpg',
+    tag: 'Hạ tầng vệ sinh',
   },
 ];
 
@@ -67,9 +67,7 @@ const HomeServices = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10">
           {displayServices.map((service, index) => {
             const imageSrc = service.thumbnail
-              ? service.thumbnail.startsWith('http')
-                ? service.thumbnail
-                : `${API_BASE_URL}${service.thumbnail}`
+              ? resolveAssetUrl(service.thumbnail)
               : FALLBACK_SERVICES[index % FALLBACK_SERVICES.length].thumbnail;
 
             return (
@@ -86,6 +84,7 @@ const HomeServices = () => {
                     alt={service.title}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-108"
                     onError={(e) => {
+                      e.target.onerror = null;
                       e.target.src = FALLBACK_SERVICES[index % FALLBACK_SERVICES.length].thumbnail;
                     }}
                   />

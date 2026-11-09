@@ -10,7 +10,11 @@ import News from './pages/user/News';
 import ArticleDetail from './pages/user/ArticleDetail';
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminLayout from './components/AdminLayout';
+import AdminCmsOverview from './pages/admin/AdminCmsOverview';
 import AdminNewsManager from './pages/admin/AdminNewsManager';
+import AdminAboutManager from './pages/admin/AdminAboutManager';
+import AdminShowcaseManager from './pages/admin/AdminShowcaseManager';
+import AdminGalleryManager from './pages/admin/AdminGalleryManager';
 import AdminIpWhitelist from './pages/admin/AdminIpWhitelist';
 import AdminBannerManager from './pages/admin/AdminBannerManager';
 import AdminDeviceManager from './pages/admin/AdminDeviceManager';
@@ -32,14 +36,15 @@ const queryClient = new QueryClient({
     queries: {
       refetchOnWindowFocus: false,
       retry: 1,
-      staleTime: 5 * 60 * 1000,
-    },
-  },
+      staleTime: 5 * 60 * 1000
+    }
+  }
 });
 
 const AppRoutes = () => {
   const location = useLocation();
-  const isAdminRoute = location.pathname.startsWith('/admin-dashboard');
+  const isAdminRoute =
+    location.pathname.startsWith('/admin-dashboard') || location.pathname === ROUTES.ADMIN;
   const isLoginRoute = location.pathname === ROUTES.ADMIN_LOGIN;
 
   useEffect(() => {
@@ -49,11 +54,16 @@ const AppRoutes = () => {
   if (isAdminRoute) {
     return (
       <Routes>
+        <Route path={ROUTES.ADMIN} element={<Navigate to={ROUTES.ADMIN_OVERVIEW} replace />} />
         <Route path="/admin-dashboard" element={<AdminLayout />}>
-          <Route index element={<Navigate to="news" replace />} />
+          <Route index element={<Navigate to="overview" replace />} />
+          <Route path="overview" element={<AdminCmsOverview />} />
           <Route path="news" element={<AdminNewsManager type="news" />} />
           <Route path="shareholders" element={<AdminNewsManager type="shareholders" />} />
+          <Route path="about" element={<AdminAboutManager />} />
           <Route path="services" element={<AdminNewsManager type="service" />} />
+          <Route path="showcase" element={<AdminShowcaseManager />} />
+          <Route path="gallery" element={<AdminGalleryManager />} />
           <Route path="banners" element={<AdminBannerManager />} />
           <Route path="ip-whitelist" element={<AdminIpWhitelist />} />
           <Route path="devices" element={<AdminDeviceManager />} />

@@ -50,7 +50,7 @@ const Pagination = ({ meta, onPageChange, hideTotal = false, size = 'md', showSi
           </p>
         </div>
       )}
-      <div className="flex flex-1 justify-between sm:justify-end items-center gap-2">
+      <div className="flex flex-wrap flex-1 justify-center sm:justify-end items-center gap-1 sm:gap-2">
         <div className="flex items-center gap-1">
           <button
             onClick={() => handlePageChange(1)}

@@ -5,17 +5,22 @@ export const ROUTES = {
   NEWS: '/tin-tuc',
   SHAREHOLDERS: '/co-dong',
   ARTICLE_DETAIL: '/bai-viet/:id',
+  ADMIN: '/admin',
   ADMIN_LOGIN: '/admin-login',
   ADMIN_DASHBOARD: '/admin-dashboard',
+  ADMIN_OVERVIEW: '/admin-dashboard/overview',
   ADMIN_NEWS: '/admin-dashboard/news',
   ADMIN_SHAREHOLDERS: '/admin-dashboard/shareholders',
+  ADMIN_SERVICES: '/admin-dashboard/services',
+  ADMIN_ABOUT: '/admin-dashboard/about',
+  ADMIN_SHOWCASE: '/admin-dashboard/showcase',
+  ADMIN_GALLERY: '/admin-dashboard/gallery',
+  ADMIN_BANNERS: '/admin-dashboard/banners',
   ADMIN_IP: '/admin-dashboard/ip-whitelist',
   ADMIN_DEPARTMENTS: '/admin-dashboard/departments',
   ADMIN_FUEL: '/admin-dashboard/fuel-comparison',
   ADMIN_BASE_OFFICE: '/admin-dashboard/base-office',
   ADMIN_POS: '/admin-dashboard/pos',
   ADMIN_POS_EMPLOYEES: '/admin-dashboard/pos-employees',
-  ADMIN_POS_PAPER: '/admin-dashboard/pos-paper',
+  ADMIN_POS_PAPER: '/admin-dashboard/pos-paper'
 };
-
-

@@ -10,6 +10,13 @@ export const ERROR_MESSAGES = {
   TOKEN_MISSING: 'Phiên đăng nhập không hợp lệ, vui lòng đăng nhập lại.',
   TOKEN_INVALID_OR_EXPIRED: 'Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại.',
 
+  AUTH_CONFIGURATION_ERROR: 'Máy chủ chưa cấu hình xác thực. Vui lòng liên hệ quản trị.',
+  CMS_ACCESS_DENIED: 'Tài khoản chưa được cấp quyền quản lý nội dung.',
+  INVALID_SERVER_RESPONSE: 'Máy chủ chưa xác nhận kết quả hợp lệ. Hãy kiểm tra danh sách trước khi thử lại.',
+  SERVER_CONFIRMATION_UNAVAILABLE: 'Chưa xác nhận được kết quả từ máy chủ. Nội dung nhập vẫn được giữ; hãy kiểm tra trước khi gửi lại.',
+  PERMANENT_UPLOAD_REQUIRED: 'Tệp cần được lưu trên máy chủ bằng đường dẫn cố định.',
+  LOGIN_RATE_LIMITED: 'Đã có quá nhiều lần thử đăng nhập. Vui lòng thử lại sau.',
+  SHOWCASE_CONFLICT: 'Có người đã lưu bản mới hơn. Bản đang sửa được giữ nguyên; tải lại bản đã lưu để đối chiếu.',
   // News
   MISSING_REQUIRED_FIELDS: 'Vui lòng điền đầy đủ tiêu đề và nội dung.',
   CREATE_FAILED: 'Đã xảy ra lỗi khi đăng bài, vui lòng thử lại.',

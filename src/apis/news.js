@@ -21,7 +21,7 @@ export const useGetInfiniteNews = (params) => {
       return response.data;
     },
     getNextPageParam: (lastPage) => {
-      if (lastPage.meta && lastPage.meta.page < lastPage.meta.totalPages) {
+      if (lastPage?.meta && lastPage.meta.page < lastPage.meta.totalPages) {
         return lastPage.meta.page + 1;
       }
       return undefined;
