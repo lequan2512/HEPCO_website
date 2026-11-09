@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useInfiniteQuery } from '@tanstack/react-query';
 import axiosInstance from '../utils/axios';
-import { getNewsList, getNewsCategoryStats, getGalleryList } from '../services/news.service';
+import { getNewsList, getNewsCategoryStats, getShareholderStats, getGalleryList, getArticleById } from '../services/news.service';
 
 export const useGetNews = (params) => {
   return useQuery({
@@ -31,7 +31,10 @@ export const useGetNewsStats = () => {
       } catch {
         // Fall back to local dataset stats
       }
-      return getNewsCategoryStats();
+      return {
+        news: getNewsCategoryStats(),
+        shareholders: getShareholderStats()
+      };
     }
   });
 };
@@ -57,10 +60,18 @@ export const useGetInfiniteNews = (params) => {
   return useInfiniteQuery({
     queryKey: ['infiniteNews', params],
     queryFn: async ({ pageParam = 1 }) => {
-      const response = await axiosInstance.get('/api/news', {
-        params: { ...params, page: pageParam }
-      });
-      return response.data;
+      try {
+        const response = await axiosInstance.get('/api/news', {
+          params: { ...params, page: pageParam },
+          timeout: 3500
+        });
+        if (Array.isArray(response?.data?.data) && response.data.data.length > 0) {
+          return response.data;
+        }
+      } catch {
+        // Fall back to getNewsList
+      }
+      return getNewsList({ ...params, page: pageParam });
     },
     getNextPageParam: (lastPage) => {
       if (lastPage?.meta && lastPage.meta.page < lastPage.meta.totalPages) {
@@ -76,8 +87,15 @@ export const useGetArticleById = (id) => {
   return useQuery({
     queryKey: ['news', id],
     queryFn: async () => {
-      const response = await axiosInstance.get(`/api/news/${id}`);
-      return response.data;
+      try {
+        const response = await axiosInstance.get(`/api/news/${id}`, { timeout: 3500 });
+        if (response?.data && (response.data.title || response.data.id)) {
+          return response.data;
+        }
+      } catch {
+        // Fall back to local migrated article
+      }
+      return getArticleById(id);
     },
     enabled: !!id
   });
