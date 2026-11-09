@@ -180,11 +180,16 @@ const HomeImageSlider = () => {
                     : 'z-10'
                 }`}
               >
+                {/* Ambient blur background */}
+                <div
+                  className="absolute inset-0 w-full h-full bg-cover bg-center blur-2xl opacity-40 scale-110 pointer-events-none"
+                  style={{ backgroundImage: `url(${imageUrl})` }}
+                />
                 <img
                   src={imageUrl}
                   alt={slides[index]?.caption || `Slide ${index + 1}`}
-                  className="w-full h-full object-cover select-none pointer-events-none"
-                  onError={(e) => { e.target.onerror = null; e.target.src = "/uploads/images/TongQuan_6a06c09d.jpg"; }}
+                  className="relative z-10 w-full h-full object-contain object-center select-none pointer-events-none"
+                  onError={(e) => { e.target.onerror = null; e.target.src = "/uploads/images/HL-2_a07c11d6.jpg"; }}
                 />
                 {/* Paper curl shadow effect during page flip */}
                 {isAnimating && (

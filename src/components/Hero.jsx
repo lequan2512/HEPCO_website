@@ -14,6 +14,8 @@ const Hero = ({ config }) => {
     ...(config || {})
   };
 
+  const coverImageUrl = resolveAssetUrl(heroConfig.coverImage || '/uploads/images/TongQuan_6a06c09d.jpg');
+
   return (
     <section
       className="relative overflow-hidden bg-cover bg-center bg-no-repeat pt-6 pb-10 sm:pt-10 sm:pb-14 md:pt-14 md:pb-20 lg:pt-16 lg:pb-24 border-b border-gray-200/70"
@@ -56,30 +58,35 @@ const Hero = ({ config }) => {
           </div>
         </div>
 
-        {/* Hero Showcase Frame - Adaptive aspect ratio so banner graphics are never cropped */}
-        <div className="relative mt-2 sm:mt-4 md:mt-6">
-          <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-gray-200/90 shadow-2xl bg-[#0e3b2f]">
-            <div className="relative w-full aspect-[16/9] sm:aspect-[21/10] overflow-hidden group flex items-center justify-center">
+        {/* Hero Showcase Frame - Centered and perfectly proportioned */}
+        <div className="relative mt-4 sm:mt-6 md:mt-8 max-w-5xl mx-auto w-full">
+          <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-gray-200/90 shadow-2xl bg-white/80 backdrop-blur-md p-2 sm:p-3 flex items-center justify-center">
+            <div className="relative w-full flex items-center justify-center overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-b from-gray-900/5 to-gray-900/10 min-h-[300px] sm:min-h-[420px] md:min-h-[520px]">
+              {/* Ambient blur behind image */}
+              <div
+                className="absolute inset-0 w-full h-full bg-cover bg-center blur-3xl opacity-25 scale-110 pointer-events-none"
+                style={{ backgroundImage: `url(${coverImageUrl})` }}
+              />
+
               <img
-                src={resolveAssetUrl(heroConfig.coverImage || '/uploads/images/TongQuan_6a06c09d.jpg')}
+                src={coverImageUrl}
                 alt="HEPCO - Vì Môi Trường Huế Xanh Sạch Sáng"
                 onError={(e) => {
                   e.target.onerror = null;
                   e.target.src = '/uploads/images/TongQuan_6a06c09d.jpg';
                 }}
-                className="w-full h-full object-contain sm:object-cover object-center transition-transform duration-1000 group-hover:scale-[1.02]"
+                className="relative z-10 w-auto h-auto max-w-full max-h-[520px] sm:max-h-[640px] md:max-h-[720px] object-contain object-center mx-auto rounded-lg sm:rounded-xl shadow-md transition-transform duration-700 hover:scale-[1.01]"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0a1e2e]/55 via-transparent to-transparent pointer-events-none" />
 
               {/* Video Play Button Overlay */}
-              <div className="absolute bottom-3 right-3 sm:bottom-5 sm:right-6 z-10">
+              <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 z-20">
                 <button
                   type="button"
                   onClick={() => setShowVideo(true)}
-                  className="flex items-center gap-2 sm:gap-3 px-3.5 py-2 sm:px-5 sm:py-3 rounded-full bg-white/95 hover:bg-white text-[#10243b] font-bold text-xs sm:text-sm shadow-2xl backdrop-blur-md hover:scale-105 active:scale-95 transition-all duration-300 border border-white/80 group/btn cursor-pointer"
+                  className="flex items-center gap-2 sm:gap-3 px-3.5 py-2 sm:px-5 sm:py-2.5 rounded-full bg-white/95 hover:bg-white text-[#10243b] font-bold text-xs sm:text-sm shadow-xl backdrop-blur-md hover:scale-105 active:scale-95 transition-all duration-300 border border-gray-200/80 group/btn cursor-pointer"
                   title="Xem video giới thiệu HEPCO"
                 >
-                  <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-emerald-600 flex items-center justify-center text-white shadow-md group-hover/btn:bg-emerald-700 transition-colors shrink-0">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-emerald-600 flex items-center justify-center text-white shadow-md group-hover/btn:bg-emerald-700 transition-colors shrink-0">
                     <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-0.5 fill-current" />
                   </div>
                   <span className="pr-1 whitespace-nowrap">
