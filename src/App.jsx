@@ -13,6 +13,7 @@ import AdminLayout from './components/AdminLayout';
 import AdminCmsOverview from './pages/admin/AdminCmsOverview';
 import AdminNewsManager from './pages/admin/AdminNewsManager';
 import AdminAboutManager from './pages/admin/AdminAboutManager';
+import AdminShowcaseManager from './pages/admin/AdminShowcaseManager';
 import AdminGalleryManager from './pages/admin/AdminGalleryManager';
 import AdminIpWhitelist from './pages/admin/AdminIpWhitelist';
 import AdminBannerManager from './pages/admin/AdminBannerManager';
@@ -61,6 +62,7 @@ const AppRoutes = () => {
           <Route path="shareholders" element={<AdminNewsManager type="shareholders" />} />
           <Route path="about" element={<AdminAboutManager />} />
           <Route path="services" element={<AdminNewsManager type="service" />} />
+          <Route path="showcase" element={<AdminShowcaseManager />} />
           <Route path="gallery" element={<AdminGalleryManager />} />
           <Route path="banners" element={<AdminBannerManager />} />
           <Route path="ip-whitelist" element={<AdminIpWhitelist />} />

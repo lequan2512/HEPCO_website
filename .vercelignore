@@ -4,3 +4,8 @@
 node_modules
 dist
 docs
+
+HEPCO-API-main/
+HEPCO-API-main.zip
+tests
+/.hepco-preview-build/

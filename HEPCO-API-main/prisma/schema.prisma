@@ -1,0 +1,307 @@
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "library"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model IpWhitelist {
+  id          Int     @id @default(autoincrement())
+  ip          String  @unique @db.VarChar(50)
+  description String? @db.VarChar(255)
+
+  @@map("ip_whitelists")
+}
+
+model News {
+  id        Int     @id @default(autoincrement())
+  title     String  @db.VarChar(255)
+  date      String  @db.VarChar(20)
+  content   String? @db.Text
+  thumbnail String? @db.VarChar(500)
+  type      String? @default("news") @db.VarChar(50)
+  author_id Int?
+  metadata  Json?
+
+  @@map("news")
+}
+
+model Users {
+  id       Int    @id @default(autoincrement())
+  username String @unique @db.VarChar(100)
+  password String @db.VarChar(255)
+
+  @@map("users")
+}
+
+model Banner {
+  id  Int    @id @default(autoincrement())
+  url String @db.VarChar(500)
+
+  @@map("banners")
+}
+
+
+enum DeviceStatus {
+  in_stock
+  in_use
+  broken
+  retired
+}
+
+
+model Department {
+  id          Int      @id @default(autoincrement())
+  code        String?  @unique @db.VarChar(50)
+  name        String   @db.VarChar(100)
+  description String?  @db.VarChar(255)
+  type        Int?     @default(1)
+  parent_id   Int?
+  created_at  DateTime @default(now())
+
+  parent      Department?  @relation("DepartmentHierarchy", fields: [parent_id], references: [id], onDelete: SetNull)
+  children    Department[] @relation("DepartmentHierarchy")
+  employees   Employee[]
+  pos_devices PosDevice[]
+
+  @@map("departments")
+}
+
+
+
+model Employee {
+  id            Int      @id @default(autoincrement())
+  employee_code String   @unique @db.VarChar(20)
+  full_name     String   @db.VarChar(150)
+  department_id Int?
+  position      String?  @db.VarChar(100)
+  employee_type Int?     @default(2)
+  email         String?  @db.VarChar(150)
+  phone         String?  @db.VarChar(20)
+  status        Int?     @default(1)
+  created_at    DateTime @default(now())
+
+  department         Department?        @relation(fields: [department_id], references: [id])
+  device_assignments DeviceAssignment[]
+  pos_assignments    PosAssignment[]
+  pos_borrowings     PosBorrowing[]
+  pos_paper_issues   PosPaperIssue[]
+
+  @@map("employees")
+}
+
+
+enum PosStatus {
+  in_stock
+  in_use
+  borrowed
+  broken
+  retired
+}
+
+enum PosEnterprise {
+  BSH
+  NSH
+}
+
+model PosDevice {
+  id            Int           @id @default(autoincrement())
+  asset_code    String?       @db.VarChar(50)
+  serial_number String        @unique @db.VarChar(100)
+  imei          String?       @db.VarChar(100)
+  sim_number    String?       @db.VarChar(50)
+  sim_imei      String?       @db.VarChar(100)
+  telecom_plan  String?       @db.VarChar(100)
+  enterprise    PosEnterprise @default(BSH)
+  department_id Int?
+  region        String?       @db.VarChar(255)
+  status        PosStatus     @default(in_stock)
+  notes         String?       @db.Text
+  created_at    DateTime      @default(now())
+  updated_at    DateTime      @updatedAt
+
+  department  Department?    @relation(fields: [department_id], references: [id])
+  assignments PosAssignment[]
+  borrowings  PosBorrowing[]
+
+  @@index([status])
+  @@index([enterprise])
+  @@index([department_id])
+  @@map("pos_devices")
+}
+
+model PosAssignment {
+  id            Int       @id @default(autoincrement())
+  pos_id        Int
+  employee_id   Int?
+  employee_name String?   @db.VarChar(150)
+  assigned_date DateTime  @db.Date
+  returned_date DateTime? @db.Date
+  assigned_by   String?   @db.VarChar(100)
+  region        String?   @db.VarChar(255)
+  note          String?   @db.VarChar(255)
+
+  pos      PosDevice @relation(fields: [pos_id], references: [id], onDelete: Cascade)
+  employee Employee? @relation(fields: [employee_id], references: [id])
+
+  @@index([pos_id])
+  @@index([employee_id])
+  @@map("pos_assignments")
+}
+
+model PosBorrowing {
+  id                   Int       @id @default(autoincrement())
+  pos_id               Int
+  borrower_name        String    @db.VarChar(150)
+  employee_id          Int?
+  borrow_date          DateTime  @db.Date
+  expected_return_date DateTime? @db.Date
+  returned_date        DateTime? @db.Date
+  purpose              String?   @db.VarChar(255)
+  status               String    @default("borrowing") @db.VarChar(20)
+  note                 String?   @db.VarChar(255)
+
+  pos      PosDevice @relation(fields: [pos_id], references: [id], onDelete: Cascade)
+  employee Employee? @relation(fields: [employee_id], references: [id])
+
+  @@index([pos_id])
+  @@index([employee_id])
+  @@map("pos_borrowings")
+}
+
+model PosPaperInventory {
+  id                Int      @id @default(autoincrement())
+  paper_name        String   @db.VarChar(150)
+  code              String?  @unique @db.VarChar(50)
+  total_quantity    Int      @default(0)
+  in_stock_quantity Int      @default(0)
+  issued_quantity   Int      @default(0)
+  unit_price        Decimal? @db.Decimal(15, 2)
+  supplier_name     String?  @db.VarChar(150)
+  notes             String?  @db.Text
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+
+  issues PosPaperIssue[]
+
+  @@map("pos_paper_inventories")
+}
+
+model PosPaperIssue {
+  id            Int       @id @default(autoincrement())
+  paper_id      Int
+  employee_id   Int?
+  employee_name String    @db.VarChar(150)
+  quantity      Int
+  issue_date    DateTime  @db.Date
+  issued_by     String?   @db.VarChar(100)
+  note          String?   @db.VarChar(255)
+
+  paper    PosPaperInventory @relation(fields: [paper_id], references: [id], onDelete: Cascade)
+  employee Employee?          @relation(fields: [employee_id], references: [id])
+
+  @@index([paper_id])
+  @@index([employee_id])
+  @@map("pos_paper_issues")
+}
+
+
+model DeviceCategory {
+  id           Int      @id @default(autoincrement())
+  code         String?  @unique @db.VarChar(50)
+  name         String   @db.VarChar(100)
+  is_component Boolean? @default(false)
+  description  String?  @db.VarChar(255)
+  parent_id    Int?
+
+  parent       DeviceCategory?  @relation("CategoryHierarchy", fields: [parent_id], references: [id])
+  children     DeviceCategory[] @relation("CategoryHierarchy")
+
+  devices      Device[]
+
+  @@map("device_categories")
+}
+
+model Supplier {
+  id             Int     @id @default(autoincrement())
+  name           String  @db.VarChar(150)
+  contact_person String? @db.VarChar(100)
+  phone          String? @db.VarChar(20)
+  email          String? @db.VarChar(150)
+  address        String? @db.VarChar(255)
+
+  devices Device[]
+
+  @@map("suppliers")
+}
+
+
+
+model Device {
+  id               Int           @id @default(autoincrement())
+  asset_code       String        @unique @db.VarChar(30)
+  name             String        @db.VarChar(150)
+  category_id      Int
+
+  parent_device_id Int?
+  brand            String?       @db.VarChar(100)
+  model            String?       @db.VarChar(100)
+  serial_number    String?       @unique @db.VarChar(100)
+  spec_detail      String?       @db.VarChar(255)
+  manufacture_year Int?          @db.Year
+  purchase_date    DateTime?     @db.Date
+  purchase_price   Decimal?      @db.Decimal(15, 2)
+  warranty_expiry  DateTime?     @db.Date
+  supplier_id      Int?
+  status           DeviceStatus? @default(in_stock)
+  location         String?       @db.VarChar(150)
+  notes            String?       @db.Text
+  created_at       DateTime      @default(now())
+  updated_at       DateTime      @updatedAt
+
+  category      DeviceCategory @relation(fields: [category_id], references: [id])
+
+  parent_device Device?        @relation("ParentDevice", fields: [parent_device_id], references: [id])
+  child_devices Device[]       @relation("ParentDevice")
+  supplier      Supplier?      @relation(fields: [supplier_id], references: [id])
+
+  assignments DeviceAssignment[]
+
+
+  @@index([status])
+  @@index([category_id])
+
+  @@index([parent_device_id])
+  @@map("devices")
+}
+
+model DeviceAssignment {
+  id            Int       @id @default(autoincrement())
+  device_id     Int
+  employee_id   Int
+  assigned_date DateTime  @db.Date
+  returned_date DateTime? @db.Date
+  assigned_by   String?   @db.VarChar(100)
+  note          String?   @db.VarChar(255)
+
+  device   Device   @relation(fields: [device_id], references: [id])
+  employee Employee @relation(fields: [employee_id], references: [id])
+
+  @@index([employee_id])
+  @@index([device_id])
+  @@map("device_assignments")
+}
+
+
+
+model HomeShowcase {
+  id Int @id
+  data Json
+  version Int @default(1)
+  updated_at DateTime @updatedAt
+
+  @@map("home_showcases")
+}

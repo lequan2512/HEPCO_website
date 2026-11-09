@@ -13,6 +13,7 @@ export const ROUTES = {
   ADMIN_SHAREHOLDERS: '/admin-dashboard/shareholders',
   ADMIN_SERVICES: '/admin-dashboard/services',
   ADMIN_ABOUT: '/admin-dashboard/about',
+  ADMIN_SHOWCASE: '/admin-dashboard/showcase',
   ADMIN_GALLERY: '/admin-dashboard/gallery',
   ADMIN_BANNERS: '/admin-dashboard/banners',
   ADMIN_IP: '/admin-dashboard/ip-whitelist',

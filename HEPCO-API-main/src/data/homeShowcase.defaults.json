@@ -1,0 +1,44 @@
+{
+  "title": "Hoạt Động & Dự Án Trọng Điểm",
+  "description": "Hình ảnh công tác thực tế của đội ngũ cán bộ công nhân viên HEPCO trên khắp các nẻo đường Cố đô Huế.",
+  "linkLabel": "Thư Viện Hình Ảnh & Hoạt Động",
+  "href": "/tin-tuc?tab=gallery",
+  "items": [
+    {
+      "id": "trucks",
+      "title": "Đoàn Phương Tiện Chuyên Dụng Thu Gom",
+      "location": "Các tuyến đường trục chính, TP. Huế",
+      "scale": "100+ Xe chuyên dùng",
+      "image": "/images/news_trucks.png",
+      "href": "/tin-tuc?tab=gallery",
+      "linkLabel": "Xem thư viện ảnh"
+    },
+    {
+      "id": "parks",
+      "title": "Chăm Sóc & Tôn Tạo Công Viên Di Sản",
+      "location": "Dọc bờ sông Hương & công viên trung tâm",
+      "scale": "50+ Hécta thảm cỏ, hoa cảnh",
+      "image": "/images/news_planting.png",
+      "href": "/tin-tuc?tab=gallery",
+      "linkLabel": "Xem thư viện ảnh"
+    },
+    {
+      "id": "cleanup",
+      "title": "Chiến Dịch Vệ Sinh Môi Trường Đô Thị",
+      "location": "Khu vực dân cư & các điểm công cộng",
+      "scale": "Hằng ngày & Cao điểm lễ",
+      "image": "/images/news_cleanup.png",
+      "href": "/tin-tuc?tab=gallery",
+      "linkLabel": "Xem thư viện ảnh"
+    },
+    {
+      "id": "meeting",
+      "title": "Họp Điều Hành & Sẵn Sàng Ứng Trực",
+      "location": "Trung tâm điều hành HEPCO",
+      "scale": "Toàn lực lượng cán bộ công nhân",
+      "image": "/images/news_meeting.png",
+      "href": "/tin-tuc?tab=gallery",
+      "linkLabel": "Xem thư viện ảnh"
+    }
+  ]
+}

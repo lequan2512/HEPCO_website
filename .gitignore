@@ -51,3 +51,6 @@ Thumbs.db
 .env
 .vercel
 .env*
+/.hepco-preview-build/
+!.env.example
+!HEPCO-API-main/.env.example

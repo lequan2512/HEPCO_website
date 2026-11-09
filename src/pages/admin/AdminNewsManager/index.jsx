@@ -37,6 +37,7 @@ import {
   SHAREHOLDER_DOC_TYPE_OPTIONS,
   SHAREHOLDER_DOC_TYPE_LABELS
 } from '../../../constants/news';
+import { CONTENT_SOURCE } from '../../../constants/cms';
 import { ROUTES } from '../../../constants/routes';
 
 const parseToInputDateTime = (dateStr) => {
@@ -121,7 +122,8 @@ const AdminNewsManager = ({ type = 'news', editOnly = false }) => {
     return () => clearTimeout(handler);
   }, [searchQuery]);
 
-  const { data: newsResponse = {}, isLoading } = useGetNews({
+  const { data: newsResponse = {}, isLoading, isError, refetch } = useGetNews({
+    requireServer: true,
     type,
     limit: 15,
     search: debouncedSearch,
@@ -149,14 +151,14 @@ const AdminNewsManager = ({ type = 'news', editOnly = false }) => {
   const uploadImageMutation = useUploadImage();
 
   const handleCreateSuccess = () => {
-    toast.success('Thêm mới thành công!');
+    toast.success('Đã lưu bài viết trên máy chủ.');
     queryClient.invalidateQueries({ queryKey: ['news'] });
     setIsFormOpen(false);
     formik.resetForm();
   };
 
   const handleUpdateSuccess = () => {
-    toast.success('Cập nhật thành công!');
+    toast.success('Máy chủ đã xác nhận cập nhật bài viết.');
     queryClient.invalidateQueries({ queryKey: ['news'] });
     setIsFormOpen(false);
     setEditingId(null);
@@ -164,7 +166,7 @@ const AdminNewsManager = ({ type = 'news', editOnly = false }) => {
   };
 
   const handleDeleteSuccess = () => {
-    toast.success('Xóa thành công!');
+    toast.success('Máy chủ đã xác nhận xóa bài viết.');
     queryClient.invalidateQueries({ queryKey: ['news'] });
   };
 
@@ -711,6 +713,7 @@ const AdminNewsManager = ({ type = 'news', editOnly = false }) => {
 
   return (
     <div className="w-full relative space-y-5">
+      {CONTENT_SOURCE !== 'server' && <div role="status" className="p-4 rounded-xl border border-amber-200 bg-amber-50 text-sm text-amber-900">Website công khai đang dùng dữ liệu tĩnh. Bài viết tại đây được lưu trên máy chủ; cần chuyển nguồn dữ liệu công khai sau khi kiểm tra và chuyển dữ liệu cũ.</div>}
       {deleteNewsMutation.isPending && <Loading fullScreen message="Đang xóa..." />}
 
       {/* Header & Filter Bar */}
@@ -817,7 +820,9 @@ const AdminNewsManager = ({ type = 'news', editOnly = false }) => {
 
       {/* Table Box */}
       <div className="bg-white rounded-2xl shadow-xs border border-gray-100 min-h-[300px] flex flex-col justify-center overflow-hidden">
-        {isLoading ? (
+        {isError ? (
+            <div role="alert" className="p-8 text-center"><p>Không thể tải dữ liệu máy chủ. Chưa có thay đổi nào được xác nhận.</p><button type="button" onClick={() => refetch()} className="mt-3 underline text-hepco-green">Thử lại</button></div>
+          ) : isLoading ? (
           <Loading />
         ) : articles.length > 0 ? (
           <div className="overflow-x-auto">

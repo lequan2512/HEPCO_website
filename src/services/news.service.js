@@ -1,3 +1,5 @@
+import { CONTENT_SOURCE } from '../constants/cms';
+import { createServerArticle, updateServerArticle, deleteServerArticle, getServerArticles, getServerArticle } from './article.service';
 import axiosInstance from '../utils/axios';
 import migratedData from '../data/migratedData.json';
 import {
@@ -294,21 +296,19 @@ export const getNewsList = async (params = {}) => {
     sort = 'created_at_desc'
   } = params;
 
-  let apiItems = [];
-  try {
-    const response = await axiosInstance.get('/api/news', {
-      params: { type, limit: 50, page: 1 },
-      timeout: 2500
+  if (params.requireServer || CONTENT_SOURCE === 'server') {
+    const activeCategory = documentType || category;
+    const groupTypes = SHAREHOLDER_DOC_GROUP_LABELS[activeCategory]?.types;
+    const response = await getServerArticles({
+      type, page, limit, search, sort,
+      category: groupTypes?.length ? undefined : (activeCategory && activeCategory !== 'all' ? activeCategory : undefined),
+      documentTypes: groupTypes?.length ? groupTypes.join(',') : undefined,
+      year: year && year !== 'all' ? year : undefined,
     });
-    if (Array.isArray(response?.data?.data)) {
-      apiItems = response.data.data;
-    }
-  } catch {
-    // Use local migrated dataset seamlessly when API is offline or unreachable
+    return { ...response, data: response.data.map(enrichArticleMetadata) };
   }
-
-  const baseList = getBaseCollectionByType(type);
-  let items = mergeWithOverridesAndApi(baseList, apiItems, type);
+  // Legacy content is an explicit read-only snapshot, never a publication fallback.
+  let items = getBaseCollectionByType(type).map(enrichArticleMetadata);
 
   // Filter by category / documentType / documentGroup
   const activeCategory = documentType || category;
@@ -384,19 +384,21 @@ export const getNewsList = async (params = {}) => {
       total,
       page: currentPage,
       limit: pageSize,
-      totalPages
+      totalPages,
+      source: 'legacy'
     }
   };
 };
 
 export const getArticleById = async (rawId) => {
+  if (CONTENT_SOURCE === 'server') return { ...enrichArticleMetadata(await getServerArticle(rawId)), relatedArticles: [] };
   if (!rawId) throw new Error('Missing article ID');
   const strId = String(rawId).trim();
   const aliasId = migratedData.legacyIdAliases?.[strId]
     ? String(migratedData.legacyIdAliases[strId])
     : strId;
 
-  const allLocal = mergeWithOverridesAndApi(getBaseCollectionByType('all'), [], 'all');
+  const allLocal = getBaseCollectionByType('all').map(enrichArticleMetadata);
 
   let found = allLocal.find(
     (item) =>
@@ -735,70 +737,11 @@ export const reorderBannerItems = async (newBannerList) => {
   return { success: true, data: overrides.banners };
 };
 
-export const createNewsItem = async (newPost) => {
-  const nowStr = new Date().toLocaleDateString('vi-VN', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric'
-  });
-  const formattedPost = enrichArticleMetadata({
-    ...newPost,
-    date: newPost.date || `${nowStr} 08:00`
-  });
+export const createNewsItem = async (newPost) => enrichArticleMetadata(await createServerArticle(newPost));
 
-  try {
-    const response = await axiosInstance.post('/api/news', formattedPost, { timeout: 2500 });
-    if (response?.data && response.data.id) {
-      return response.data;
-    }
-  } catch {
-    // Save to local CMS overrides
-  }
+export const updateNewsItem = async ({ id, ...data }) => enrichArticleMetadata(await updateServerArticle(id, data));
 
-  const overrides = loadLocalOverrides();
-  const createdItem = {
-    id: Date.now(),
-    ...formattedPost,
-    timestamp: Date.now(),
-    status: 'published'
-  };
-  overrides.created.unshift(createdItem);
-  saveLocalOverrides(overrides);
-  return createdItem;
-};
-
-export const updateNewsItem = async ({ id, ...data }) => {
-  const formattedData = enrichArticleMetadata({ id, ...data });
-  try {
-    await axiosInstance.put(`/api/news/${id}`, formattedData, { timeout: 2500 });
-  } catch {
-    // Always persist in local CMS overrides so changes reflect immediately on static deployments
-  }
-  const overrides = loadLocalOverrides();
-  const strId = String(id);
-  overrides.updated[strId] = {
-    ...(overrides.updated[strId] || {}),
-    ...formattedData,
-    updatedAt: new Date().toISOString()
-  };
-  saveLocalOverrides(overrides);
-  return { id, ...formattedData };
-};
-
-export const deleteNewsItem = async (id) => {
-  try {
-    await axiosInstance.delete(`/api/news/${id}`, { timeout: 2500 });
-  } catch {
-    // Persist deletion in local CMS overrides
-  }
-  const overrides = loadLocalOverrides();
-  const strId = String(id);
-  if (!overrides.deleted.includes(strId)) {
-    overrides.deleted.push(strId);
-  }
-  saveLocalOverrides(overrides);
-  return { success: true };
-};
+export const deleteNewsItem = async (id) => deleteServerArticle(id);
 
 export const getCmsOverviewCounts = () => {
   const newsCount = mergeWithOverridesAndApi(migratedData.news || [], [], 'news').length;

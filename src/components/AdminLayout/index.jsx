@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 
 import useAuthStore from '../../store/useAuthStore';
+import { useSession } from '../../apis/auth';
 import { ROUTES } from '../../constants/routes';
 import logo from '../../assets/images/logo.png';
 
@@ -78,7 +79,8 @@ const SectionHeader = ({ label, isCollapsed }) => {
 };
 
 const AdminLayout = () => {
-  const { isAuthenticated, logout } = useAuthStore();
+  const { isAuthenticated, token, logout } = useAuthStore();
+  const session = useSession(token);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -120,6 +122,8 @@ const AdminLayout = () => {
   };
 
   if (!isAuthenticated) return null;
+  if (session.isPending) return <p role="status" className="p-8">Đang xác nhận phiên đăng nhập với máy chủ…</p>;
+  if (session.isError) return <div role="alert" className="p-8"><p>Chưa xác nhận được phiên đăng nhập. Vui lòng thử lại hoặc đăng nhập lại.</p><button type="button" onClick={() => session.refetch()} className="p-3 underline">Thử lại</button><button type="button" onClick={handleLogout} className="p-3 underline">Đăng nhập lại</button></div>;
 
   return (
     <div className="flex h-screen bg-gray-100 font-sans w-full overflow-hidden relative">
@@ -225,6 +229,14 @@ const AdminLayout = () => {
             icon={Wrench}
             label="Dịch Vụ Công Ty"
             isActive={location.pathname.includes('/services')}
+            isCollapsed={isCollapsed}
+            onClick={() => setIsSidebarOpen(false)}
+          />
+          <NavItem
+            to={ROUTES.ADMIN_SHOWCASE}
+            icon={ImageIcon}
+            label="Hoạt động & Dự án trọng điểm"
+            isActive={location.pathname === ROUTES.ADMIN_SHOWCASE}
             isCollapsed={isCollapsed}
             onClick={() => setIsSidebarOpen(false)}
           />

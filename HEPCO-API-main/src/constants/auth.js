@@ -1,0 +1,18 @@
+const AUTH = Object.freeze({
+  ALGORITHM: 'HS256',
+  ISSUER: 'hepco-api',
+  AUDIENCE: 'hepco-admin',
+  TOKEN_TTL: '1d',
+  MIN_SECRET_BYTES: 32,
+  MAX_PASSWORD_BYTES: 1024,
+  HASH_PREFIX: 'scrypt',
+  HASH_COST: 16384,
+  HASH_BLOCK_SIZE: 8,
+  HASH_PARALLELISM: 1,
+  HASH_BYTES: 64,
+  SALT_BYTES: 16,
+  HASH_MAX_MEMORY: 64 * 1024 * 1024,
+  SAFE_METHODS: ['GET', 'HEAD', 'OPTIONS'],
+});
+const LOGIN_LIMIT = Object.freeze({ ATTEMPTS: 10, WINDOW_MS: 15 * 60 * 1000, MAX_TRACKED_IPS: 10000 });
+module.exports = { AUTH, LOGIN_LIMIT };

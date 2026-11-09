@@ -1,0 +1,11 @@
+node_modules
+.env*
+.git
+.agents/
+.test-artifacts/
+tests/
+scripts/
+*.sql
+/*.js
+prisma/migrations/
+prisma/seed.js

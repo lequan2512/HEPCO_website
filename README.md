@@ -44,7 +44,15 @@ This README is the delivery plan and contributor entry point for upgrading the e
 
 Upgrade the existing public website, frontend CMS behavior, backend integrations, responsive layouts, accessibility, performance, SEO and release operations. Preserve useful content, attachments and working routes.
 
-The backend, database and file-storage implementation are not included in this checkout. Confirm their deployment, ownership and contracts before accepting backend-dependent phases. New backend infrastructure or substantial data migration requires a separately defined scope and estimate.
+Backend source has now been supplied locally in `HEPCO-API-main/` as an untracked import. See [backend assessment](docs/BACKEND_REVIEW.md) for the architecture, integration gaps and revised phase sequence. The backend upstream repository, deployed database/file storage and production environment remain unverified. Confirm ownership and deployment contracts before accepting backend-dependent phases. New backend infrastructure or substantial migration requires a separately defined scope and estimate.
+
+## Activities and projects editor
+
+The home-page activities/projects section now has a dedicated admin editor at `/admin-dashboard/showcase`. See [editor instructions and deployment notes](docs/SHOWCASE_ADMIN.md). This implementation is local and has not been deployed to production.
+
+## Current CMS/authentication implementation
+
+See [CMS delivery and rollout](docs/CMS_DELIVERY.md) for the local implementation of confirmed article CRUD, server-backed sessions, password hashing, IP enforcement and CMS write permissions. Backend SQL/account changes have not been applied and this work is not deployed. The restored public layout remains unchanged.
 
 ## Delivery status
 
@@ -192,7 +200,7 @@ Completing an initial component does not complete the entire phase. Each phase r
 | --- | --- | --- |
 | 1 | Source, infrastructure and content baseline | Partially complete |
 | 2 | Information architecture and UI standard | Initial home-page work implemented; review pending |
-| 3 | Reliable essential functions and CMS | Pending backend assessment |
+| 3 | Reliable essential functions and CMS | Static backend assessment complete; environment verification and implementation pending |
 | 4 | Complete public-page experience | Pending |
 | 5 | Performance, SEO and accessibility | Pending |
 | 6 | Integrated QA and acceptance | Pending |
