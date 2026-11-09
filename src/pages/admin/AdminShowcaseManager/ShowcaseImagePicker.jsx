@@ -4,7 +4,6 @@ import { useUploadImage } from '../../../apis/upload';
 import { getGalleryList } from '../../../services/news.service';
 import { resolveAssetUrl } from '../../../utils/assetUrl';
 import { isShowcaseUrl, SHOWCASE_IMAGE_MAX_BYTES } from '../../../constants/showcase';
-import defaults from '../../../data/homeShowcase.defaults.json';
 import toast from 'react-hot-toast';
 
 const ShowcaseImagePicker = ({ value, onChange, onBusyChange, disabled, name }) => {
@@ -12,7 +11,7 @@ const ShowcaseImagePicker = ({ value, onChange, onBusyChange, disabled, name }) 
   const [failedSource, setFailedSource] = useState(null);
   const upload = useUploadImage();
   const gallery = getGalleryList({ page: 1, limit: 24 }).data || [];
-  const options = [...new Map([...defaults.items.map((item) => ({ url: item.image, caption: item.title })), ...gallery].filter((item) => isShowcaseUrl(item.url, true)).map((item) => [item.url, item])).values()];
+  const options = [...new Map([...gallery].filter((item) => isShowcaseUrl(item.url, true)).map((item) => [item.url, item])).values()];
   const chooseFile = async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;

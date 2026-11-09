@@ -4,25 +4,38 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import toast from 'react-hot-toast';
 
-const FaqContact = () => {
+const DEFAULT_FAQS = [
+  {
+    question: 'Làm thế nào để tra cứu lịch trình thu gom rác tại tuyến đường nhà tôi?',
+    answer: 'Quý khách có thể vào mục "Lịch Gom Rác" ngay trên trang chủ để tra cứu lịch theo từng phường/xã và tuyến đường cụ thể, hoặc liên hệ tổng đài (0234) 3822 052.'
+  },
+  {
+    question: 'Quy trình đăng ký dịch vụ hút hầm vệ sinh hoặc cắt tỉa cành cây như thế nào?',
+    answer: 'Quý khách chỉ cần chọn mục "Đăng ký dịch vụ" trên website hoặc liên hệ hotline. Đội ngũ kỹ thuật của HEPCO sẽ liên hệ lại trong vòng 24 giờ để khảo sát và báo giá cụ thể.'
+  },
+  {
+    question: 'Doanh nghiệp có thể ký hợp đồng thu gom chất thải công nghiệp định kỳ bằng cách nào?',
+    answer: 'Doanh nghiệp có thể gửi yêu cầu qua form liên hệ hoặc liên hệ trực tiếp phòng Kế hoạch - Kinh doanh của HEPCO. Chúng tôi cung cấp hợp đồng trọn gói kèm đầy đủ chứng từ nghiệm thu môi trường theo luật định.'
+  },
+  {
+    question: 'Cách thức tra cứu và thanh toán tiền dịch vụ vệ sinh môi trường qua hóa đơn điện tử?',
+    answer: 'Quý khách truy cập cổng "Hóa Đơn Điện Tử" tại hoadondientu.hepco.com.vn, nhập mã khách hàng in trên biên lai thu tiền để tra cứu và thanh toán trực tuyến qua các ngân hàng.'
+  },
+  {
+    question: 'Khi phát hiện điểm tập kết rác thải tự phát hoặc sự cố môi trường, tôi phản ánh qua đâu?',
+    answer: 'Quý khách có thể chụp ảnh và gửi phản ánh qua mục "Báo cáo sự cố" trên website, hoặc gọi hotline khẩn cấp 24/7 để đội cơ động HEPCO tiếp nhận và xử lý nhanh chóng trong ngày.'
+  }
+];
+
+const FaqContact = ({ config }) => {
   const [openFaq, setOpenFaq] = useState(0);
   const [activeTab, setActiveTab] = useState('faq'); // 'faq' or 'contact'
 
-  const faqs = [
-    'Làm thế nào để tra cứu lịch trình thu gom rác tại tuyến đường nhà tôi?',
-    'Quy trình đăng ký dịch vụ hút hầm vệ sinh hoặc cắt tỉa cành cây như thế nào?',
-    'Doanh nghiệp có thể ký hợp đồng thu gom chất thải công nghiệp định kỳ bằng cách nào?',
-    'Cách thức tra cứu và thanh toán tiền dịch vụ vệ sinh môi trường qua hóa đơn điện tử?',
-    'Khi phát hiện điểm tập kết rác thải tự phát hoặc sự cố môi trường, tôi phản ánh qua đâu?'
-  ];
-
-  const faqAnswers = [
-    'Quý khách có thể vào mục "Lịch Gom Rác" ngay trên trang chủ để tra cứu lịch theo từng phường/xã và tuyến đường cụ thể, hoặc liên hệ tổng đài (0234) 3822 052.',
-    'Quý khách chỉ cần chọn mục "Đăng ký dịch vụ" trên website hoặc liên hệ hotline. Đội ngũ kỹ thuật của HEPCO sẽ liên hệ lại trong vòng 24 giờ để khảo sát và báo giá cụ thể.',
-    'Doanh nghiệp có thể gửi yêu cầu qua form liên hệ hoặc liên hệ trực tiếp phòng Kế hoạch - Kinh doanh của HEPCO. Chúng tôi cung cấp hợp đồng trọn gói kèm đầy đủ chứng từ nghiệm thu môi trường theo luật định.',
-    'Quý khách truy cập cổng "Hóa Đơn Điện Tử" tại hoadondientu.hepco.com.vn, nhập mã khách hàng in trên biên lai thu tiền để tra cứu và thanh toán trực tuyến qua các ngân hàng.',
-    'Quý khách có thể chụp ảnh và gửi phản ánh qua mục "Báo cáo sự cố" trên website, hoặc gọi hotline khẩn cấp 24/7 để đội cơ động HEPCO tiếp nhận và xử lý nhanh chóng trong ngày.'
-  ];
+  const title = config?.title || 'Giải Đáp Thắc Mắc & Liên Hệ';
+  const subtitle = config?.subtitle || 'Chúng tôi luôn lắng nghe và phản hồi mọi câu hỏi, ý kiến đóng góp của quý khách hàng và nhân dân.';
+  const items = Array.isArray(config?.items) && config.items.length > 0
+    ? config.items
+    : DEFAULT_FAQS;
 
   const formik = useFormik({
     initialValues: {
@@ -34,10 +47,12 @@ const FaqContact = () => {
     },
     validationSchema: Yup.object({
       name: Yup.string().required('Vui lòng nhập họ và tên'),
-      email: Yup.string().email('Email không hợp lệ').required('Vui lòng nhập email'),
-      phone: Yup.string().matches(/^[0-9]+$/, 'Số điện thoại chỉ được chứa số').required('Vui lòng nhập số điện thoại'),
-      subject: Yup.string().required('Vui lòng nhập tiêu đề'),
-      message: Yup.string().required('Vui lòng nhập nội dung'),
+      phone: Yup.string()
+        .matches(/^[0-9+() -]+$/, 'Số điện thoại không hợp lệ')
+        .required('Vui lòng nhập số điện thoại'),
+      email: Yup.string().email('Email không hợp lệ'),
+      subject: Yup.string().required('Vui lòng chọn hoặc nhập tiêu đề'),
+      message: Yup.string().required('Vui lòng nhập nội dung tin nhắn'),
     }),
     onSubmit: async (values, { resetForm }) => {
       try {
@@ -52,11 +67,11 @@ const FaqContact = () => {
 
         await fetch(GOOGLE_FORM_ACTION_URL, {
           method: 'POST',
-          mode: 'no-cors',
-          body: formData
+          body: formData,
+          mode: 'no-cors'
         });
 
-        toast.success('Yêu cầu của bạn đã được gửi thành công!');
+        toast.success('Yêu cầu đã được gửi thành công! HEPCO sẽ liên hệ lại quý khách sớm nhất.');
         resetForm();
       } catch (error) {
         console.error('Lỗi khi gửi form:', error);
@@ -71,14 +86,14 @@ const FaqContact = () => {
         {/* Section Header */}
         <div className="max-w-3xl mx-auto text-center mb-14 md:mb-16">
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#10243b] tracking-tight leading-tight mb-4">
-            Giải Đáp Thắc Mắc &amp; Liên Hệ
+            {title}
           </h2>
           <p className="text-base sm:text-lg text-gray-600 leading-relaxed font-normal">
-            Chúng tôi luôn lắng nghe và phản hồi mọi câu hỏi, ý kiến đóng góp của quý khách hàng và nhân dân.
+            {subtitle}
           </p>
         </div>
 
-        {/* Content Box (Oakdale Style Clean Split) */}
+        {/* Content Box */}
         <div className="rounded-3xl overflow-hidden bg-white border border-gray-200/90 shadow-xl grid grid-cols-1 lg:grid-cols-12">
           {/* Left Side: Tabs (FAQ & Contact) */}
           <div className="lg:col-span-7 p-7 sm:p-10 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-gray-200/80">
@@ -114,7 +129,7 @@ const FaqContact = () => {
               {/* Tab 1: FAQ Accordion */}
               {activeTab === 'faq' && (
                 <div className="space-y-4">
-                  {faqs.map((faq, index) => (
+                  {items.map((item, index) => (
                     <div
                       key={index}
                       className="border border-gray-200/80 rounded-2xl p-4 sm:p-5 transition-all duration-200 hover:border-emerald-600/40 bg-[#fafafa]"
@@ -127,7 +142,7 @@ const FaqContact = () => {
                         <span className={`text-sm sm:text-base font-bold pr-4 transition-colors ${
                           openFaq === index ? 'text-emerald-700' : 'text-[#10243b] group-hover:text-emerald-700'
                         }`}>
-                          {faq}
+                          {item.question}
                         </span>
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-colors ${
                           openFaq === index ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-500'
@@ -140,8 +155,8 @@ const FaqContact = () => {
                         </div>
                       </button>
                       {openFaq === index && (
-                        <div className="mt-4 pt-3 border-t border-gray-200/60 text-gray-600 text-sm leading-relaxed">
-                          {faqAnswers[index]}
+                        <div className="mt-4 pt-3 border-t border-gray-200/60 text-gray-600 text-sm leading-relaxed whitespace-pre-line">
+                          {item.answer}
                         </div>
                       )}
                     </div>
@@ -154,156 +169,156 @@ const FaqContact = () => {
                 <form onSubmit={formik.handleSubmit} className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                      <label htmlFor="name" className="block text-xs font-bold text-gray-700 uppercase mb-1">
                         Họ và tên *
                       </label>
                       <input
+                        id="name"
                         type="text"
-                        name="name"
+                        {...formik.getFieldProps('name')}
                         placeholder="Nguyễn Văn A"
-                        value={formik.values.name}
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
-                        className={`w-full bg-[#fafafa] border text-gray-800 placeholder-gray-400 px-4 py-3 rounded-xl focus:bg-white focus:outline-none transition-all ${
-                          formik.touched.name && formik.errors.name
-                            ? 'border-red-400 focus:border-red-400'
-                            : 'border-gray-200 focus:border-[#10243b]'
+                        className={`w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
+                          formik.touched.name && formik.errors.name ? 'border-red-500' : 'border-gray-200'
                         }`}
                       />
                       {formik.touched.name && formik.errors.name && (
-                        <div className="text-red-500 text-xs mt-1">{formik.errors.name}</div>
+                        <p className="text-red-500 text-xs mt-1">{formik.errors.name}</p>
                       )}
                     </div>
-
                     <div>
-                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                      <label htmlFor="phone" className="block text-xs font-bold text-gray-700 uppercase mb-1">
                         Số điện thoại *
                       </label>
                       <input
+                        id="phone"
                         type="tel"
-                        name="phone"
-                        placeholder="0905 123 456"
-                        value={formik.values.phone}
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
-                        className={`w-full bg-[#fafafa] border text-gray-800 placeholder-gray-400 px-4 py-3 rounded-xl focus:bg-white focus:outline-none transition-all ${
-                          formik.touched.phone && formik.errors.phone
-                            ? 'border-red-400 focus:border-red-400'
-                            : 'border-gray-200 focus:border-[#10243b]'
+                        {...formik.getFieldProps('phone')}
+                        placeholder="0912 345 678"
+                        className={`w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
+                          formik.touched.phone && formik.errors.phone ? 'border-red-500' : 'border-gray-200'
                         }`}
                       />
                       {formik.touched.phone && formik.errors.phone && (
-                        <div className="text-red-500 text-xs mt-1">{formik.errors.phone}</div>
+                        <p className="text-red-500 text-xs mt-1">{formik.errors.phone}</p>
                       )}
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                        Email *
+                      <label htmlFor="email" className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                        Email
                       </label>
                       <input
+                        id="email"
                         type="email"
-                        name="email"
-                        placeholder="email@example.com"
-                        value={formik.values.email}
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
-                        className={`w-full bg-[#fafafa] border text-gray-800 placeholder-gray-400 px-4 py-3 rounded-xl focus:bg-white focus:outline-none transition-all ${
-                          formik.touched.email && formik.errors.email
-                            ? 'border-red-400 focus:border-red-400'
-                            : 'border-gray-200 focus:border-[#10243b]'
-                        }`}
+                        {...formik.getFieldProps('email')}
+                        placeholder="example@gmail.com"
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                       />
-                      {formik.touched.email && formik.errors.email && (
-                        <div className="text-red-500 text-xs mt-1">{formik.errors.email}</div>
-                      )}
                     </div>
-
                     <div>
-                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                        Tiêu đề yêu cầu *
+                      <label htmlFor="subject" className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                        Dịch vụ cần tư vấn *
                       </label>
-                      <input
-                        type="text"
-                        name="subject"
-                        placeholder="Đăng ký thu gom rác / Báo giá"
-                        value={formik.values.subject}
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
-                        className={`w-full bg-[#fafafa] border text-gray-800 placeholder-gray-400 px-4 py-3 rounded-xl focus:bg-white focus:outline-none transition-all ${
-                          formik.touched.subject && formik.errors.subject
-                            ? 'border-red-400 focus:border-red-400'
-                            : 'border-gray-200 focus:border-[#10243b]'
+                      <select
+                        id="subject"
+                        {...formik.getFieldProps('subject')}
+                        className={`w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white ${
+                          formik.touched.subject && formik.errors.subject ? 'border-red-500' : 'border-gray-200'
                         }`}
-                      />
+                      >
+                        <option value="">-- Chọn dịch vụ --</option>
+                        <option value="Thu gom rác sinh hoạt">Thu gom rác sinh hoạt</option>
+                        <option value="Hút hầm cầu / bể phốt">Hút hầm cầu / bể phốt</option>
+                        <option value="Cắt tỉa cây xanh / Vườn hoa">Cắt tỉa cây xanh / Vườn hoa</option>
+                        <option value="Xử lý chất thải công nghiệp">Xử lý chất thải công nghiệp</option>
+                        <option value="Dịch vụ sự kiện / Nhà vệ sinh lưu động">Dịch vụ sự kiện / Nhà vệ sinh lưu động</option>
+                        <option value="Phản ánh sự cố vệ sinh">Phản ánh sự cố vệ sinh</option>
+                        <option value="Khác">Khác</option>
+                      </select>
                       {formik.touched.subject && formik.errors.subject && (
-                        <div className="text-red-500 text-xs mt-1">{formik.errors.subject}</div>
+                        <p className="text-red-500 text-xs mt-1">{formik.errors.subject}</p>
                       )}
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                      Nội dung chi tiết *
+                    <label htmlFor="message" className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                      Chi tiết yêu cầu *
                     </label>
                     <textarea
-                      name="message"
-                      placeholder="Mô tả cụ thể nhu cầu dịch vụ hoặc câu hỏi của quý khách..."
-                      rows="4"
-                      value={formik.values.message}
-                      onChange={formik.handleChange}
-                      onBlur={formik.handleBlur}
-                      className={`w-full bg-[#fafafa] border text-gray-800 placeholder-gray-400 px-4 py-3 rounded-xl focus:bg-white focus:outline-none transition-all resize-none ${
-                        formik.touched.message && formik.errors.message
-                          ? 'border-red-400 focus:border-red-400'
-                          : 'border-gray-200 focus:border-[#10243b]'
+                      id="message"
+                      rows={4}
+                      {...formik.getFieldProps('message')}
+                      placeholder="Ghi rõ địa chỉ, khối lượng hoặc tình trạng cần hỗ trợ..."
+                      className={`w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
+                        formik.touched.message && formik.errors.message ? 'border-red-500' : 'border-gray-200'
                       }`}
                     />
                     {formik.touched.message && formik.errors.message && (
-                      <div className="text-red-500 text-xs mt-1">{formik.errors.message}</div>
+                      <p className="text-red-500 text-xs mt-1">{formik.errors.message}</p>
                     )}
                   </div>
 
                   <button
                     type="submit"
-                    className="w-full bg-[#10243b] hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-md active:scale-[0.99] cursor-pointer"
+                    disabled={formik.isSubmitting}
+                    className="w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md transition-all active:scale-[0.99] disabled:opacity-50 cursor-pointer"
                   >
-                    GỬI YÊU CẦU CHO CHÚNG TÔI
+                    <Send className="w-4 h-4" />
+                    <span>{formik.isSubmitting ? 'Đang gửi...' : 'Gửi Thông Tin Yêu Cầu'}</span>
                   </button>
                 </form>
               )}
             </div>
           </div>
 
-          {/* Right Side: Map & Address Info */}
-          <div className="lg:col-span-5 bg-[#fafafa] flex flex-col justify-between">
-            <div className="p-6 sm:p-8 border-b border-gray-200/80 bg-white">
-              <span className="text-xs font-extrabold uppercase tracking-wider text-emerald-700 block mb-1">
-                Trụ Sở Chính
-              </span>
-              <h3 className="text-lg font-black text-[#10243b] mb-2">
-                Công ty CP Môi Trường &amp; Công Trình Đô Thị Huế
-              </h3>
-              <div className="flex items-start gap-2.5 text-xs sm:text-sm text-gray-600">
-                <MapPin className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                <span>46 Trần Phú, Phường Thuận Hóa, Thành phố Huế, Tỉnh Thừa Thiên Huế</span>
+          {/* Right Side: Map & Contact Info */}
+          <div className="lg:col-span-5 bg-[#fafafa] p-7 sm:p-10 flex flex-col justify-between">
+            <div className="space-y-6">
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider text-emerald-800">
+                  Thông Tin Trụ Sở
+                </span>
+                <h3 className="text-xl sm:text-2xl font-black text-[#10243b] mt-1 mb-2">
+                  HEPCO Huế
+                </h3>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  Công ty Cổ phần Môi trường và Công trình Đô thị Huế.
+                </p>
+              </div>
+
+              <div className="space-y-3.5 text-sm text-gray-600">
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-emerald-600 shrink-0 mt-0.5">
+                    <MapPin className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <span className="font-bold text-gray-800 block text-xs uppercase">Địa chỉ trụ sở</span>
+                    <span>46 Trần Phú, Phường Phước Vĩnh, TP. Huế</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Google Maps Embed Frame */}
+              <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm h-52 sm:h-64 relative bg-gray-200">
+                <iframe
+                  title="Bản đồ chỉ đường đến HEPCO Huế"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3826.357193237194!2d107.58784867590895!3d16.457476828929762!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3141a141a0279601%3A0xe96cf03c73bb1e17!2zNDYgVHLhuqduIFBow7osIFBoxrDhu5tjIFbEqW5oLCBUaMOgbmggcGjhu5EgSHXhur8!5e0!3m2!1svi!2s!4v1715694200000!5m2!1svi!2s"
+                  className="w-full h-full border-0"
+                  allowFullScreen=""
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
               </div>
             </div>
 
-            <div className="flex-1 w-full min-h-[340px] relative">
-              <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d478.30214414111595!2d107.59154364573497!3d16.45440178297318!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3141a146b5a816c7%3A0xada6cb22654e37cc!2zSEVQQ08gLSBDw7RuZyB0eSBDUCBNw7RpIHRyxrDhu51uZyB2w6AgQ8O0bmcgdHLDrG5oIMSQw7QgdGjhu4sgSHXhur8!5e0!3m2!1svi!2s!4v1785397496081!5m2!1svi!2s"
-                width="100%"
-                height="100%"
-                style={{ border: 0 }}
-                allowFullScreen=""
-                loading="lazy"
-                referrerPolicy="strict-origin-when-cross-origin"
-                title="Bản đồ vị trí HEPCO"
-                className="w-full h-full min-h-[340px]"
-              />
+            <div className="mt-8 pt-6 border-t border-gray-200 text-xs text-gray-500">
+              Tổng đài tiếp nhận thông tin 24/7:{' '}
+              <a href="tel:02343822052" className="font-bold text-emerald-700 hover:underline">
+                (0234) 3822 052
+              </a>
             </div>
           </div>
         </div>

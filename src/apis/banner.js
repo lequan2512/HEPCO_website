@@ -1,16 +1,22 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
 import axiosInstance from '../utils/axios';
-import {
-  getMigratedBanners,
-  addBannerItem,
-  removeBannerItem
-} from '../services/news.service';
+import { getMigratedBanners } from '../services/news.service';
 
 // Fetch banner images (with migrated fallback & CMS overrides)
 export const useGetBanners = () => {
   return useQuery({
     queryKey: ['banners'],
-    queryFn: () => getMigratedBanners()
+    queryFn: async () => {
+      try {
+        const response = await axiosInstance.get('/api/banner', { timeout: 3500 });
+        if (Array.isArray(response?.data?.data) && response.data.data.length > 0) {
+          return response.data;
+        }
+      } catch {
+        // Fallback to local banners
+      }
+      return getMigratedBanners();
+    },
   });
 };
 

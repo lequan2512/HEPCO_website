@@ -44,7 +44,7 @@ import {
   GALLERY_CATEGORY_LABELS,
   GALLERY_CATEGORY_OPTIONS
 } from '../../../constants/news';
-import { useGetNews } from '../../../apis/news';
+import { useGetNews, useGetNewsStats, useGetGallery } from '../../../apis/news';
 import {
   getShareholderStats,
   getNewsCategoryStats,
@@ -164,23 +164,20 @@ const News = ({ pageType = 'news' }) => {
   const articles = useMemo(() => newsResponse?.data || [], [newsResponse]);
   const meta = newsResponse?.meta || { total: 0, page: 1, limit: pageSize, totalPages: 1 };
 
-  const shareholderStats = useMemo(() => getShareholderStats(), []);
-  const newsStats = useMemo(() => getNewsCategoryStats(), []);
+  const { data: statsData } = useGetNewsStats();
+  const shareholderStats = useMemo(() => statsData?.shareholders || { total: 0, countsByType: {}, countsByGroup: {}, countsByYear: {}, years: [] }, [statsData]);
+  const newsStats = useMemo(() => statsData?.news || { total: 0, countsByCategory: {}, countsByYear: {}, years: [] }, [statsData]);
 
-  const galleryResponse = useMemo(
-    () =>
-      getGalleryList({
-        category: galleryCategory,
-        search: gallerySearch,
-        page: galleryPage,
-        limit: 16
-      }),
-    [galleryCategory, gallerySearch, galleryPage]
-  );
+  const { data: galleryResponse } = useGetGallery({
+    category: galleryCategory,
+    search: gallerySearch,
+    page: galleryPage,
+    limit: 16
+  });
 
-  const galleryItems = galleryResponse.data || [];
-  const allFilteredGallery = galleryResponse.allFiltered || [];
-  const galleryMeta = galleryResponse.meta;
+  const galleryItems = galleryResponse?.data || [];
+  const allFilteredGallery = galleryItems;
+  const galleryMeta = galleryResponse?.meta || { total: 0, page: 1, limit: 16, totalPages: 1 };
 
   const bannerInfo =
     pageType === 'news'

@@ -306,7 +306,9 @@ export const getNewsList = async (params = {}) => {
         documentTypes: groupTypes?.length ? groupTypes.join(',') : undefined,
         year: year && year !== 'all' ? year : undefined,
       });
-      return { ...response, data: response.data.map(enrichArticleMetadata) };
+      if (response?.data && response.data.length > 0) {
+        return { ...response, data: response.data.map(enrichArticleMetadata) };
+      }
     } catch {
       // Fallback seamlessly to local collection when server is offline
     }
