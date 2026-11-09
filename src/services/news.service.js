@@ -12,13 +12,13 @@ import {
 const STORAGE_OVERRIDES_KEY = 'hepco_cms_overrides_v1';
 
 const DEFAULT_HERO_SETTINGS = {
-  headlinePrefix: 'Hạ Tầng Đô Thị & Môi Trường Xanh',
-  headlineHighlight: 'Cho Cố Đô Vững Bền',
+  headlinePrefix: 'CÔNG TY CỔ PHẦN MÔI TRƯỜNG',
+  headlineHighlight: 'VÀ CÔNG TRÌNH ĐÔ THỊ HUẾ',
   subtitle:
     'Gần 50 năm đồng hành cùng tỉnh Thừa Thiên Huế, HEPCO cung ứng trọn gói dịch vụ thu gom chất thải, vệ sinh môi trường, chăm sóc cây xanh công viên và chiếu sáng công cộng đạt chuẩn chất lượng cao.',
   primaryCtaText: 'Khám Phá Dịch Vụ',
-  hotlineDisplay: '(0234) 3822 052',
-  hotlineTel: '02343822052',
+  hotlineDisplay: '1900.96.96.69',
+  hotlineTel: '1900969669',
   coverImage: '/images/cover.png',
   videoUrl: 'https://www.youtube.com/embed/P7RZLoytEBI?autoplay=1',
   videoButtonText: 'Xem Phim Giới Thiệu'

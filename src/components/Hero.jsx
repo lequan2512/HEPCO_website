@@ -21,8 +21,8 @@ const Hero = () => {
         {/* Main Display Headline */}
         <div className="flex flex-col items-center text-center max-w-4xl mx-auto mb-8 sm:mb-10 md:mb-12">
           <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tight text-[#10243b] leading-[1.2] sm:leading-[1.15] mb-4 sm:mb-6 drop-shadow-2xs">
-            {heroConfig.headlinePrefix}{' '}
-            <span className="block sm:inline text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-green-600 to-teal-700">
+            <span className="block">{heroConfig.headlinePrefix}</span>
+            <span className="block text-hepco-green mt-1 sm:mt-2">
               {heroConfig.headlineHighlight}
             </span>
           </h1>
@@ -43,11 +43,11 @@ const Hero = () => {
             </Link>
 
             <a
-              href={`tel:${heroConfig.hotlineTel || '02343822052'}`}
+              href={`tel:${heroConfig.hotlineTel || '1900969669'}`}
               className="w-full sm:w-auto whitespace-nowrap inline-flex items-center justify-center gap-2.5 px-6 sm:px-7 py-3.5 sm:py-4 rounded-xl text-gray-800 font-bold text-sm sm:text-base bg-white hover:bg-gray-50 border border-gray-300 shadow-xs hover:border-gray-400 transition-all active:scale-[0.98]"
             >
               <Phone className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>Hotline: {heroConfig.hotlineDisplay || '(0234) 3822 052'}</span>
+              <span>Hotline: {heroConfig.hotlineDisplay || '1900.96.96.69'}</span>
             </a>
           </div>
         </div>
