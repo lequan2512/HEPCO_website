@@ -44,6 +44,15 @@ const AWARDS = [
   { img: '/images/merit/bang-khen5.jpg', alt: 'Bằng khen 5' },
 ];
 
+const getNewsSortScore = (item) => {
+  const dStr = item.date || item.created_at || '';
+  let score = 0;
+  if (typeof dStr === 'string' && dStr.includes('2026')) {
+    score += 10000000000000;
+  }
+  return score + parseNewsDate(dStr);
+};
+
 const parseNewsDate = (dStr) => {
   if (!dStr) return 0;
   if (typeof dStr === 'string') {
@@ -70,8 +79,8 @@ const NewsPartnersAwards = () => {
 
   const rawNews = Array.isArray(newsResponse?.data) ? newsResponse.data : [];
   const news = [...rawNews].sort((a, b) => {
-    const timeA = parseNewsDate(a.date || a.created_at);
-    const timeB = parseNewsDate(b.date || b.created_at);
+    const timeA = getNewsSortScore(a);
+    const timeB = getNewsSortScore(b);
     return timeB - timeA;
   }).slice(0, 4);
 

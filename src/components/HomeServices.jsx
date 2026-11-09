@@ -47,7 +47,7 @@ const HomeServices = () => {
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-14 md:mb-16 gap-6">
           <div className="max-w-4xl">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#10243b] tracking-tight leading-tight text-balance">
-              Giải Pháp Môi Trường &amp; Hạ Tầng Đô Thị
+              Giải Pháp Môi Trường &amp; <span className="inline-block whitespace-nowrap">Hạ Tầng Đô Thị</span>
             </h2>
             <p className="mt-4 text-base sm:text-lg text-gray-600 leading-relaxed font-normal">
               Đáp ứng trọn gói nhu cầu của người dân, cơ quan, doanh nghiệp và các sự kiện lớn trên địa bàn tỉnh Thừa Thiên Huế.
