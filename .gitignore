@@ -49,5 +49,3 @@ Thumbs.db
 *.wmv
 
 .env
-# User uploads (served from DB/Cloudinary, not tracked in git)
-public/uploads/

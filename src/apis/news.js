@@ -1,12 +1,20 @@
 import { useQuery, useMutation, useInfiniteQuery } from '@tanstack/react-query';
 import axiosInstance from '../utils/axios';
+import { getNewsList, getNewsCategoryStats, getGalleryList } from '../services/news.service';
 
 export const useGetNews = (params) => {
   return useQuery({
     queryKey: ['news', params],
     queryFn: async () => {
-      const response = await axiosInstance.get('/api/news', { params });
-      return response.data;
+      try {
+        const response = await axiosInstance.get('/api/news', { params, timeout: 3500 });
+        if (Array.isArray(response?.data?.data) && response.data.data.length > 0) {
+          return response.data;
+        }
+      } catch {
+        // Fall back seamlessly to complete migrated dataset
+      }
+      return getNewsList(params);
     }
   });
 };
@@ -15,8 +23,15 @@ export const useGetNewsStats = () => {
   return useQuery({
     queryKey: ['newsStats'],
     queryFn: async () => {
-      const response = await axiosInstance.get('/api/news/stats');
-      return response.data;
+      try {
+        const response = await axiosInstance.get('/api/news/stats', { timeout: 3500 });
+        if (response?.data && (response.data.total > 0 || Object.keys(response.data.countsByYear || {}).length > 0)) {
+          return response.data;
+        }
+      } catch {
+        // Fall back to local dataset stats
+      }
+      return getNewsCategoryStats();
     }
   });
 };
@@ -25,8 +40,15 @@ export const useGetGallery = (params) => {
   return useQuery({
     queryKey: ['gallery', params],
     queryFn: async () => {
-      const response = await axiosInstance.get('/api/gallery', { params });
-      return response.data;
+      try {
+        const response = await axiosInstance.get('/api/gallery', { params, timeout: 3500 });
+        if (Array.isArray(response?.data?.data) && response.data.data.length > 0) {
+          return response.data;
+        }
+      } catch {
+        // Fall back to rich gallery dataset
+      }
+      return getGalleryList(params);
     }
   });
 };

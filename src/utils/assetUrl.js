@@ -7,20 +7,20 @@ export const resolveAssetUrl = (url) => {
   if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('data:')) {
     return trimmed;
   }
-  // Uploads, media, and pdf files hosted on backend API
-  if (trimmed.startsWith('/uploads/') || trimmed.startsWith('/api/media/') || trimmed.startsWith('/pdf/')) {
+  // Local static assets in frontend public folder (e.g. /uploads/images/, /images/, /pdf/)
+  if (trimmed.startsWith('/uploads/images/') || trimmed.startsWith('/images/') || trimmed.startsWith('/pdf/')) {
+    return trimmed;
+  }
+  // Uploads, media, and other uploads hosted on backend API
+  if (trimmed.startsWith('/uploads/') || trimmed.startsWith('/api/media/')) {
     return `${API_BASE_URL}${trimmed}`;
   }
   // Legacy uploads fallback to hepco.com.vn
   if (trimmed.startsWith('/Public/Upload/')) {
     return `https://www.hepco.com.vn${trimmed}`;
   }
-  // Local static assets in frontend /public/images/
-  if (trimmed.startsWith('/images/')) {
-    return trimmed;
-  }
   if (trimmed.startsWith('/')) {
-    return `${API_BASE_URL}${trimmed}`;
+    return trimmed;
   }
   return trimmed;
 };

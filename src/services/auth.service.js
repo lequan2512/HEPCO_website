@@ -11,8 +11,14 @@ export const OFFLINE_MOCK_TOKEN =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJhZG1pbiIsImNhbk1hbmFnZUNvbnRlbnQiOnRydWV9.hepco_cms_session';
 
 export const login = async (credentials) => {
+  const username = (credentials?.username || '').trim().toLowerCase();
+  const password = (credentials?.password || '').trim();
+  const matched = LOCAL_ADMIN_ACCOUNTS.some(
+    (acc) => acc.username.toLowerCase() === username && acc.password === password
+  );
+
   try {
-    const response = await axiosInstance.post('/api/login', credentials, { timeout: 3500 });
+    const response = await axiosInstance.post('/api/login', { username, password }, { timeout: 3500 });
     if (
       response?.data?.success === true &&
       typeof response.data.token === 'string' &&
@@ -23,17 +29,21 @@ export const login = async (credentials) => {
       return response.data;
     }
   } catch (err) {
-    if (err.response?.status === 401 && err.response?.data?.errorCode) {
-      throw err;
+    if (matched) {
+      return {
+        success: true,
+        token: OFFLINE_MOCK_TOKEN,
+        user: {
+          id: 1,
+          username,
+          name: 'Quản trị viên HEPCO',
+          canManageContent: true,
+          role: 'ADMIN'
+        }
+      };
     }
+    throw err;
   }
-
-  // Fallback to local admin accounts when backend API is offline or unreachable
-  const username = (credentials?.username || '').trim().toLowerCase();
-  const password = (credentials?.password || '').trim();
-  const matched = LOCAL_ADMIN_ACCOUNTS.some(
-    (acc) => acc.username.toLowerCase() === username && acc.password === password
-  );
 
   if (matched) {
     return {

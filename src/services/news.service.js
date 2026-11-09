@@ -1,7 +1,7 @@
 import { CONTENT_SOURCE } from '../constants/cms';
 import { createServerArticle, updateServerArticle, deleteServerArticle, getServerArticles, getServerArticle } from './article.service';
 import axiosInstance from '../utils/axios';
-const migratedData = { news: [], shareholders: [], services: [], about: [], gallery: [], banners: [], legacyIdAliases: {} };
+import migratedData from '../data/migratedData.json';
 import {
   NEWS_CATEGORY_LABELS,
   SHAREHOLDER_DOC_TYPE_LABELS,
@@ -306,7 +306,9 @@ export const getNewsList = async (params = {}) => {
         documentTypes: groupTypes?.length ? groupTypes.join(',') : undefined,
         year: year && year !== 'all' ? year : undefined,
       });
-      return { ...response, data: response.data.map(enrichArticleMetadata) };
+      if (response?.data && response.data.length > 0) {
+        return { ...response, data: response.data.map(enrichArticleMetadata) };
+      }
     } catch {
       // Fallback seamlessly to local collection when server is offline
     }
